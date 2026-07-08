@@ -1,6 +1,6 @@
 # rimeflow-yolov8n
 
-YOLOv8n object detection for [RimeCut](https://github.com/caozisheng/rimecut) — YOLO output decoding + Non-Maximum Suppression (NMS) in pure Rust.
+YOLOv8n object detection — YOLO output decoding + Non-Maximum Suppression (NMS) in pure Rust.
 
 ## What it does
 
