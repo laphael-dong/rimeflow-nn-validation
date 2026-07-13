@@ -88,7 +88,7 @@ pub fn nms(detections: &[Detection], iou_threshold: f32) -> Vec<Detection> {
     keep
 }
 
-fn iou(a: &[f32; 4], b: &[f32; 4]) -> f32 {
+pub fn iou(a: &[f32; 4], b: &[f32; 4]) -> f32 {
     let x1 = a[0].max(b[0]);
     let y1 = a[1].max(b[1]);
     let x2 = a[2].min(b[2]);
@@ -100,6 +100,3 @@ fn iou(a: &[f32; 4], b: &[f32; 4]) -> f32 {
     if union <= 0.0 { 0.0 } else { inter / union }
 }
 
-pub fn iou_pub(a: &[f32; 4], b: &[f32; 4]) -> f32 {
-    iou(a, b)
-}
