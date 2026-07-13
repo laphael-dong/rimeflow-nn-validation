@@ -72,13 +72,13 @@ export async function ort_init(model_url) {
     //
     // Also try `env.webgpu.adapter` for good measure (some ORT versions
     // use that as a hint if it's set before requestDevice).
-    let deviceInjected = false;
-    if (_capturedDevice) {
+    let deviceInjected = _deviceShared;
+    // Skip re-assign if a prior ort_init already succeeded — ORT locks
+    // `env.webgpu.device` after the first WebGPU session creation, so
+    // any later write throws a TypeError. `_deviceShared === true` is
+    // proof enough that our device is already installed.
+    if (_capturedDevice && !_deviceShared) {
         try {
-            // The write may throw `TypeError: Cannot assign to read only
-            // property 'device'` if a prior WebGPU session (or a lazy
-            // internal initialization) already locked it. We swallow that
-            // and fall back to "share via monkey-patch" hopeful semantics.
             globalThis.ort.env.webgpu.device = _capturedDevice;
             deviceInjected = true;
         } catch (e) {
@@ -305,6 +305,34 @@ function _computeLetterbox(srcW, srcH, dstSize) {
 //
 // Main-line callers MUST NOT use this (r4 §15 D10 constraint 1). Rust-side
 // consumers are expected to prefer ort_run_gpu_buffer + local LetterboxParams.
+// Tier C CPU sub-path — shared by (1) the `useGpu === false` default when the
+// device-sharing / fromGpuBuffer preconditions aren't met, (2) the canvas
+// backing-tex race fallback (copyExternalImageToTexture async validation
+// error), and (3) the ORT fromGpuBuffer catch. `OffscreenCanvas.drawImage`
+// runs on a freshly-snapshot canvas so it doesn't share the race hazard of
+// the GPU sub-path (2D drawImage silently blocks on a valid tex if needed).
+async function _runCpuSubpath(canvas, srcW, srcH, scale) {
+    const off = new OffscreenCanvas(DST_SIZE, DST_SIZE);
+    const ctx = off.getContext('2d');
+    const dw = srcW * scale, dh = srcH * scale;
+    const dx = (DST_SIZE - dw) / 2, dy = (DST_SIZE - dh) / 2;
+    ctx.fillStyle = 'rgb(114,114,114)';
+    ctx.fillRect(0, 0, DST_SIZE, DST_SIZE);
+    ctx.drawImage(canvas, 0, 0, srcW, srcH, dx, dy, dw, dh);
+    const imageData = ctx.getImageData(0, 0, DST_SIZE, DST_SIZE);
+    const data = new Float32Array(3 * DST_SIZE * DST_SIZE);
+    const hw = DST_SIZE * DST_SIZE;
+    for (let i = 0; i < hw; i++) {
+        data[i]           = imageData.data[i * 4]     / 255;
+        data[hw + i]      = imageData.data[i * 4 + 1] / 255;
+        data[2 * hw + i]  = imageData.data[i * 4 + 2] / 255;
+    }
+    const tensor = new globalThis.ort.Tensor('float32', data, [1, 3, DST_SIZE, DST_SIZE]);
+    const result = await _session.run({ [_inputName]: tensor });
+    const output = await result[_outputName].getData();
+    return { output, scale, padX: dx, padY: dy, srcW, srcH };
+}
+
 export async function ort_detect(canvas) {
     if (!_session) throw new Error('ORT session not initialized');
     const srcW = canvas.width, srcH = canvas.height;
@@ -408,11 +436,22 @@ export async function ort_detect(canvas) {
                 globalThis.__rimeflow_debug_copy_race_logged = true;
                 console.warn(
                     '[ort-bridge] canvas copyExternalImageToTexture races with compositor present '
-                    + '— dropping affected frames. First error:',
+                    + '— falling back to CPU sub-path for affected frames. First error:',
                     _copyErr.message,
                 );
             }
-            return null;  // caller drops this detection cycle
+            // Bypass the compute pass (its input tex is now stale/invalid) and
+            // run the CPU sub-path against a fresh 2D snapshot of the canvas.
+            // Costs ~30ms on the race frame; steady-state race rate is low so
+            // amortized latency stays close to the pure-GPU path.
+            //
+            // Alternative: `return null` to let the caller advance its tracker
+            // via Kalman-only prediction (see `rimeflow-tracking::wasm_yolo`
+            // + `ByteTracker::predict_only`). That is faster but drops one
+            // actual detection cycle. Pick per-app: CPU-fallback prioritises
+            // detection quality (RimeCut editor preview), null-return
+            // prioritises latency (real-time overlay).
+            return await _runCpuSubpath(canvas, srcW, srcH, scale);
         }
 
         // 3. Upload preprocess uniforms.
@@ -501,24 +540,5 @@ export async function ort_detect(canvas) {
         }
     }
 
-    // CPU sub-path — OffscreenCanvas 2D → getImageData → tensor
-    const off = new OffscreenCanvas(DST_SIZE, DST_SIZE);
-    const ctx = off.getContext('2d');
-    const dw = srcW * scale, dh = srcH * scale;
-    const dx = (DST_SIZE - dw) / 2, dy = (DST_SIZE - dh) / 2;
-    ctx.fillStyle = 'rgb(114,114,114)';
-    ctx.fillRect(0, 0, DST_SIZE, DST_SIZE);
-    ctx.drawImage(canvas, 0, 0, srcW, srcH, dx, dy, dw, dh);
-    const imageData = ctx.getImageData(0, 0, DST_SIZE, DST_SIZE);
-    const data = new Float32Array(3 * DST_SIZE * DST_SIZE);
-    const hw = DST_SIZE * DST_SIZE;
-    for (let i = 0; i < hw; i++) {
-        data[i]           = imageData.data[i * 4]     / 255;
-        data[hw + i]      = imageData.data[i * 4 + 1] / 255;
-        data[2 * hw + i]  = imageData.data[i * 4 + 2] / 255;
-    }
-    const tensor = new globalThis.ort.Tensor('float32', data, [1, 3, DST_SIZE, DST_SIZE]);
-    const result = await _session.run({ [_inputName]: tensor });
-    const output = await result[_outputName].getData();
-    return { output, scale, padX: dx, padY: dy, srcW, srcH };
+    return await _runCpuSubpath(canvas, srcW, srcH, scale);
 }
