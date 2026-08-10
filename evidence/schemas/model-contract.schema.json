@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://rimeflow.dev/schemas/yolov8n-model-contract-v1.json",
   "title": "RimeFlow YOLOv8n extracted model contract",
   "type": "object",
