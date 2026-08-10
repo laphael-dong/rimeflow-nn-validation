@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rimeflow.dev/schemas/yolov8n-model-contract-v1.json",
+  "title": "RimeFlow YOLOv8n extracted model contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedBy", "source", "model", "responsibilities", "runtimeMetadata", "verification"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedBy": { "type": "object", "required": ["name", "version", "runtime", "runtimeVersion", "executionProvider"] },
+    "source": { "type": "object", "required": ["repository", "commit", "modelPath", "modelSha256"] },
+    "model": { "type": "object", "required": ["logicalId", "version", "task", "input", "output"] },
+    "responsibilities": { "type": "object", "required": ["preprocessing", "postprocessing", "modelGraph"] },
+    "runtimeMetadata": { "type": "object", "required": ["inputMetadata", "outputMetadata"] },
+    "verification": { "type": "object", "required": ["inputModelSha256", "shaderSha256", "postprocessSha256"] }
+  }
+}

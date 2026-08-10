@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "commit": "eacbcf00dfc2fba941b494e2955e87fffd707382",
+    "modelPath": "models/yolov8n.onnx",
+    "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+  },
+  "spikes": [
+    {
+      "platform": "apple",
+      "format": "coreml",
+      "state": "blocked",
+      "tool": {
+        "name": "coremltools",
+        "version": "unavailable"
+      },
+      "attempt": {
+        "command": [
+          "python3",
+          "-c",
+          "import coremltools as ct; ct.convert('models/yolov8n.onnx', source='onnx')"
+        ],
+        "exitCode": 1,
+        "signal": null,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'coremltools'"
+      },
+      "artifact": null,
+      "ioChanges": "无法检查",
+      "quantization": "未执行",
+      "nmsResponsibility": "operator",
+      "failedOperator": null,
+      "license": "Core ML runtime follows Apple SDK terms; model remains AGPL-3.0",
+      "redistribution": "转换器/runner 不可用，禁止发布 artifact",
+      "conclusion": "本 Linux 主机不能证明 Core ML 转换或加载。"
+    },
+    {
+      "platform": "android",
+      "format": "tflite/litert-compiled-model",
+      "state": "blocked",
+      "tool": {
+        "name": "LiteRT v2 converter",
+        "version": "unavailable"
+      },
+      "attempt": {
+        "command": [
+          "python3",
+          "-c",
+          "from ai_edge_litert import converter; converter.convert('models/yolov8n.onnx')"
+        ],
+        "exitCode": 1,
+        "signal": null,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'ai_edge_litert'"
+      },
+      "artifact": null,
+      "ioChanges": "无法检查",
+      "quantization": "未执行",
+      "nmsResponsibility": "operator",
+      "failedOperator": null,
+      "license": "LiteRT Apache-2.0; model AGPL-3.0",
+      "redistribution": "未生成，禁止发布 artifact",
+      "conclusion": "SDK/converter 缺失；Android SDK 存在但无真实设备。"
+    },
+    {
+      "platform": "windows",
+      "format": "onnx",
+      "state": "blocked",
+      "conversion": "无格式转换，Windows ML 直接加载原 ONNX",
+      "tool": {
+        "name": "Windows ML",
+        "version": "unavailable on Linux host"
+      },
+      "attempt": {
+        "command": [
+          "pwsh",
+          "-NoProfile",
+          "-Command",
+          "$m=[Microsoft.AI.MachineLearning.LearningModel]::LoadFromFilePath((Resolve-Path 'models/yolov8n.onnx')); $m.Close()"
+        ],
+        "exitCode": null,
+        "signal": null,
+        "stdout": "",
+        "stderr": "spawnSync pwsh ENOENT"
+      },
+      "artifact": {
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "ioChanges": "none",
+      "quantization": "none",
+      "nmsResponsibility": "operator",
+      "failedOperator": null,
+      "license": "Windows ML follows Windows App SDK terms; model AGPL-3.0",
+      "redistribution": "原 ONNX 受 AGPL-3.0 约束",
+      "conclusion": "没有 Windows runner，实际加载未验证，不能标记 supported。"
+    },
+    {
+      "platform": "harmonyos",
+      "format": "mindir/ms",
+      "state": "blocked",
+      "tool": {
+        "name": "MindSpore Lite converter_lite",
+        "version": "unavailable"
+      },
+      "attempt": {
+        "command": [
+          "converter_lite",
+          "--fmk=ONNX",
+          "--modelFile=models/yolov8n.onnx",
+          "--outputFile=evidence/conversions/yolov8n"
+        ],
+        "exitCode": null,
+        "signal": null,
+        "stdout": "",
+        "stderr": "spawnSync converter_lite ENOENT"
+      },
+      "artifact": null,
+      "ioChanges": "无法检查",
+      "quantization": "未执行",
+      "nmsResponsibility": "operator",
+      "failedOperator": null,
+      "license": "MindSpore Apache-2.0; model AGPL-3.0",
+      "redistribution": "未生成，禁止发布 artifact",
+      "conclusion": "converter 与 HarmonyOS runner 缺失。"
+    },
+    {
+      "platform": "linux-x86_64",
+      "format": "onnx",
+      "state": "load-verified",
+      "tool": {
+        "name": "onnxruntime-node",
+        "version": "1.24.3"
+      },
+      "attempt": {
+        "command": [
+          "onnxruntime-node@1.24.3",
+          "InferenceSession.create",
+          "--execution-provider=cpu"
+        ],
+        "exitCode": 0,
+        "runtimeVersion": "1.24.3",
+        "requestedProvider": "cpu",
+        "actualProvider": "cpu",
+        "inputNames": [
+          "images"
+        ],
+        "outputNames": [
+          "output0"
+        ],
+        "inputMetadata": [
+          {
+            "name": "images",
+            "isTensor": true,
+            "type": "float32",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ]
+          }
+        ],
+        "outputMetadata": [
+          {
+            "name": "output0",
+            "isTensor": true,
+            "type": "float32",
+            "shape": [
+              1,
+              84,
+              8400
+            ]
+          }
+        ],
+        "smoke": "load-only; fixed-input inference belongs to later adapter conformance task"
+      },
+      "artifact": {
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "ioChanges": "none",
+      "quantization": "none",
+      "nmsResponsibility": "operator",
+      "failedOperator": null,
+      "license": "ONNX Runtime MIT; model AGPL-3.0",
+      "redistribution": "运行时与模型分别遵循 MIT/AGPL-3.0",
+      "conclusion": "Linux x86_64 CPU provider 实际加载成功；无 CUDA/TensorRT/OpenVINO，状态仅 build-verified。"
+    }
+  ]
+}

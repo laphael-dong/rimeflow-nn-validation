@@ -1,0 +1,9 @@
+{
+  "name": "rimeflow-yolov8n-evidence-web",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "onnxruntime-node": "1.24.3",
+    "onnxruntime-web": "1.27.0"
+  }
+}

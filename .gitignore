@@ -1,2 +1,4 @@
 /target
 /Cargo.lock
+/.evidence/
+/evidence/tooling/web/node_modules/

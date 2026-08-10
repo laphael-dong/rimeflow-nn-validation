@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "manually-constructed-raw-tensor",
+  "modelShape": [
+    1,
+    84,
+    8400
+  ],
+  "layout": "channels-first-over-anchors",
+  "sourceImage": null,
+  "scenario": "重叠框/NMS",
+  "geometry": {
+    "width": 640,
+    "height": 640
+  },
+  "anchors": [
+    {
+      "anchor": 3,
+      "cx": 320,
+      "cy": 320,
+      "width": 250,
+      "height": 260,
+      "classId": 0,
+      "score": 0.92
+    },
+    {
+      "anchor": 4,
+      "cx": 330,
+      "cy": 325,
+      "width": 245,
+      "height": 250,
+      "classId": 0,
+      "score": 0.84
+    }
+  ],
+  "expectedPostprocess": {
+    "decodeThreshold": 0.25,
+    "nmsIouThreshold": 0.45,
+    "decoded": [
+      {
+        "anchor": 3,
+        "classId": 0,
+        "score": 0.92,
+        "bbox": [
+          0.3046875,
+          0.296875,
+          0.6953125,
+          0.703125
+        ]
+      },
+      {
+        "anchor": 4,
+        "classId": 0,
+        "score": 0.84,
+        "bbox": [
+          0.32421875,
+          0.3125,
+          0.70703125,
+          0.703125
+        ]
+      }
+    ],
+    "nms": [
+      {
+        "anchor": 3,
+        "classId": 0,
+        "score": 0.92,
+        "bbox": [
+          0.3046875,
+          0.296875,
+          0.6953125,
+          0.703125
+        ]
+      }
+    ]
+  },
+  "note": "此 fixture 只验证 decode/NMS，不声明来自图片推理。"
+}

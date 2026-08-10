@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "kind": "manually-constructed-raw-tensor",
+  "modelShape": [
+    1,
+    84,
+    8400
+  ],
+  "layout": "channels-first-over-anchors",
+  "sourceImage": null,
+  "scenario": "多类别",
+  "geometry": {
+    "width": 640,
+    "height": 360
+  },
+  "anchors": [
+    {
+      "anchor": 1,
+      "cx": 180,
+      "cy": 340,
+      "width": 220,
+      "height": 120,
+      "classId": 2,
+      "score": 0.88
+    },
+    {
+      "anchor": 2,
+      "cx": 470,
+      "cy": 280,
+      "width": 90,
+      "height": 260,
+      "classId": 0,
+      "score": 0.86
+    }
+  ],
+  "expectedPostprocess": {
+    "decodeThreshold": 0.25,
+    "nmsIouThreshold": 0.45,
+    "decoded": [
+      {
+        "anchor": 1,
+        "classId": 2,
+        "score": 0.88,
+        "bbox": [
+          0.109375,
+          0.38888889,
+          0.453125,
+          0.72222222
+        ]
+      },
+      {
+        "anchor": 2,
+        "classId": 0,
+        "score": 0.86,
+        "bbox": [
+          0.6640625,
+          0.02777778,
+          0.8046875,
+          0.75
+        ]
+      }
+    ],
+    "nms": [
+      {
+        "anchor": 1,
+        "classId": 2,
+        "score": 0.88,
+        "bbox": [
+          0.109375,
+          0.38888889,
+          0.453125,
+          0.72222222
+        ]
+      },
+      {
+        "anchor": 2,
+        "classId": 0,
+        "score": 0.86,
+        "bbox": [
+          0.6640625,
+          0.02777778,
+          0.8046875,
+          0.75
+        ]
+      }
+    ]
+  },
+  "note": "此 fixture 只验证 decode/NMS，不声明来自图片推理。"
+}

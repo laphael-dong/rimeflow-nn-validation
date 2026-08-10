@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "sourceReferenceSha256": "55f4b1e418831113dcf15c89ff2c62aa8f9ac6e0ec9014a9bea10f1cf4ea3d87",
+  "runtime": {
+    "name": "onnxruntime-web",
+    "version": "1.27.0",
+    "requestedExecutionProviders": [
+      "wasm"
+    ],
+    "actualExecutionProvider": "wasm",
+    "evidence": "session 仅配置 wasm provider 且初始化/推理成功",
+    "threads": 1
+  },
+  "host": {
+    "os": "linux",
+    "arch": "x64",
+    "node": "v24.15.0"
+  },
+  "metrics": {
+    "initializationMs": 177.865,
+    "fixtures": [
+      {
+        "id": "no-detection",
+        "coldMs": 312.714,
+        "warmMs": [
+          293.252,
+          291.774
+        ]
+      },
+      {
+        "id": "single-target",
+        "coldMs": 289.793,
+        "warmMs": [
+          287.172,
+          287.507
+        ]
+      },
+      {
+        "id": "multi-class",
+        "coldMs": 291.433,
+        "warmMs": [
+          289.77,
+          288.971
+        ]
+      },
+      {
+        "id": "overlap-nms",
+        "coldMs": 290.987,
+        "warmMs": [
+          290.571,
+          289.642
+        ]
+      },
+      {
+        "id": "extreme-aspect",
+        "coldMs": 290.227,
+        "warmMs": [
+          294.361,
+          290.798
+        ]
+      },
+      {
+        "id": "boundary-box",
+        "coldMs": 290.254,
+        "warmMs": [
+          288.406,
+          289.697
+        ]
+      }
+    ],
+    "peakProcessRssBytes": 257265664,
+    "runtimePackageBytes": 138083940
+  },
+  "note": "性能采样可变；峰值是独立 harness 进程 RSS 上界；包体为 onnxruntime-web package 文件总和；不得与 WebGPU 或 Native 数据混合。"
+}

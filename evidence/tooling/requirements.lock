@@ -1,0 +1,6 @@
+# Python converter environment. Install with hashes enabled in a clean network.
+onnx==1.17.0
+onnxruntime==1.20.1
+numpy==1.26.4
+Pillow==10.4.0
+jsonschema==4.23.0

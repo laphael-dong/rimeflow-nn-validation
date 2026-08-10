@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "eacbcf00dfc2fba941b494e2955e87fffd707382",
+  "artifacts": [
+    {
+      "path": "models/yolov8n.onnx",
+      "bytes": 12851098,
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+    },
+    {
+      "path": "evidence/model/model-contract.json",
+      "bytes": 2692,
+      "sha256": "f7f8cd8ea82d010af07487602a864c400e09335cdf5e0bf99ffb53731d98adb1"
+    },
+    {
+      "path": "evidence/fixtures/manifest.json",
+      "bytes": 4253,
+      "sha256": "d121d338ffb679e75da1a331578fb20ad9c11a82a126485159022ef1d41b7b38"
+    },
+    {
+      "path": "evidence/golden/web-reference.json",
+      "bytes": 10013,
+      "sha256": "55f4b1e418831113dcf15c89ff2c62aa8f9ac6e0ec9014a9bea10f1cf4ea3d87"
+    },
+    {
+      "path": "evidence/conversions/conversion-spikes.json",
+      "bytes": 5974,
+      "sha256": "820c9d96d6b4d9a0f424bd8cca45d36181d584b280dbda5e96e6298e34d17905"
+    },
+    {
+      "path": "evidence/reports/web-wasm-performance.json",
+      "bytes": 1633,
+      "sha256": "e5b118b15ba49b1b2bc1d7bcaa63f17b941a0ce5eacb3ddd061fc491d0cb39b3"
+    }
+  ]
+}
