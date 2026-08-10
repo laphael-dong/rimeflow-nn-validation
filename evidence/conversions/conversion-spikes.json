@@ -12,76 +12,92 @@
       "state": "blocked",
       "tool": {
         "name": "coremltools",
-        "version": "unavailable"
+        "version": "9.0",
+        "officialSource": "https://apple.github.io/coremltools/docs-guides/source/convert-learning-models.html"
       },
       "attempt": {
         "command": [
-          "python3",
-          "-c",
-          "import coremltools as ct; ct.convert('models/yolov8n.onnx', source='onnx')"
+          ".evidence/python-tools/bin/python",
+          "evidence/scripts/probe_python_converters.py",
+          "models/yolov8n.onnx"
         ],
         "exitCode": 1,
-        "signal": null,
-        "stdout": "",
-        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'coremltools'"
+        "stdout": "{\"coremltools\": {\"acceptedSources\": [\"auto\", \"tensorflow\", \"pytorch\", \"milinternal\"], \"attempt\": {\"error\": \"Unable to determine the type of the model, i.e. the source framework. Please provide the value of argument \\\"source\\\", from one of [\\\"tensorflow\\\", \\\"pytorch\\\", \\\"milinternal\\\"]. Note that model conversion requires the source package that generates the model. Please make sure you have the appropriate version of source package installed. E.g., if you're converting model originally trained with TensorFlow 1.14, make sure you have `tensorflow==1.14` installed.\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"convertSignature\": \"(model, source='auto', inputs=None, outputs=None, classifier_config=None, minimum_deployment_target=None, convert_to=None, compute_precision=None, skip_model_load=False, compute_units=<ComputeUnit.ALL: 1>, package_dir=None, debug=False, pass_pipeline: Optional[coremltools.converters.mil.mil.passes.pass_pipeline.PassPipeline] = None, states=None)\", \"onnxDirectConversionSupported\": false, \"version\": \"9.0\"}, \"litert\": {\"acceptedModelFormat\": \"TFLite FlatBuffer\", \"attempt\": {\"error\": \"The model is not a valid Flatbuffer buffer\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"interpreterSignature\": \"(model_path=None, model_content=None, experimental_delegates=None, num_threads=None, experimental_op_resolver_type=<OpResolverType.AUTO: 0>, experimental_preserve_all_tensors=False, experimental_disable_delegate_clustering=False, experimental_default_delegate_latest_features=False, experimental_compress_quantization_zero_points=False, experimental_disable_delegate_node_fusion=False, experimental_force_delegate_node_profiling=False)\", \"modulePath\": \"ai_edge_litert/__init__.py\", \"onnxConverterModulePresent\": false, \"version\": \"2.1.6\"}, \"onnxMetadata\": {\"args\": \"{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': 17, 'nms': False}\", \"author\": \"Ultralytics\", \"batch\": \"1\", \"channels\": \"3\", \"date\": \"2026-07-07T14:57:25.224955\", \"description\": \"Ultralytics YOLOv8n model trained on coco.yaml\", \"docs\": \"https://docs.ultralytics.com\", \"end2end\": \"False\", \"head\": \"Detect\", \"imgsz\": \"[640, 640]\", \"license\": \"AGPL-3.0 License (https://ultralytics.com/license)\", \"names\": \"{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}\", \"stride\": \"32\", \"task\": \"detect\", \"version\": \"8.4.90\"}, \"onnxVersion\": \"1.22.0\", \"python\": \"3.12.3\"}",
+        "stderr": "Failed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLCPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLGPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLNeuralEngineComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLComputePlanProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelAssetProxy: No module named 'coremltools.libcoremlpython'",
+        "apiSignature": "(model, source='auto', inputs=None, outputs=None, classifier_config=None, minimum_deployment_target=None, convert_to=None, compute_precision=None, skip_model_load=False, compute_units=<ComputeUnit.ALL: 1>, package_dir=None, debug=False, pass_pipeline: Optional[coremltools.converters.mil.mil.passes.pass_pipeline.PassPipeline] = None, states=None)",
+        "acceptedSources": [
+          "auto",
+          "tensorflow",
+          "pytorch",
+          "milinternal"
+        ],
+        "errorType": "ValueError",
+        "error": "Unable to determine the type of the model, i.e. the source framework. Please provide the value of argument \"source\", from one of [\"tensorflow\", \"pytorch\", \"milinternal\"]. Note that model conversion requires the source package that generates the model. Please make sure you have the appropriate version of source package installed. E.g., if you're converting model originally trained with TensorFlow 1.14, make sure you have `tensorflow==1.14` installed."
       },
       "artifact": null,
-      "ioChanges": "无法检查",
+      "ioChanges": "未生成 artifact；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]",
       "quantization": "未执行",
       "nmsResponsibility": "operator",
-      "failedOperator": null,
-      "license": "Core ML runtime follows Apple SDK terms; model remains AGPL-3.0",
-      "redistribution": "转换器/runner 不可用，禁止发布 artifact",
-      "conclusion": "本 Linux 主机不能证明 Core ML 转换或加载。"
+      "failedOperator": "source framework discovery before MIL conversion",
+      "license": "coremltools BSD；模型 ONNX metadata 声明 AGPL-3.0，准确原始权重与授权未确认",
+      "redistribution": "缺少同源 .pt/ExportedProgram 和授权依据，禁止发布 artifact",
+      "conclusion": "coremltools 9.0 官方入口只接受 TensorFlow/PyTorch/MIL；真实 ct.convert(source=auto) 拒绝 ONNX。仓库没有可验证的同源 .pt，无法进入获准转换或 golden 等价验证。"
     },
     {
       "platform": "android",
       "format": "tflite/litert-compiled-model",
       "state": "blocked",
       "tool": {
-        "name": "LiteRT v2 converter",
-        "version": "unavailable"
+        "name": "ai-edge-litert runtime",
+        "version": "2.1.6",
+        "officialSource": "https://ai.google.dev/edge/litert/models/convert"
       },
       "attempt": {
         "command": [
-          "python3",
-          "-c",
-          "from ai_edge_litert import converter; converter.convert('models/yolov8n.onnx')"
+          ".evidence/python-tools/bin/python",
+          "evidence/scripts/probe_python_converters.py",
+          "models/yolov8n.onnx"
         ],
         "exitCode": 1,
-        "signal": null,
-        "stdout": "",
-        "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'ai_edge_litert'"
+        "stdout": "{\"coremltools\": {\"acceptedSources\": [\"auto\", \"tensorflow\", \"pytorch\", \"milinternal\"], \"attempt\": {\"error\": \"Unable to determine the type of the model, i.e. the source framework. Please provide the value of argument \\\"source\\\", from one of [\\\"tensorflow\\\", \\\"pytorch\\\", \\\"milinternal\\\"]. Note that model conversion requires the source package that generates the model. Please make sure you have the appropriate version of source package installed. E.g., if you're converting model originally trained with TensorFlow 1.14, make sure you have `tensorflow==1.14` installed.\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"convertSignature\": \"(model, source='auto', inputs=None, outputs=None, classifier_config=None, minimum_deployment_target=None, convert_to=None, compute_precision=None, skip_model_load=False, compute_units=<ComputeUnit.ALL: 1>, package_dir=None, debug=False, pass_pipeline: Optional[coremltools.converters.mil.mil.passes.pass_pipeline.PassPipeline] = None, states=None)\", \"onnxDirectConversionSupported\": false, \"version\": \"9.0\"}, \"litert\": {\"acceptedModelFormat\": \"TFLite FlatBuffer\", \"attempt\": {\"error\": \"The model is not a valid Flatbuffer buffer\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"interpreterSignature\": \"(model_path=None, model_content=None, experimental_delegates=None, num_threads=None, experimental_op_resolver_type=<OpResolverType.AUTO: 0>, experimental_preserve_all_tensors=False, experimental_disable_delegate_clustering=False, experimental_default_delegate_latest_features=False, experimental_compress_quantization_zero_points=False, experimental_disable_delegate_node_fusion=False, experimental_force_delegate_node_profiling=False)\", \"modulePath\": \"ai_edge_litert/__init__.py\", \"onnxConverterModulePresent\": false, \"version\": \"2.1.6\"}, \"onnxMetadata\": {\"args\": \"{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': 17, 'nms': False}\", \"author\": \"Ultralytics\", \"batch\": \"1\", \"channels\": \"3\", \"date\": \"2026-07-07T14:57:25.224955\", \"description\": \"Ultralytics YOLOv8n model trained on coco.yaml\", \"docs\": \"https://docs.ultralytics.com\", \"end2end\": \"False\", \"head\": \"Detect\", \"imgsz\": \"[640, 640]\", \"license\": \"AGPL-3.0 License (https://ultralytics.com/license)\", \"names\": \"{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}\", \"stride\": \"32\", \"task\": \"detect\", \"version\": \"8.4.90\"}, \"onnxVersion\": \"1.22.0\", \"python\": \"3.12.3\"}",
+        "stderr": "Failed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLCPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLGPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLNeuralEngineComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLComputePlanProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelAssetProxy: No module named 'coremltools.libcoremlpython'",
+        "apiSignature": "(model_path=None, model_content=None, experimental_delegates=None, num_threads=None, experimental_op_resolver_type=<OpResolverType.AUTO: 0>, experimental_preserve_all_tensors=False, experimental_disable_delegate_clustering=False, experimental_default_delegate_latest_features=False, experimental_compress_quantization_zero_points=False, experimental_disable_delegate_node_fusion=False, experimental_force_delegate_node_profiling=False)",
+        "acceptedModelFormat": "TFLite FlatBuffer",
+        "converterModulePresent": false,
+        "errorType": "ValueError",
+        "error": "The model is not a valid Flatbuffer buffer"
       },
       "artifact": null,
-      "ioChanges": "无法检查",
+      "ioChanges": "未生成 TFLite；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]",
       "quantization": "未执行",
       "nmsResponsibility": "operator",
-      "failedOperator": null,
-      "license": "LiteRT Apache-2.0; model AGPL-3.0",
-      "redistribution": "未生成，禁止发布 artifact",
-      "conclusion": "SDK/converter 缺失；Android SDK 存在但无真实设备。"
+      "failedOperator": "TFLite FlatBuffer identifier validation before graph load",
+      "license": "ai-edge-litert Apache-2.0；模型权重授权未确认",
+      "redistribution": "缺少获准且可追溯的 SavedModel/TFLite 导出链，禁止发布 artifact",
+      "conclusion": "ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；真实 Interpreter 加载原 ONNX 在格式标识校验阶段失败。仓库没有可验证同源源模型，且无 Android 设备。"
     },
     {
-      "platform": "windows",
+      "platform": "windows-x86_64-and-arm64",
       "format": "onnx",
       "state": "blocked",
-      "conversion": "无格式转换，Windows ML 直接加载原 ONNX",
+      "conversion": "无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入",
       "tool": {
-        "name": "Windows ML",
-        "version": "unavailable on Linux host"
+        "name": "Windows ML / Windows App SDK",
+        "version": "1.8 target; unavailable on Linux host",
+        "officialSource": "https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models"
       },
       "attempt": {
         "command": [
-          "pwsh",
-          "-NoProfile",
-          "-Command",
-          "$m=[Microsoft.AI.MachineLearning.LearningModel]::LoadFromFilePath((Resolve-Path 'models/yolov8n.onnx')); $m.Close()"
+          "dotnet",
+          "--info"
         ],
         "exitCode": null,
         "signal": null,
         "stdout": "",
-        "stderr": "spawnSync pwsh ENOENT"
+        "stderr": "executable unavailable: dotnet",
+        "logNormalization": "仅将仓库绝对路径替换为 $REPO，并将 converter_lite 的时间戳/PID/thread 替换为占位符；其余 stdout/stderr 逐字保留",
+        "requiredRunnerCommand": "dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin",
+        "requiredApi": "Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)"
       },
       "artifact": {
         "path": "models/yolov8n.onnx",
@@ -90,10 +106,10 @@
       "ioChanges": "none",
       "quantization": "none",
       "nmsResponsibility": "operator",
-      "failedOperator": null,
-      "license": "Windows ML follows Windows App SDK terms; model AGPL-3.0",
-      "redistribution": "原 ONNX 受 AGPL-3.0 约束",
-      "conclusion": "没有 Windows runner，实际加载未验证，不能标记 supported。"
+      "failedOperator": "Windows runner/toolchain discovery before Windows ML model load",
+      "license": "Windows ML follows Windows App SDK terms；模型权重授权未确认",
+      "redistribution": "原 ONNX 授权未闭环，禁止随 RimeCut 发布",
+      "conclusion": "没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。"
     },
     {
       "platform": "harmonyos",
@@ -101,33 +117,37 @@
       "state": "blocked",
       "tool": {
         "name": "MindSpore Lite converter_lite",
-        "version": "unavailable"
+        "version": "2.7.0",
+        "archiveSha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+        "officialSource": "https://www.mindspore.cn/lite/docs/en/r2.7.0/use/downloads.html"
       },
       "attempt": {
         "command": [
-          "converter_lite",
+          ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
           "--fmk=ONNX",
           "--modelFile=models/yolov8n.onnx",
-          "--outputFile=evidence/conversions/yolov8n"
+          "--outputFile=.evidence/mindspore/yolov8n",
+          "--optimize=general"
         ],
-        "exitCode": null,
+        "exitCode": 255,
         "signal": null,
-        "stdout": "",
-        "stderr": "spawnSync converter_lite ENOENT"
+        "stdout": "ERROR [mindspore-lite/tools/converter/converter_lite/main.cc:107] main] Convert failed. Ret: Common error code.\nConvert failed. Ret: Common error code.",
+        "stderr": "[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/parser/onnx/onnx_model_parser.cc:680] CheckOnnxModel] Cannot find input:  of node: /model.10/Resize\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/parser/onnx/onnx_model_parser.cc:680] CheckOnnxModel] Cannot find input:  of node: /model.13/Resize\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/legacy_optimizer/graph/infershape_pass.cc:633] InferSubgraph] InferShape failed, name: /model.22/dfl/conv/Conv, type: Conv2DFusion\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/legacy_optimizer/graph/infershape_pass.cc:650] Run] InferSubgraph index: 0 failed, ret: -500\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/optimizer.cc:78] Run] Run GraphPass failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/graphdef_transform.cc:71] QuantTransform] Run quant_node_optimizer graphPasses Failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter_metagraph.cc:102] Build] Transform meta graph failed!ret = -500\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1260] SaveGraph] Convert to meta graph failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1213] HandleGraphCommon] Save graph failed: -1 Common error code.\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1152] Convert] Handle graph failed: -1 Common error code.\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1345] RunConverter] Convert model failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/cxx_api/converter.cc:361] Convert] Convert model failed, ret=Common error code.",
+        "logNormalization": "仅将仓库绝对路径替换为 $REPO，并将 converter_lite 的时间戳/PID/thread 替换为占位符；其余 stdout/stderr 逐字保留"
       },
       "artifact": null,
-      "ioChanges": "无法检查",
-      "quantization": "未执行",
+      "ioChanges": "转换失败，无 artifact；原始 I/O 为 [1,3,640,640] -> [1,84,8400]",
+      "quantization": "命令未请求量化，FP32",
       "nmsResponsibility": "operator",
-      "failedOperator": null,
-      "license": "MindSpore Apache-2.0; model AGPL-3.0",
-      "redistribution": "未生成，禁止发布 artifact",
-      "conclusion": "converter 与 HarmonyOS runner 缺失。"
+      "failedOperator": "/model.22/dfl/conv/Conv (Conv2DFusion infer-shape/graph pass)",
+      "license": "MindSpore Apache-2.0；模型权重授权未确认",
+      "redistribution": "即使转换成功也只允许本地 spike，禁止发布 artifact",
+      "conclusion": "官方 converter_lite 2.7.0 已进入 ONNX parse/graph optimization，因 Conv2DFusion infer-shape 失败；缺 HarmonyOS runner。"
     },
     {
-      "platform": "linux-x86_64",
+      "platform": "linux-x86_64-cpu",
       "format": "onnx",
-      "state": "load-verified",
+      "state": "inference-verified",
       "tool": {
         "name": "onnxruntime-node",
         "version": "1.24.3"
@@ -135,13 +155,35 @@
       "attempt": {
         "command": [
           "onnxruntime-node@1.24.3",
-          "InferenceSession.create",
+          "InferenceSession.create+run",
           "--execution-provider=cpu"
         ],
-        "exitCode": 0,
         "runtimeVersion": "1.24.3",
         "requestedProvider": "cpu",
-        "actualProvider": "cpu",
+        "configuredProviders": [
+          "cpu"
+        ],
+        "bundledBackends": [
+          {
+            "name": "cpu",
+            "bundled": true
+          },
+          {
+            "name": "webgpu",
+            "bundled": true
+          },
+          {
+            "name": "cuda",
+            "bundled": false
+          },
+          {
+            "name": "tensorrt",
+            "bundled": false
+          }
+        ],
+        "fixtureId": "single-target",
+        "canonicalInputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "exitCode": 0,
         "inputNames": [
           "images"
         ],
@@ -173,7 +215,15 @@
             ]
           }
         ],
-        "smoke": "load-only; fixed-input inference belongs to later adapter conformance task"
+        "output": {
+          "elementCount": 705600,
+          "finiteCount": 705600,
+          "minimum": 0,
+          "maximum": 637.0564575195312,
+          "mean": 9.809624081740235,
+          "sha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27"
+        },
+        "inferenceExecuted": true
       },
       "artifact": {
         "path": "models/yolov8n.onnx",
@@ -183,9 +233,174 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": null,
-      "license": "ONNX Runtime MIT; model AGPL-3.0",
-      "redistribution": "运行时与模型分别遵循 MIT/AGPL-3.0",
-      "conclusion": "Linux x86_64 CPU provider 实际加载成功；无 CUDA/TensorRT/OpenVINO，状态仅 build-verified。"
+      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
+      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "conclusion": "cpu provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。"
+    },
+    {
+      "platform": "linux-x86_64-openvino",
+      "format": "onnx",
+      "state": "blocked",
+      "tool": {
+        "name": "onnxruntime-node",
+        "version": "1.24.3"
+      },
+      "attempt": {
+        "command": [
+          "onnxruntime-node@1.24.3",
+          "InferenceSession.create+run",
+          "--execution-provider=openvino"
+        ],
+        "runtimeVersion": "1.24.3",
+        "requestedProvider": "openvino",
+        "configuredProviders": [
+          "openvino"
+        ],
+        "bundledBackends": [
+          {
+            "name": "cpu",
+            "bundled": true
+          },
+          {
+            "name": "webgpu",
+            "bundled": true
+          },
+          {
+            "name": "cuda",
+            "bundled": false
+          },
+          {
+            "name": "tensorrt",
+            "bundled": false
+          }
+        ],
+        "fixtureId": "single-target",
+        "canonicalInputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "exitCode": 1,
+        "inferenceExecuted": false,
+        "error": "Error: no available backend found. ERR: [openvino] backend not found."
+      },
+      "artifact": {
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "ioChanges": "none",
+      "quantization": "none",
+      "nmsResponsibility": "operator",
+      "failedOperator": "provider/session initialization before graph execution",
+      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
+      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "conclusion": "openvino provider 未能进入固定输入 inference，保持 blocked。"
+    },
+    {
+      "platform": "linux-x86_64-cuda",
+      "format": "onnx",
+      "state": "blocked",
+      "tool": {
+        "name": "onnxruntime-node",
+        "version": "1.24.3"
+      },
+      "attempt": {
+        "command": [
+          "onnxruntime-node@1.24.3",
+          "InferenceSession.create+run",
+          "--execution-provider=cuda"
+        ],
+        "runtimeVersion": "1.24.3",
+        "requestedProvider": "cuda",
+        "configuredProviders": [
+          "cuda"
+        ],
+        "bundledBackends": [
+          {
+            "name": "cpu",
+            "bundled": true
+          },
+          {
+            "name": "webgpu",
+            "bundled": true
+          },
+          {
+            "name": "cuda",
+            "bundled": false
+          },
+          {
+            "name": "tensorrt",
+            "bundled": false
+          }
+        ],
+        "fixtureId": "single-target",
+        "canonicalInputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "exitCode": 1,
+        "inferenceExecuted": false,
+        "error": "Error: OrtSessionOptionsAppendExecutionProvider_Cuda: Failed to load shared library"
+      },
+      "artifact": {
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "ioChanges": "none",
+      "quantization": "none",
+      "nmsResponsibility": "operator",
+      "failedOperator": "provider/session initialization before graph execution",
+      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
+      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "conclusion": "cuda provider 未能进入固定输入 inference，保持 blocked。"
+    },
+    {
+      "platform": "linux-x86_64-tensorrt",
+      "format": "onnx",
+      "state": "blocked",
+      "tool": {
+        "name": "onnxruntime-node",
+        "version": "1.24.3"
+      },
+      "attempt": {
+        "command": [
+          "onnxruntime-node@1.24.3",
+          "InferenceSession.create+run",
+          "--execution-provider=tensorrt"
+        ],
+        "runtimeVersion": "1.24.3",
+        "requestedProvider": "tensorrt",
+        "configuredProviders": [
+          "tensorrt"
+        ],
+        "bundledBackends": [
+          {
+            "name": "cpu",
+            "bundled": true
+          },
+          {
+            "name": "webgpu",
+            "bundled": true
+          },
+          {
+            "name": "cuda",
+            "bundled": false
+          },
+          {
+            "name": "tensorrt",
+            "bundled": false
+          }
+        ],
+        "fixtureId": "single-target",
+        "canonicalInputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "exitCode": 1,
+        "inferenceExecuted": false,
+        "error": "Error: OrtSessionOptionsAppendExecutionProvider_TensorRT: Failed to load shared library"
+      },
+      "artifact": {
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "ioChanges": "none",
+      "quantization": "none",
+      "nmsResponsibility": "operator",
+      "failedOperator": "provider/session initialization before graph execution",
+      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
+      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "conclusion": "tensorrt provider 未能进入固定输入 inference，保持 blocked。"
     }
   ]
 }

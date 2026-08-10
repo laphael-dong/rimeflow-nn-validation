@@ -27,25 +27,66 @@
         640,
         640
       ],
+      "axes": [
+        "batch",
+        "channel",
+        "height",
+        "width"
+      ],
       "dynamicDimensions": [],
       "layout": "NCHW",
       "dtype": "float32",
-      "colorChannels": "RGB",
-      "valueRange": [
-        0,
-        1
-      ],
+      "quantization": null,
+      "color": {
+        "sourceChannels": [
+          "R",
+          "G",
+          "B",
+          "A"
+        ],
+        "modelChannels": [
+          "R",
+          "G",
+          "B"
+        ],
+        "alpha": "ignored"
+      },
+      "valueRange": {
+        "minimum": 0,
+        "maximum": 1,
+        "inclusive": true
+      },
       "normalize": {
         "kind": "none",
+        "mean": null,
+        "standardDeviation": null,
+        "scale": null,
+        "offset": null,
         "responsibility": "preprocess-shader"
       },
       "preprocess": {
         "kind": "letterbox",
-        "size": [
+        "targetSize": [
           640,
           640
         ],
-        "fill": 0.4470588235294118,
+        "interpolation": "linear",
+        "samplerAddressMode": "clamp-to-edge",
+        "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+        "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+        "letterbox": {
+          "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+          "scaledDimensionRounding": "none-continuous",
+          "paddingRule": "symmetric-continuous",
+          "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+          "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+          "insideRule": "0<=u<=1 && 0<=v<=1",
+          "fillRgb": [
+            0.447,
+            0.447,
+            0.447
+          ]
+        },
         "responsibility": "preprocess-shader"
       }
     },
@@ -58,11 +99,45 @@
         84,
         8400
       ],
-      "layout": "CANDIDATE_MAJOR",
+      "axes": [
+        "batch",
+        "attribute",
+        "anchor"
+      ],
+      "layout": "N_ATTRIBUTES_ANCHORS",
       "dtype": "float32",
+      "quantization": null,
+      "memoryOrder": "row-major contiguous; offset=batch*705600+attribute*8400+anchor",
       "semantics": {
-        "box": "cxcywh-model-pixels",
-        "classScores": "80-coco-scores",
+        "attributes": {
+          "box": {
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "order": [
+              "centerX",
+              "centerY",
+              "width",
+              "height"
+            ]
+          },
+          "classScores": {
+            "startIndex": 4,
+            "count": 80,
+            "activation": "already-applied"
+          }
+        },
+        "anchorDimension": {
+          "axis": 2,
+          "count": 8400
+        },
+        "boxEncoding": {
+          "format": "center-x-center-y-width-height",
+          "coordinateSpace": "letterboxed-model-pixels"
+        },
         "nmsFused": false
       },
       "postprocess": {
@@ -108,6 +183,7 @@
   "verification": {
     "inputModelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
     "shaderSha256": "7fbb81c6c5540165d3b6668220a8f62df292dfe14e0b0c56b74b370259f46bcf",
-    "postprocessSha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+    "postprocessSha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b",
+    "preprocessContractSha256": "6ab42f34588643884762fad2497716ea324a6a207461ca6cdd125de830a2c530"
   }
 }

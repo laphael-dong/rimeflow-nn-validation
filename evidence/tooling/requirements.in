@@ -1,0 +1,5 @@
+# 任务 1 转换/加载 spike 的顶层工具版本；requirements.lock 由 lock_python_tooling.mjs 生成。
+ai-edge-litert==2.1.6
+coremltools==9.0
+onnx==1.22.0
+onnxruntime==1.27.0

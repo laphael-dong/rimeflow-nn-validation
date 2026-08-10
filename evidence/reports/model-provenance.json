@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "model": {
+    "path": "models/yolov8n.onnx",
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "firstRepositoryCommit": "8eb3a3f33ca945694af5a08b81b28a013af8695a",
+    "firstRepositoryCommitDate": "2026-07-08T13:11:23+08:00",
+    "embeddedMetadata": {
+      "args": "{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': 17, 'nms': False}",
+      "author": "Ultralytics",
+      "batch": "1",
+      "channels": "3",
+      "date": "2026-07-07T14:57:25.224955",
+      "description": "Ultralytics YOLOv8n model trained on coco.yaml",
+      "docs": "https://docs.ultralytics.com",
+      "end2end": "False",
+      "head": "Detect",
+      "imgsz": "[640, 640]",
+      "license": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "names": "{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}",
+      "stride": "32",
+      "task": "detect",
+      "version": "8.4.90"
+    }
+  },
+  "declaredExportRecipe": {
+    "source": "README.md in firstRepositoryCommit",
+    "command": "pip install ultralytics && yolo export model=yolov8n.pt format=onnx simplify=True opset=17",
+    "reproducible": false,
+    "reason": "命令没有锁定 ultralytics 或 yolov8n.pt digest；仓库历史没有提交 .pt、训练配置或导出日志。"
+  },
+  "originalTrainingArtifact": {
+    "path": null,
+    "version": null,
+    "sha256": null,
+    "sourceUrl": null,
+    "state": "unverifiable",
+    "gitPtArtifactCommits": []
+  },
+  "licensing": {
+    "repositoryCode": {
+      "declaredLicense": "MIT",
+      "licensePath": "LICENSE",
+      "licenseSha256": "0e9cf1beb7efd7c779613bd0030ed303a5c26d73dd5e22e5a8fad4ffc2e968e0"
+    },
+    "fixtureFiles": {
+      "state": "per-file",
+      "manifestPath": "evidence/fixtures/manifest.json",
+      "note": "外部 Ultralytics assets 与脚本生成 CC0 fixture 逐文件记录；不由仓库 MIT 统一覆盖。"
+    },
+    "originalWeights": {
+      "declaredByOnnxMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "enterpriseLicenseEvidence": null,
+      "authorizationState": "unverified"
+    },
+    "onnxWeights": {
+      "licenseState": "embedded metadata declares AGPL-3.0; exact original artifact and authorization are unresolved"
+    },
+    "conversionArtifacts": {
+      "licenseState": "inherit unresolved model-weight obligations plus converter/runtime terms",
+      "redistributionAllowed": false
+    },
+    "rimecutPackageRedistribution": {
+      "allowed": false,
+      "reason": "没有可验证的原始权重来源、准确 .pt SHA 或 Ultralytics Enterprise 授权依据。"
+    }
+  },
+  "decision": {
+    "task14": "blocked",
+    "task1": "blocked",
+    "publication": "prohibited",
+    "reason": "仓库 MIT 声明不能覆盖模型权重；在授权链闭环前禁止发布或分发 ONNX 及其转换产物。"
+  },
+  "tooling": {
+    "python": "3.12.3",
+    "onnx": "1.22.0"
+  }
+}

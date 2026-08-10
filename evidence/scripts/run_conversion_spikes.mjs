@@ -1,41 +1,72 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ortNative from '../tooling/web/node_modules/onnxruntime-node/dist/index.js';
+import { preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const modelPath = resolve(root, 'models/yolov8n.onnx');
 const modelBytes = await readFile(modelPath);
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => JSON.stringify(value, null, 2) + '\n';
-function command(program, args) {
-  const result = spawnSync(program, args, { cwd: root, encoding: 'utf8', timeout: 120000 });
-  return { command: [program, ...args], exitCode: result.status, signal: result.signal, stdout: (result.stdout || '').trim(), stderr: (result.stderr || result.error?.message || '').trim() };
+const normalizeLog = (value) => value
+  .replaceAll(root, '$REPO')
+  .replace(/LITE\(\d+,[0-9a-f]+,converter_lite\):\d{4}-\d{2}-\d{2}-\d{2}:\d{2}:\d{2}\.\d+(?:\.\d+)?/g, 'LITE(<pid>,<thread>,converter_lite):<timestamp>');
+function command(program, args, options = {}) {
+  const result = spawnSync(program, args, { cwd: root, encoding: 'utf8', timeout: 120000, ...options });
+  const unavailable = result.error?.code === 'ENOENT' || result.stderr?.includes('Executable not found in $PATH');
+  return { command: [program, ...args], exitCode: result.status ?? null, signal: result.signal ?? null, stdout: normalizeLog((result.stdout || '').trim()), stderr: unavailable ? `executable unavailable: ${program}` : normalizeLog((result.stderr || result.error?.message || '').trim()), logNormalization: '仅将仓库绝对路径替换为 $REPO，并将 converter_lite 的时间戳/PID/thread 替换为占位符；其余 stdout/stderr 逐字保留' };
 }
 
-const coreml = command('python3', ['-c', "import coremltools as ct; ct.convert('models/yolov8n.onnx', source='onnx')"]);
-const litert = command('python3', ['-c', "from ai_edge_litert import converter; converter.convert('models/yolov8n.onnx')"]);
-const windowsMl = command('pwsh', ['-NoProfile', '-Command', "$m=[Microsoft.AI.MachineLearning.LearningModel]::LoadFromFilePath((Resolve-Path 'models/yolov8n.onnx')); $m.Close()"]);
-const mindspore = command('converter_lite', ['--fmk=ONNX', '--modelFile=models/yolov8n.onnx', '--outputFile=evidence/conversions/yolov8n']);
-let linuxOrt;
-try {
-  const session = await ortNative.InferenceSession.create(modelPath, { executionProviders: ['cpu'] });
-  linuxOrt = { command: ['onnxruntime-node@1.24.3', 'InferenceSession.create', '--execution-provider=cpu'], exitCode: 0, runtimeVersion: '1.24.3', requestedProvider: 'cpu', actualProvider: 'cpu', inputNames: session.inputNames, outputNames: session.outputNames, inputMetadata: session.inputMetadata, outputMetadata: session.outputMetadata, smoke: 'load-only; fixed-input inference belongs to later adapter conformance task' };
-  await session.release();
-} catch (error) {
-  linuxOrt = { command: ['onnxruntime-node@1.24.3', 'InferenceSession.create', '--execution-provider=cpu'], exitCode: 1, error: String(error) };
+function tensorSummary(values) {
+  let minimum = Infinity; let maximum = -Infinity; let sum = 0; let finiteCount = 0;
+  for (const value of values) if (Number.isFinite(value)) { minimum = Math.min(minimum, value); maximum = Math.max(maximum, value); sum += value; finiteCount++; }
+  return { elementCount: values.length, finiteCount, minimum, maximum, mean: sum / finiteCount, sha256Float32Le: sha256(Buffer.from(values.buffer, values.byteOffset, values.byteLength)) };
 }
+
+const pythonProbe = command('.evidence/python-tools/bin/python', ['evidence/scripts/probe_python_converters.py', 'models/yolov8n.onnx']);
+if (pythonProbe.exitCode !== 0) throw new Error(`Python converter probe failed: ${pythonProbe.stderr}`);
+const pythonResult = JSON.parse(pythonProbe.stdout.split('\n').at(-1));
+const windowsMl = command('dotnet', ['--info']);
+const mindsporeRoot = resolve(root, '.evidence/mindspore/mindspore-lite-2.7.0-linux-x64');
+const mindsporeBinary = resolve(mindsporeRoot, 'tools/converter/converter/converter_lite');
+const mindsporeOutput = resolve(root, '.evidence/mindspore/yolov8n');
+const mindspore = command(mindsporeBinary, ['--fmk=ONNX', '--modelFile=models/yolov8n.onnx', `--outputFile=${mindsporeOutput}`, '--optimize=general'], { env: { ...process.env, LD_LIBRARY_PATH: `${resolve(mindsporeRoot, 'tools/converter/lib')}:${resolve(mindsporeRoot, 'runtime/lib')}` } });
+mindspore.command[0] = '.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite';
+mindspore.command[3] = '--outputFile=.evidence/mindspore/yolov8n';
+const mindsporeArtifactPath = `${mindsporeOutput}.ms`;
+const mindsporeArtifact = await stat(mindsporeArtifactPath).then(async (info) => ({ path: '.evidence/mindspore/yolov8n.ms', bytes: info.size, sha256: sha256(await readFile(mindsporeArtifactPath)) }), () => null);
+const fixtureManifest = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
+const inferenceFixture = fixtureManifest.images.find((item) => item.id === 'single-target');
+const image = readPpm(await readFile(resolve(root, inferenceFixture.path)));
+const canonical = preprocessCanonical(image);
+const supportedBackends = ortNative.listSupportedBackends();
+async function linuxProvider(provider) {
+  const attempt = { command: ['onnxruntime-node@1.24.3', 'InferenceSession.create+run', `--execution-provider=${provider}`], runtimeVersion: ortNative.env.versions.node, requestedProvider: provider, configuredProviders: [provider], bundledBackends: supportedBackends, fixtureId: inferenceFixture.id, canonicalInputSha256Float32Le: tensorDigest(canonical.tensor) };
+  try {
+    const session = await ortNative.InferenceSession.create(modelPath, { executionProviders: [provider] });
+    const outputs = await session.run({ images: new ortNative.Tensor('float32', canonical.tensor, [1, 3, 640, 640]) });
+    const raw = outputs.output0.data;
+    Object.assign(attempt, { exitCode: 0, inputNames: session.inputNames, outputNames: session.outputNames, inputMetadata: session.inputMetadata, outputMetadata: session.outputMetadata, output: tensorSummary(raw), inferenceExecuted: true });
+    await session.release();
+  } catch (error) {
+    Object.assign(attempt, { exitCode: 1, inferenceExecuted: false, error: String(error) });
+  }
+  return attempt;
+}
+const linuxProviders = [];
+for (const provider of ['cpu', 'openvino', 'cuda', 'tensorrt']) linuxProviders.push(await linuxProvider(provider));
 const report = {
   schemaVersion: 1,
   source: { commit: 'eacbcf00dfc2fba941b494e2955e87fffd707382', modelPath: 'models/yolov8n.onnx', modelSha256: sha256(modelBytes) },
   spikes: [
-    { platform: 'apple', format: 'coreml', state: coreml.exitCode === 0 ? 'converted-not-load-verified' : 'blocked', tool: { name: 'coremltools', version: coreml.exitCode === 0 ? 'reported-in-stdout' : 'unavailable' }, attempt: coreml, artifact: null, ioChanges: '无法检查', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: null, license: 'Core ML runtime follows Apple SDK terms; model remains AGPL-3.0', redistribution: '转换器/runner 不可用，禁止发布 artifact', conclusion: '本 Linux 主机不能证明 Core ML 转换或加载。' },
-    { platform: 'android', format: 'tflite/litert-compiled-model', state: litert.exitCode === 0 ? 'converted-not-load-verified' : 'blocked', tool: { name: 'LiteRT v2 converter', version: litert.exitCode === 0 ? 'reported-in-stdout' : 'unavailable' }, attempt: litert, artifact: null, ioChanges: '无法检查', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: null, license: 'LiteRT Apache-2.0; model AGPL-3.0', redistribution: '未生成，禁止发布 artifact', conclusion: 'SDK/converter 缺失；Android SDK 存在但无真实设备。' },
-    { platform: 'windows', format: 'onnx', state: windowsMl.exitCode === 0 ? 'load-verified' : 'blocked', conversion: '无格式转换，Windows ML 直接加载原 ONNX', tool: { name: 'Windows ML', version: 'unavailable on Linux host' }, attempt: windowsMl, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: null, license: 'Windows ML follows Windows App SDK terms; model AGPL-3.0', redistribution: '原 ONNX 受 AGPL-3.0 约束', conclusion: '没有 Windows runner，实际加载未验证，不能标记 supported。' },
-    { platform: 'harmonyos', format: 'mindir/ms', state: mindspore.exitCode === 0 ? 'converted-not-load-verified' : 'blocked', tool: { name: 'MindSpore Lite converter_lite', version: mindspore.exitCode === 0 ? 'reported-in-stdout' : 'unavailable' }, attempt: mindspore, artifact: null, ioChanges: '无法检查', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: null, license: 'MindSpore Apache-2.0; model AGPL-3.0', redistribution: '未生成，禁止发布 artifact', conclusion: 'converter 与 HarmonyOS runner 缺失。' },
-    { platform: 'linux-x86_64', format: 'onnx', state: linuxOrt.exitCode === 0 ? 'load-verified' : 'blocked', tool: { name: 'onnxruntime-node', version: '1.24.3' }, attempt: linuxOrt, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: null, license: 'ONNX Runtime MIT; model AGPL-3.0', redistribution: '运行时与模型分别遵循 MIT/AGPL-3.0', conclusion: linuxOrt.exitCode === 0 ? 'Linux x86_64 CPU provider 实际加载成功；无 CUDA/TensorRT/OpenVINO，状态仅 build-verified。' : 'Linux ORT 加载失败。' },
+    { platform: 'apple', format: 'coreml', state: 'blocked', tool: { name: 'coremltools', version: pythonResult.coremltools.version, officialSource: 'https://apple.github.io/coremltools/docs-guides/source/convert-learning-models.html' }, attempt: { command: pythonProbe.command, exitCode: pythonResult.coremltools.attempt.exitCode, stdout: pythonProbe.stdout, stderr: pythonProbe.stderr, apiSignature: pythonResult.coremltools.convertSignature, acceptedSources: pythonResult.coremltools.acceptedSources, errorType: pythonResult.coremltools.attempt.errorType, error: pythonResult.coremltools.attempt.error }, artifact: null, ioChanges: '未生成 artifact；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: 'source framework discovery before MIL conversion', license: 'coremltools BSD；模型 ONNX metadata 声明 AGPL-3.0，准确原始权重与授权未确认', redistribution: '缺少同源 .pt/ExportedProgram 和授权依据，禁止发布 artifact', conclusion: 'coremltools 9.0 官方入口只接受 TensorFlow/PyTorch/MIL；真实 ct.convert(source=auto) 拒绝 ONNX。仓库没有可验证的同源 .pt，无法进入获准转换或 golden 等价验证。' },
+    { platform: 'android', format: 'tflite/litert-compiled-model', state: 'blocked', tool: { name: 'ai-edge-litert runtime', version: pythonResult.litert.version, officialSource: 'https://ai.google.dev/edge/litert/models/convert' }, attempt: { command: pythonProbe.command, exitCode: pythonResult.litert.attempt.exitCode, stdout: pythonProbe.stdout, stderr: pythonProbe.stderr, apiSignature: pythonResult.litert.interpreterSignature, acceptedModelFormat: pythonResult.litert.acceptedModelFormat, converterModulePresent: pythonResult.litert.onnxConverterModulePresent, errorType: pythonResult.litert.attempt.errorType, error: pythonResult.litert.attempt.error }, artifact: null, ioChanges: '未生成 TFLite；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: 'TFLite FlatBuffer identifier validation before graph load', license: 'ai-edge-litert Apache-2.0；模型权重授权未确认', redistribution: '缺少获准且可追溯的 SavedModel/TFLite 导出链，禁止发布 artifact', conclusion: 'ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；真实 Interpreter 加载原 ONNX 在格式标识校验阶段失败。仓库没有可验证同源源模型，且无 Android 设备。' },
+    { platform: 'windows-x86_64-and-arm64', format: 'onnx', state: 'blocked', conversion: '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入', tool: { name: 'Windows ML / Windows App SDK', version: '1.8 target; unavailable on Linux host', officialSource: 'https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models' }, attempt: { ...windowsMl, requiredRunnerCommand: 'dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin', requiredApi: 'Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)' }, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: 'Windows runner/toolchain discovery before Windows ML model load', license: 'Windows ML follows Windows App SDK terms；模型权重授权未确认', redistribution: '原 ONNX 授权未闭环，禁止随 RimeCut 发布', conclusion: '没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。' },
+    { platform: 'harmonyos', format: 'mindir/ms', state: mindspore.exitCode === 0 && mindsporeArtifact ? 'converted-not-load-verified' : 'blocked', tool: { name: 'MindSpore Lite converter_lite', version: '2.7.0', archiveSha256: '8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b', officialSource: 'https://www.mindspore.cn/lite/docs/en/r2.7.0/use/downloads.html' }, attempt: mindspore, artifact: mindsporeArtifact, ioChanges: mindsporeArtifact ? '需要 HarmonyOS runner 检查实际 I/O；原始 I/O 为 [1,3,640,640] -> [1,84,8400]' : '转换失败，无 artifact；原始 I/O 为 [1,3,640,640] -> [1,84,8400]', quantization: '命令未请求量化，FP32', nmsResponsibility: 'operator', failedOperator: mindspore.exitCode === 0 ? null : '/model.22/dfl/conv/Conv (Conv2DFusion infer-shape/graph pass)', license: 'MindSpore Apache-2.0；模型权重授权未确认', redistribution: '即使转换成功也只允许本地 spike，禁止发布 artifact', conclusion: mindspore.exitCode === 0 ? '已进入真实 ONNX 转换并生成本地 artifact；缺 HarmonyOS runner 与授权，保持不可发布。' : '官方 converter_lite 2.7.0 已进入 ONNX parse/graph optimization，因 Conv2DFusion infer-shape 失败；缺 HarmonyOS runner。' },
+    ...linuxProviders.map((attempt) => ({ platform: `linux-x86_64-${attempt.requestedProvider}`, format: 'onnx', state: attempt.exitCode === 0 ? 'inference-verified' : 'blocked', tool: { name: 'onnxruntime-node', version: '1.24.3' }, attempt, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: attempt.exitCode === 0 ? null : 'provider/session initialization before graph execution', license: 'ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认', redistribution: '模型授权未闭环，禁止随产品发布', conclusion: attempt.exitCode === 0 ? `${attempt.requestedProvider} provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。` : `${attempt.requestedProvider} provider 未能进入固定输入 inference，保持 blocked。` })),
   ],
 };
 await writeFile(resolve(root, 'evidence/conversions/conversion-spikes.json'), stable(report));

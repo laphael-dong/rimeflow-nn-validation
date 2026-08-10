@@ -4,45 +4,13 @@ import { dirname, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import * as ort from '../tooling/web/node_modules/onnxruntime-web/dist/ort.node.min.mjs';
+import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => JSON.stringify(value, null, 2) + '\n';
 const round = (value, digits = 8) => Number(value.toFixed(digits));
 async function directoryBytes(path) { let total = 0; for (const name of await readdir(path)) { const child = resolve(path, name); const info = await stat(child); total += info.isDirectory() ? await directoryBytes(child) : info.size; } return total; }
-
-function readPpm(bytes) {
-  const marker = Buffer.from('\n255\n');
-  const headerEnd = bytes.indexOf(marker);
-  if (headerEnd < 0) throw new Error('unsupported PPM header');
-  const header = bytes.subarray(0, headerEnd).toString('ascii').trim().split(/\s+/);
-  if (header[0] !== 'P6') throw new Error('only P6 PPM is supported');
-  const width = Number(header[1]); const height = Number(header[2]);
-  const pixels = bytes.subarray(headerEnd + marker.length);
-  if (pixels.length !== width * height * 3) throw new Error('PPM byte length mismatch');
-  return { width, height, pixels };
-}
-
-function preprocess(image) {
-  const dst = 640; const scale = Math.min(dst / image.width, dst / image.height);
-  const scaledW = image.width * scale; const scaledH = image.height * scale;
-  const padX = (dst - scaledW) / 2; const padY = (dst - scaledH) / 2;
-  const tensor = new Float32Array(3 * dst * dst);
-  tensor.fill(114 / 255);
-  for (let y = 0; y < dst; y++) {
-    for (let x = 0; x < dst; x++) {
-      const srcX = (x - padX) / scale; const srcY = (y - padY) / scale;
-      if (srcX < 0 || srcX >= image.width || srcY < 0 || srcY >= image.height) continue;
-      const ix = Math.min(image.width - 1, Math.max(0, Math.floor(srcX)));
-      const iy = Math.min(image.height - 1, Math.max(0, Math.floor(srcY)));
-      const sourceOffset = (iy * image.width + ix) * 3; const targetOffset = y * dst + x;
-      tensor[targetOffset] = image.pixels[sourceOffset] / 255;
-      tensor[dst * dst + targetOffset] = image.pixels[sourceOffset + 1] / 255;
-      tensor[2 * dst * dst + targetOffset] = image.pixels[sourceOffset + 2] / 255;
-    }
-  }
-  return { tensor, scale, padX, padY };
-}
 
 function iou(a, b) {
   const x1 = Math.max(a[0], b[0]); const y1 = Math.max(a[1], b[1]);
@@ -69,10 +37,10 @@ function decode(raw, image, prep) {
       classId,
       score,
       bbox: [
-        clamp(((cx - width / 2) - prep.padX) / (image.width * prep.scale)),
-        clamp(((cy - height / 2) - prep.padY) / (image.height * prep.scale)),
-        clamp(((cx + width / 2) - prep.padX) / (image.width * prep.scale)),
-        clamp(((cy + height / 2) - prep.padY) / (image.height * prep.scale)),
+        clamp(((cx - width / 2) - prep.padXPixels) / (image.width * prep.scale)),
+        clamp(((cy - height / 2) - prep.padYPixels) / (image.height * prep.scale)),
+        clamp(((cx + width / 2) - prep.padXPixels) / (image.width * prep.scale)),
+        clamp(((cy + height / 2) - prep.padYPixels) / (image.height * prep.scale)),
       ],
     });
   }
@@ -89,7 +57,34 @@ function summary(values) {
   return { elementCount: values.length, finiteCount, min: round(min, 9), max: round(max, 9), mean: round(sum / finiteCount, 9), sha256Float32Le: sha256(bytes) };
 }
 
-const manifest = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
+function validateCoverage(entry, image, decoded) {
+  const expectation = entry.coverageExpectation;
+  if (!expectation) throw new Error(`${entry.id}: coverageExpectation 缺失`);
+  const count = decoded.length;
+  const { minimum = 0, maximum = Number.POSITIVE_INFINITY } = expectation.detectionCount;
+  if (count < minimum || count > maximum) throw new Error(`${entry.id}: 检测数 ${count} 不在 [${minimum}, ${maximum}]`);
+  const classIds = [...new Set(decoded.map((item) => item.classId))].sort((a, b) => a - b);
+  if (expectation.minimumDistinctClassIds && classIds.length < expectation.minimumDistinctClassIds) {
+    throw new Error(`${entry.id}: 类别数 ${classIds.length} 小于 ${expectation.minimumDistinctClassIds}`);
+  }
+  for (const classId of expectation.requiredClassIds ?? []) {
+    if (!classIds.includes(classId)) throw new Error(`${entry.id}: 缺少 classId=${classId}`);
+  }
+  const boundaryDistance = decoded.length === 0 ? null : Math.min(...decoded.flatMap((item) => [item.bbox[0], item.bbox[1], 1 - item.bbox[2], 1 - item.bbox[3]]));
+  if (expectation.boundaryDistanceMaximum !== undefined && (boundaryDistance === null || boundaryDistance > expectation.boundaryDistanceMaximum)) {
+    throw new Error(`${entry.id}: 最近边界距离 ${boundaryDistance} 超过 ${expectation.boundaryDistanceMaximum}`);
+  }
+  const sourceAspectRatio = Math.max(image.width / image.height, image.height / image.width);
+  if (expectation.sourceAspectRatioMinimum !== undefined && sourceAspectRatio < expectation.sourceAspectRatioMinimum) {
+    throw new Error(`${entry.id}: 源宽高比 ${sourceAspectRatio} 小于 ${expectation.sourceAspectRatioMinimum}`);
+  }
+  return { passed: true, detectionCount: count, distinctClassIds: classIds, nearestBoundaryDistance: boundaryDistance === null ? null : round(boundaryDistance), sourceAspectRatio: round(sourceAspectRatio) };
+}
+
+const manifestPath = resolve(root, process.env.RIMEFLOW_FIXTURE_MANIFEST ?? 'evidence/fixtures/manifest.json');
+const outputPath = resolve(root, process.env.RIMEFLOW_WEB_REFERENCE_OUTPUT ?? 'evidence/golden/web-reference.json');
+const manifestBytes = await readFile(manifestPath);
+const manifest = JSON.parse(manifestBytes);
 const modelBytes = await readFile(resolve(root, 'models/yolov8n.onnx'));
 ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false;
 const initStart = performance.now();
@@ -100,7 +95,7 @@ const performanceSamples = [];
 let peakRssBytes = process.memoryUsage().rss;
 for (const entry of manifest.images) {
   const image = readPpm(await readFile(resolve(root, entry.path)));
-  const prep = preprocess(image); const runs = []; const timings = [];
+  const prep = preprocessCanonical(image); const runs = []; const timings = [];
   for (let repeat = 0; repeat < 3; repeat++) {
     const start = performance.now();
     const outputs = await session.run({ images: new ort.Tensor('float32', prep.tensor, [1, 3, 640, 640]) });
@@ -110,17 +105,19 @@ for (const entry of manifest.images) {
     runs.push({ repeat: repeat + 1, rawTensor: summary(raw), decoded: decode(raw, image, prep) });
   }
   const reference = runs[0].rawTensor.sha256Float32Le;
-  fixtures.push({ id: entry.id, imageSha256: entry.sha256, preprocessing: { algorithm: 'letterbox-nearest-rgb-f32-v1', scale: round(prep.scale), padX: round(prep.padX), padY: round(prep.padY) }, runs, determinism: { allRawDigestsEqual: runs.every((run) => run.rawTensor.sha256Float32Le === reference), maxRawAbsoluteDifference: 0, allDecodedEqual: runs.every((run) => JSON.stringify(run.decoded) === JSON.stringify(runs[0].decoded)) } });
+  const determinism = { allRawDigestsEqual: runs.every((run) => run.rawTensor.sha256Float32Le === reference), maxRawAbsoluteDifference: 0, allDecodedEqual: runs.every((run) => JSON.stringify(run.decoded) === JSON.stringify(runs[0].decoded)) };
+  if (!determinism.allRawDigestsEqual || !determinism.allDecodedEqual) throw new Error(`${entry.id}: 三次 WASM 运行不确定`);
+  fixtures.push({ id: entry.id, imageSha256: entry.sha256, canonicalInput: { shape: [1, 3, 640, 640], dtype: 'float32', byteOrder: 'little-endian', sha256Float32Le: tensorDigest(prep.tensor), summary: summary(prep.tensor) }, preprocessing: { contract: PREPROCESS_CONTRACT, scale: round(prep.scale), padXNormalized: round(prep.padXNormalized), padYNormalized: round(prep.padYNormalized), padXPixels: round(prep.padXPixels), padYPixels: round(prep.padYPixels) }, runs, determinism, coverage: validateCoverage(entry, image, runs[0].decoded) });
   performanceSamples.push({ id: entry.id, coldMs: round(timings[0], 3), warmMs: timings.slice(1).map((value) => round(value, 3)) });
 }
 const reference = {
   schemaVersion: 1,
-  source: { modelSha256: sha256(modelBytes), fixtureManifestSha256: sha256(await readFile(resolve(root, 'evidence/fixtures/manifest.json'))) },
+  source: { modelSha256: sha256(modelBytes), fixtureManifestSha256: sha256(manifestBytes) },
   runtime: { name: 'onnxruntime-web', version: ort.env.versions.web, requestedExecutionProviders: ['wasm'], actualExecutionProvider: 'wasm', evidence: 'session 仅配置 wasm provider 且初始化/推理成功', threads: 1 },
   tolerances: { frozenBeforeNativeAdapterResults: true, classIdExact: true, confidenceAbsolute: 0.0001, boxIouMinimum: 0.999, rawTensorAbsolute: 0.00001, rawTensorRelative: 0.0001, decodedBoxAbsolute: 0.0001, missingValuePolicy: 'fail', nonFinitePolicy: 'fail' },
   fixtures,
 };
-await writeFile(resolve(root, 'evidence/golden/web-reference.json'), stable(reference));
+await writeFile(outputPath, stable(reference));
 if (process.env.RIMEFLOW_RECORD_PERFORMANCE === '1') {
   await writeFile(resolve(root, 'evidence/reports/web-wasm-performance.json'), stable({ schemaVersion: 1, sourceReferenceSha256: sha256(Buffer.from(stable(reference))), runtime: reference.runtime, host: { os: process.platform, arch: process.arch, node: process.version }, metrics: { initializationMs: round(initializationMs, 3), fixtures: performanceSamples, peakProcessRssBytes: peakRssBytes, runtimePackageBytes: await directoryBytes(resolve(root, 'evidence/tooling/web/node_modules/onnxruntime-web')) }, note: '性能采样可变；峰值是独立 harness 进程 RSS 上界；包体为 onnxruntime-web package 文件总和；不得与 WebGPU 或 Native 数据混合。' }));
 }

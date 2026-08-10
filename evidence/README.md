@@ -15,16 +15,28 @@
 
 ```sh
 bun install --frozen-lockfile --cwd evidence/tooling/web
+node evidence/scripts/lock_python_tooling.mjs
+node evidence/scripts/prepare_python_tooling.mjs
+node evidence/scripts/prepare_mindspore_lite.mjs
 bun run evidence/scripts/generate_all.mjs
-sha256sum models/yolov8n.onnx evidence/model/model-contract.json evidence/golden/web-reference.json
+sha256sum models/yolov8n.onnx evidence/model/model-contract.json evidence/fixtures/manifest.json evidence/golden/web-reference.json evidence/reports/preprocess-conformance.json evidence/reports/model-provenance.json evidence/conversions/conversion-spikes.json
+cargo test --offline --test task1_raw_golden --config 'patch."https://github.com/caozisheng/rimeflow-onnx-base".rimeflow-onnx-base.path="../rimeflow-onnx-base"'
 bun run evidence/scripts/validate_evidence.mjs
 git diff --check
 ```
 
-`generate_all.mjs` 会先读取模型文件和 ORT session 的真实 metadata，再生成 contract、合成 PPM 图片、raw tensor fixture 和三次 WASM 推理报告。图片是确定性程序生成的几何图案，无个人信息；raw tensor/NMS fixture 不冒充图片经过模型的结果。
+`generate_all.mjs` 会先从固定 `ultralytics/assets@42ef8a125df038dcca49f6216f446fe9112946c1` 获取并校验源文件，再读取模型与 ORT session 的真实 metadata，生成 contract、PPM fixture、raw tensor fixture、三次 WASM 推理和真实生产 WGSL conformance 报告。图片解码与裁剪固定为 `sharp@0.34.4`，其包完整性由 `evidence/tooling/web/bun.lock` 锁定。
+
+Python 转换工具固定为 CPython 3.12/Linux x86_64 wheel，并由 `requirements.lock` 逐包记录 PyPI 官方 SHA-256。`prepare_python_tooling.mjs` 使用 `--require-hashes --no-deps` 安装后执行 `pip check`。LiteRT 2.1.6 对 `backports.strenum` 的 metadata 仍是无条件依赖，但该包声明 Python `<3.11`；Python 3.12 的 LiteRT 实现实际使用标准库 `enum.StrEnum`，因此准备命令显式使用 `--ignore-requires-python` 安装该已锁纯 Python wheel，不能省略或隐藏该上游元数据例外。MindSpore Lite 2.7.0 tarball 使用官方发布页给出的 SHA-256 校验。
+
+外部源文件逐文件记录在 `evidence/fixtures/manifest.json`：`im/bus.jpg` 和 `docs/ultralytics-dogs.avif` 均锁定 upstream commit、Git blob SHA、内容 SHA-256、准确转换与 upstream 根 `AGPL-3.0-only` LICENSE URL。仓库的 MIT LICENSE 不覆盖这些图片。无检测图由脚本生成并标记 CC0；不使用本机 `素材/` 或私人媒体。
+
+模型级图片只覆盖无检测、单目标、多类别、边界框和极端宽高比。重叠框/NMS 由 `evidence/fixtures/raw/overlap-nms.json` 与 `tests/task1_raw_golden.rs` 调用生产 Rust `decode_yolo_output`/`nms` 验证；该 raw tensor 明确不来自图片推理。分层关系见 `evidence/golden/coverage-matrix.json`。
 
 性能重新采样使用 `RIMEFLOW_RECORD_PERFORMANCE=1 bun run evidence/scripts/run_web_golden.mjs`，随后运行 `bun run evidence/scripts/finalize_manifest.mjs`。计时与 RSS 是环境测量值，重新采样预期会变化；contract、fixture、raw tensor、Web 原始 tensor 与 decode reference 则必须重复生成相同 digest。
 
 ## 状态判定
 
-本机没有 Core ML、LiteRT v2、Windows ML 或 MindSpore Lite converter/runner。转换报告保留实际命令、版本探测、失败阶段、I/O 影响、许可和再分发结论；失败 artifact 不会写入发布目录。只有真实目标设备通过全部 conformance、golden、fallback、性能和加载测试时才允许标记 `supported`。
+Core ML 9.0 与 LiteRT 2.1.6 已调用真实官方 API：前者不接受 ONNX 作为直接转换源，后者是 TFLite runtime 而不是 ONNX converter。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。转换报告保留完整命令、工具版本、stdout/stderr、退出码、失败阶段、I/O、量化、NMS、许可和再分发结论；失败或授权不明 artifact 不进入发布目录。
+
+`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史生成。仓库没有原始 `.pt`、准确 SHA 或企业授权证据；仓库 MIT 不能覆盖权重。当前禁止在 RimeCut 包中再分发 ONNX 或转换产物，任务 1.4 与大任务 1 保持 blocked。

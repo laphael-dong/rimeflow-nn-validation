@@ -7,11 +7,185 @@
   "required": ["schemaVersion", "generatedBy", "source", "model", "responsibilities", "runtimeMetadata", "verification"],
   "properties": {
     "schemaVersion": { "const": 1 },
-    "generatedBy": { "type": "object", "required": ["name", "version", "runtime", "runtimeVersion", "executionProvider"] },
-    "source": { "type": "object", "required": ["repository", "commit", "modelPath", "modelSha256"] },
-    "model": { "type": "object", "required": ["logicalId", "version", "task", "input", "output"] },
-    "responsibilities": { "type": "object", "required": ["preprocessing", "postprocessing", "modelGraph"] },
-    "runtimeMetadata": { "type": "object", "required": ["inputMetadata", "outputMetadata"] },
-    "verification": { "type": "object", "required": ["inputModelSha256", "shaderSha256", "postprocessSha256"] }
+    "generatedBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "runtime", "runtimeVersion", "executionProvider"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "runtime": { "const": "onnxruntime-web" },
+        "runtimeVersion": { "const": "1.27.0" },
+        "executionProvider": { "const": "wasm" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "modelPath", "modelSha256"],
+      "properties": {
+        "repository": { "type": "string", "format": "uri" },
+        "commit": { "$ref": "#/definitions/sha1" },
+        "modelPath": { "const": "models/yolov8n.onnx" },
+        "modelSha256": { "$ref": "#/definitions/sha256" }
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logicalId", "version", "task", "input", "output"],
+      "properties": {
+        "logicalId": { "const": "rimeflow-yolov8n" },
+        "version": { "type": "string", "minLength": 1 },
+        "task": { "const": "detection" },
+        "input": { "$ref": "#/definitions/inputTensor" },
+        "output": { "$ref": "#/definitions/outputTensor" }
+      }
+    },
+    "responsibilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preprocessing", "postprocessing", "modelGraph"],
+      "properties": {
+        "preprocessing": { "const": "operator-shader" },
+        "postprocessing": { "const": "operator-rust" },
+        "modelGraph": { "const": "raw-boxes-and-class-scores" }
+      }
+    },
+    "runtimeMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputMetadata", "outputMetadata"],
+      "properties": {
+        "inputMetadata": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/definitions/runtimeTensor" } },
+        "outputMetadata": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/definitions/runtimeTensor" } }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputModelSha256", "shaderSha256", "postprocessSha256", "preprocessContractSha256"],
+      "properties": {
+        "inputModelSha256": { "$ref": "#/definitions/sha256" },
+        "shaderSha256": { "$ref": "#/definitions/sha256" },
+        "postprocessSha256": { "$ref": "#/definitions/sha256" },
+        "preprocessContractSha256": { "$ref": "#/definitions/sha256" }
+      }
+    }
+  },
+  "definitions": {
+    "sha1": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "quantization": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "scale", "zeroPoint"],
+          "properties": {
+            "kind": { "enum": ["per-tensor", "per-axis"] },
+            "scale": { "type": ["number", "array"] },
+            "zeroPoint": { "type": ["integer", "array"] },
+            "axis": { "type": ["integer", "null"] }
+          }
+        }
+      ]
+    },
+    "inputTensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "runtimeName", "index", "shape", "axes", "dynamicDimensions", "layout", "dtype", "quantization", "color", "valueRange", "normalize", "preprocess"],
+      "properties": {
+        "role": { "const": "image" },
+        "runtimeName": { "type": "string", "minLength": 1 },
+        "index": { "const": 0 },
+        "shape": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "integer", "minimum": 1 } },
+        "axes": { "const": ["batch", "channel", "height", "width"] },
+        "dynamicDimensions": { "type": "array", "maxItems": 0 },
+        "layout": { "const": "NCHW" },
+        "dtype": { "const": "float32" },
+        "quantization": { "$ref": "#/definitions/quantization" },
+        "color": {
+          "type": "object", "additionalProperties": false,
+          "required": ["sourceChannels", "modelChannels", "alpha"],
+          "properties": { "sourceChannels": { "const": ["R", "G", "B", "A"] }, "modelChannels": { "const": ["R", "G", "B"] }, "alpha": { "const": "ignored" } }
+        },
+        "valueRange": {
+          "type": "object", "additionalProperties": false,
+          "required": ["minimum", "maximum", "inclusive"],
+          "properties": { "minimum": { "const": 0 }, "maximum": { "const": 1 }, "inclusive": { "const": true } }
+        },
+        "normalize": {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "mean", "standardDeviation", "scale", "offset", "responsibility"],
+          "properties": { "kind": { "const": "none" }, "mean": { "type": "null" }, "standardDeviation": { "type": "null" }, "scale": { "type": "null" }, "offset": { "type": "null" }, "responsibility": { "const": "preprocess-shader" } }
+        },
+        "preprocess": { "$ref": "#/definitions/preprocess" }
+      }
+    },
+    "preprocess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "targetSize", "interpolation", "samplerAddressMode", "outputPixelCoordinate", "sourceTexelCoordinate", "letterbox", "responsibility"],
+      "properties": {
+        "kind": { "const": "letterbox" },
+        "targetSize": { "const": [640, 640] },
+        "interpolation": { "const": "linear" },
+        "samplerAddressMode": { "const": "clamp-to-edge" },
+        "outputPixelCoordinate": { "const": "u=x/targetWidth; v=y/targetHeight" },
+        "sourceTexelCoordinate": { "const": "texel=normalizedCoordinate*sourceSize-0.5" },
+        "letterbox": {
+          "type": "object", "additionalProperties": false,
+          "required": ["scaleRule", "scaledDimensionRounding", "paddingRule", "padXRule", "padYRule", "insideRule", "fillRgb"],
+          "properties": {
+            "scaleRule": { "const": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)" },
+            "scaledDimensionRounding": { "const": "none-continuous" },
+            "paddingRule": { "const": "symmetric-continuous" },
+            "padXRule": { "const": "(1-sourceWidth*scale/targetWidth)/2" },
+            "padYRule": { "const": "(1-sourceHeight*scale/targetHeight)/2" },
+            "insideRule": { "const": "0<=u<=1 && 0<=v<=1" },
+            "fillRgb": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } }
+          }
+        },
+        "responsibility": { "const": "preprocess-shader" }
+      }
+    },
+    "outputTensor": {
+      "type": "object", "additionalProperties": false,
+      "required": ["role", "runtimeName", "index", "shape", "axes", "layout", "dtype", "quantization", "memoryOrder", "semantics", "postprocess"],
+      "properties": {
+        "role": { "const": "detections" }, "runtimeName": { "type": "string", "minLength": 1 }, "index": { "const": 0 },
+        "shape": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "integer", "minimum": 1 } },
+        "axes": { "const": ["batch", "attribute", "anchor"] },
+        "layout": { "const": "N_ATTRIBUTES_ANCHORS" }, "dtype": { "const": "float32" },
+        "quantization": { "$ref": "#/definitions/quantization" },
+        "memoryOrder": { "type": "string", "pattern": "attribute\\*[0-9]+\\+anchor$" },
+        "semantics": {
+          "type": "object", "additionalProperties": false,
+          "required": ["attributes", "anchorDimension", "boxEncoding", "nmsFused"],
+          "properties": {
+            "attributes": {
+              "type": "object", "additionalProperties": false, "required": ["box", "classScores"],
+              "properties": {
+                "box": { "type": "object", "additionalProperties": false, "required": ["indices", "order"], "properties": { "indices": { "const": [0, 1, 2, 3] }, "order": { "const": ["centerX", "centerY", "width", "height"] } } },
+                "classScores": { "type": "object", "additionalProperties": false, "required": ["startIndex", "count", "activation"], "properties": { "startIndex": { "const": 4 }, "count": { "const": 80 }, "activation": { "const": "already-applied" } } }
+              }
+            },
+            "anchorDimension": { "type": "object", "additionalProperties": false, "required": ["axis", "count"], "properties": { "axis": { "const": 2 }, "count": { "const": 8400 } } },
+            "boxEncoding": { "type": "object", "additionalProperties": false, "required": ["format", "coordinateSpace"], "properties": { "format": { "const": "center-x-center-y-width-height" }, "coordinateSpace": { "const": "letterboxed-model-pixels" } } },
+            "nmsFused": { "const": false }
+          }
+        },
+        "postprocess": {
+          "type": "object", "additionalProperties": false, "required": ["decode", "threshold", "nms", "sourceSha256"],
+          "properties": { "decode": { "const": "operator" }, "threshold": { "type": "number", "minimum": 0, "maximum": 1 }, "nms": { "const": "operator" }, "sourceSha256": { "$ref": "#/definitions/sha256" } }
+        }
+      }
+    },
+    "runtimeTensor": {
+      "type": "object", "additionalProperties": false, "required": ["name", "isTensor", "type", "shape"],
+      "properties": { "name": { "type": "string" }, "isTensor": { "const": true }, "type": { "const": "float32" }, "shape": { "type": "array", "items": { "type": "integer" } } }
+    }
   }
 }

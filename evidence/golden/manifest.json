@@ -9,28 +9,113 @@
     },
     {
       "path": "evidence/model/model-contract.json",
-      "bytes": 2692,
-      "sha256": "f7f8cd8ea82d010af07487602a864c400e09335cdf5e0bf99ffb53731d98adb1"
+      "bytes": 4749,
+      "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
     },
     {
       "path": "evidence/fixtures/manifest.json",
-      "bytes": 4253,
-      "sha256": "d121d338ffb679e75da1a331578fb20ad9c11a82a126485159022ef1d41b7b38"
+      "bytes": 8091,
+      "sha256": "e460e435c5c0cea346697e7edeaacf6e38b6c4f641dd8dd4b11e446094ab5e7c"
+    },
+    {
+      "path": "evidence/fixtures/images/no-detection.ppm",
+      "bytes": 1228815,
+      "sha256": "5a0d17c1055bd16e1b790fe8fcc048828c4112b50646ad217a25bd4a2fdf833f"
+    },
+    {
+      "path": "evidence/fixtures/images/single-target.ppm",
+      "bytes": 2073615,
+      "sha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18"
+    },
+    {
+      "path": "evidence/fixtures/sources/ultralytics-dogs.avif",
+      "bytes": 316761,
+      "sha256": "051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c"
+    },
+    {
+      "path": "evidence/fixtures/images/multi-class.ppm",
+      "bytes": 2624416,
+      "sha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688"
+    },
+    {
+      "path": "evidence/fixtures/sources/bus.jpg",
+      "bytes": 137419,
+      "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+    },
+    {
+      "path": "evidence/fixtures/images/boundary-box.ppm",
+      "bytes": 2621176,
+      "sha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057"
+    },
+    {
+      "path": "evidence/fixtures/images/extreme-aspect.ppm",
+      "bytes": 491536,
+      "sha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc"
+    },
+    {
+      "path": "evidence/fixtures/raw/no-detection.json",
+      "bytes": 486,
+      "sha256": "614e561a8e7510e39ca6f3e9c57ce63d1985b74a920b45584a274e6e86aee5bf"
+    },
+    {
+      "path": "evidence/fixtures/raw/single-target.json",
+      "bytes": 1011,
+      "sha256": "785f78196e831abfbb4d1be9f33da5d04a2773545fff74423cdc829608199240"
+    },
+    {
+      "path": "evidence/fixtures/raw/multi-class.json",
+      "bytes": 1557,
+      "sha256": "91cb12bcc38483edd01cce2583ed72d5417268d59ee018f76fc6a59f28e91543"
+    },
+    {
+      "path": "evidence/fixtures/raw/overlap-nms.json",
+      "bytes": 1370,
+      "sha256": "4102c7d3db23926386c5ed37c320c22782ddcbaf3b06a8e3632b63e3c4b3380f"
+    },
+    {
+      "path": "evidence/fixtures/raw/extreme-aspect.json",
+      "bytes": 1019,
+      "sha256": "3612442cc91f102542ad7d64e605bc9ecc1901229f18920d6f68324b0da4d071"
+    },
+    {
+      "path": "evidence/fixtures/raw/boundary-box.json",
+      "bytes": 1008,
+      "sha256": "a986f29744f54b2cf94773c8e8171fa7ce8a60a38f07b7bcf98b50d19fe98ffd"
+    },
+    {
+      "path": "evidence/golden/coverage-matrix.json",
+      "bytes": 3746,
+      "sha256": "d87ffcd8653f46e47103c904e09c7e50bd15fe736b15dd9f27fd5033ffb0ba45"
     },
     {
       "path": "evidence/golden/web-reference.json",
-      "bytes": 10013,
-      "sha256": "55f4b1e418831113dcf15c89ff2c62aa8f9ac6e0ec9014a9bea10f1cf4ea3d87"
+      "bytes": 29752,
+      "sha256": "7f87ca5896bdff373162d148d8ca6f545f9aa9b6e7323a0d3505eccb1172b654"
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 5974,
-      "sha256": "820c9d96d6b4d9a0f424bd8cca45d36181d584b280dbda5e96e6298e34d17905"
+      "bytes": 39389,
+      "sha256": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886"
+    },
+    {
+      "path": "evidence/reports/model-provenance.json",
+      "bytes": 4088,
+      "sha256": "71465f80c5c34bb377b5281dff6ed27d87226234414066f475d02349d7ab9d9a"
+    },
+    {
+      "path": "evidence/reports/preprocess-conformance.json",
+      "bytes": 3624,
+      "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
     },
     {
       "path": "evidence/reports/web-wasm-performance.json",
       "bytes": 1633,
       "sha256": "e5b118b15ba49b1b2bc1d7bcaa63f17b941a0ce5eacb3ddd061fc491d0cb39b3"
+    },
+    {
+      "path": "evidence/tooling/requirements.lock",
+      "bytes": 1869,
+      "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
     }
   ]
 }

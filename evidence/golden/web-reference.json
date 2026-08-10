@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
-    "fixtureManifestSha256": "d121d338ffb679e75da1a331578fb20ad9c11a82a126485159022ef1d41b7b38"
+    "fixtureManifestSha256": "e460e435c5c0cea346697e7edeaacf6e38b6c4f641dd8dd4b11e446094ab5e7c"
   },
   "runtime": {
     "name": "onnxruntime-web",
@@ -29,11 +29,81 @@
     {
       "id": "no-detection",
       "imageSha256": "5a0d17c1055bd16e1b790fe8fcc048828c4112b50646ad217a25bd4a2fdf833f",
+      "canonicalInput": {
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "byteOrder": "little-endian",
+        "sha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b",
+        "summary": {
+          "elementCount": 1228800,
+          "finiteCount": 1228800,
+          "min": 0.070588239,
+          "max": 0.070588239,
+          "mean": 0.070588239,
+          "sha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b"
+        }
+      },
       "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
+        "contract": {
+          "kind": "letterbox",
+          "targetSize": [
+            640,
+            640
+          ],
+          "interpolation": "linear",
+          "samplerAddressMode": "clamp-to-edge",
+          "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+          "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+          "color": {
+            "sourceChannels": [
+              "R",
+              "G",
+              "B",
+              "A"
+            ],
+            "modelChannels": [
+              "R",
+              "G",
+              "B"
+            ],
+            "alpha": "ignored"
+          },
+          "valueRange": {
+            "minimum": 0,
+            "maximum": 1,
+            "inclusive": true
+          },
+          "normalize": {
+            "kind": "none",
+            "mean": null,
+            "standardDeviation": null,
+            "scale": null,
+            "offset": null
+          },
+          "letterbox": {
+            "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+            "scaledDimensionRounding": "none-continuous",
+            "paddingRule": "symmetric-continuous",
+            "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+            "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+            "insideRule": "0<=u<=1 && 0<=v<=1",
+            "fillRgb": [
+              0.447,
+              0.447,
+              0.447
+            ]
+          }
+        },
         "scale": 1,
-        "padX": 0,
-        "padY": 0
+        "padXNormalized": 0,
+        "padYNormalized": 0,
+        "padXPixels": 0,
+        "padYPixels": 0
       },
       "runs": [
         {
@@ -77,16 +147,93 @@
         "allRawDigestsEqual": true,
         "maxRawAbsoluteDifference": 0,
         "allDecodedEqual": true
+      },
+      "coverage": {
+        "passed": true,
+        "detectionCount": 0,
+        "distinctClassIds": [],
+        "nearestBoundaryDistance": null,
+        "sourceAspectRatio": 1
       }
     },
     {
       "id": "single-target",
-      "imageSha256": "1c3986cc74b34f9cbe5a962bc9a331e849c6d4a0579c8cb9c9d38a0f48c4f5f3",
+      "imageSha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18",
+      "canonicalInput": {
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "byteOrder": "little-endian",
+        "sha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "summary": {
+          "elementCount": 1228800,
+          "finiteCount": 1228800,
+          "min": 0,
+          "max": 1,
+          "mean": 0.398199691,
+          "sha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe"
+        }
+      },
       "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
-        "scale": 1,
-        "padX": 0,
-        "padY": 0
+        "contract": {
+          "kind": "letterbox",
+          "targetSize": [
+            640,
+            640
+          ],
+          "interpolation": "linear",
+          "samplerAddressMode": "clamp-to-edge",
+          "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+          "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+          "color": {
+            "sourceChannels": [
+              "R",
+              "G",
+              "B",
+              "A"
+            ],
+            "modelChannels": [
+              "R",
+              "G",
+              "B"
+            ],
+            "alpha": "ignored"
+          },
+          "valueRange": {
+            "minimum": 0,
+            "maximum": 1,
+            "inclusive": true
+          },
+          "normalize": {
+            "kind": "none",
+            "mean": null,
+            "standardDeviation": null,
+            "scale": null,
+            "offset": null
+          },
+          "letterbox": {
+            "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+            "scaledDimensionRounding": "none-continuous",
+            "paddingRule": "symmetric-continuous",
+            "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+            "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+            "insideRule": "0<=u<=1 && 0<=v<=1",
+            "fillRgb": [
+              0.447,
+              0.447,
+              0.447
+            ]
+          }
+        },
+        "scale": 0.71111111,
+        "padXNormalized": 0.07333333,
+        "padYNormalized": 0,
+        "padXPixels": 46.93333333,
+        "padYPixels": 0
       },
       "runs": [
         {
@@ -95,11 +242,23 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.745361328,
-            "mean": 9.417564407,
-            "sha256Float32Le": "1eb162c915de067ae7849a65ff8d0b5927cc0eefc93d9c85bff295c0db2cc42e"
+            "max": 637.05645752,
+            "mean": 9.809623919,
+            "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8208,
+              "classId": 16,
+              "score": 0.7327919,
+              "bbox": [
+                0.09723949,
+                0.12138329,
+                0.75922947,
+                0.92565022
+              ]
+            }
+          ]
         },
         {
           "repeat": 2,
@@ -107,11 +266,23 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.745361328,
-            "mean": 9.417564407,
-            "sha256Float32Le": "1eb162c915de067ae7849a65ff8d0b5927cc0eefc93d9c85bff295c0db2cc42e"
+            "max": 637.05645752,
+            "mean": 9.809623919,
+            "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8208,
+              "classId": 16,
+              "score": 0.7327919,
+              "bbox": [
+                0.09723949,
+                0.12138329,
+                0.75922947,
+                0.92565022
+              ]
+            }
+          ]
         },
         {
           "repeat": 3,
@@ -119,27 +290,118 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.745361328,
-            "mean": 9.417564407,
-            "sha256Float32Le": "1eb162c915de067ae7849a65ff8d0b5927cc0eefc93d9c85bff295c0db2cc42e"
+            "max": 637.05645752,
+            "mean": 9.809623919,
+            "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8208,
+              "classId": 16,
+              "score": 0.7327919,
+              "bbox": [
+                0.09723949,
+                0.12138329,
+                0.75922947,
+                0.92565022
+              ]
+            }
+          ]
         }
       ],
       "determinism": {
         "allRawDigestsEqual": true,
         "maxRawAbsoluteDifference": 0,
         "allDecodedEqual": true
+      },
+      "coverage": {
+        "passed": true,
+        "detectionCount": 1,
+        "distinctClassIds": [
+          16
+        ],
+        "nearestBoundaryDistance": 0.07434978,
+        "sourceAspectRatio": 1.171875
       }
     },
     {
       "id": "multi-class",
-      "imageSha256": "f4da086d8c2db702aa1c6fd5c869af2402e582341f2ff9537749d2a3dda53a97",
+      "imageSha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
+      "canonicalInput": {
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "byteOrder": "little-endian",
+        "sha256Float32Le": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c",
+        "summary": {
+          "elementCount": 1228800,
+          "finiteCount": 1228800,
+          "min": 0,
+          "max": 1,
+          "mean": 0.456203909,
+          "sha256Float32Le": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c"
+        }
+      },
       "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
-        "scale": 1,
-        "padX": 0,
-        "padY": 140
+        "contract": {
+          "kind": "letterbox",
+          "targetSize": [
+            640,
+            640
+          ],
+          "interpolation": "linear",
+          "samplerAddressMode": "clamp-to-edge",
+          "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+          "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+          "color": {
+            "sourceChannels": [
+              "R",
+              "G",
+              "B",
+              "A"
+            ],
+            "modelChannels": [
+              "R",
+              "G",
+              "B"
+            ],
+            "alpha": "ignored"
+          },
+          "valueRange": {
+            "minimum": 0,
+            "maximum": 1,
+            "inclusive": true
+          },
+          "normalize": {
+            "kind": "none",
+            "mean": null,
+            "standardDeviation": null,
+            "scale": null,
+            "offset": null
+          },
+          "letterbox": {
+            "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+            "scaledDimensionRounding": "none-continuous",
+            "paddingRule": "symmetric-continuous",
+            "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+            "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+            "insideRule": "0<=u<=1 && 0<=v<=1",
+            "fillRgb": [
+              0.447,
+              0.447,
+              0.447
+            ]
+          }
+        },
+        "scale": 0.59259259,
+        "padXNormalized": 0.125,
+        "padYNormalized": 0,
+        "padXPixels": 80,
+        "padYPixels": 0
       },
       "runs": [
         {
@@ -148,11 +410,67 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.749755859,
-            "mean": 9.447204681,
-            "sha256Float32Le": "4b3bbbd1c452884a7febf058356e6f35bb05b355474b667cc3861944458b5eeb"
+            "max": 637.30078125,
+            "mean": 9.266902032,
+            "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.90279216,
+              "bbox": [
+                0.82857374,
+                0.36098032,
+                1,
+                0.81494503
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.8911559,
+              "bbox": [
+                0.27441789,
+                0.37837429,
+                0.42494531,
+                0.79293814
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87441862,
+              "bbox": [
+                0.06316954,
+                0.36887581,
+                0.30155996,
+                0.83891704
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85553628,
+              "bbox": [
+                0.03674355,
+                0.21414506,
+                0.98747622,
+                0.72062228
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.44307899,
+              "bbox": [
+                0.00058765,
+                0.50834541,
+                0.07410898,
+                0.80732203
+              ]
+            }
+          ]
         },
         {
           "repeat": 2,
@@ -160,11 +478,67 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.749755859,
-            "mean": 9.447204681,
-            "sha256Float32Le": "4b3bbbd1c452884a7febf058356e6f35bb05b355474b667cc3861944458b5eeb"
+            "max": 637.30078125,
+            "mean": 9.266902032,
+            "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.90279216,
+              "bbox": [
+                0.82857374,
+                0.36098032,
+                1,
+                0.81494503
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.8911559,
+              "bbox": [
+                0.27441789,
+                0.37837429,
+                0.42494531,
+                0.79293814
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87441862,
+              "bbox": [
+                0.06316954,
+                0.36887581,
+                0.30155996,
+                0.83891704
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85553628,
+              "bbox": [
+                0.03674355,
+                0.21414506,
+                0.98747622,
+                0.72062228
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.44307899,
+              "bbox": [
+                0.00058765,
+                0.50834541,
+                0.07410898,
+                0.80732203
+              ]
+            }
+          ]
         },
         {
           "repeat": 3,
@@ -172,133 +546,163 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.749755859,
-            "mean": 9.447204681,
-            "sha256Float32Le": "4b3bbbd1c452884a7febf058356e6f35bb05b355474b667cc3861944458b5eeb"
+            "max": 637.30078125,
+            "mean": 9.266902032,
+            "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.90279216,
+              "bbox": [
+                0.82857374,
+                0.36098032,
+                1,
+                0.81494503
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.8911559,
+              "bbox": [
+                0.27441789,
+                0.37837429,
+                0.42494531,
+                0.79293814
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87441862,
+              "bbox": [
+                0.06316954,
+                0.36887581,
+                0.30155996,
+                0.83891704
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85553628,
+              "bbox": [
+                0.03674355,
+                0.21414506,
+                0.98747622,
+                0.72062228
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.44307899,
+              "bbox": [
+                0.00058765,
+                0.50834541,
+                0.07410898,
+                0.80732203
+              ]
+            }
+          ]
         }
       ],
       "determinism": {
         "allRawDigestsEqual": true,
         "maxRawAbsoluteDifference": 0,
         "allDecodedEqual": true
-      }
-    },
-    {
-      "id": "overlap-nms",
-      "imageSha256": "10633ea83ad6e2edb2589600b94bdbd0def1bef0303452d63d2b0ad6223dffba",
-      "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
-        "scale": 1,
-        "padX": 0,
-        "padY": 0
       },
-      "runs": [
-        {
-          "repeat": 1,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.704711914,
-            "mean": 9.459328809,
-            "sha256Float32Le": "901ccfb90a869ab9e181ee87a290e98db740c612ce7d49bb31f6af33171e32b0"
-          },
-          "decoded": []
-        },
-        {
-          "repeat": 2,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.704711914,
-            "mean": 9.459328809,
-            "sha256Float32Le": "901ccfb90a869ab9e181ee87a290e98db740c612ce7d49bb31f6af33171e32b0"
-          },
-          "decoded": []
-        },
-        {
-          "repeat": 3,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.704711914,
-            "mean": 9.459328809,
-            "sha256Float32Le": "901ccfb90a869ab9e181ee87a290e98db740c612ce7d49bb31f6af33171e32b0"
-          },
-          "decoded": []
-        }
-      ],
-      "determinism": {
-        "allRawDigestsEqual": true,
-        "maxRawAbsoluteDifference": 0,
-        "allDecodedEqual": true
-      }
-    },
-    {
-      "id": "extreme-aspect",
-      "imageSha256": "879cd48307923938d720ac05ce24c3a5043ab21207ce68d81c31703caf9656cf",
-      "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
-        "scale": 0.5,
-        "padX": 0,
-        "padY": 288
-      },
-      "runs": [
-        {
-          "repeat": 1,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.727111816,
-            "mean": 9.542205721,
-            "sha256Float32Le": "f79f74c0937853ec0b560ee98410ff7f52dd0b6bd855136c421529b2a0cf84b7"
-          },
-          "decoded": []
-        },
-        {
-          "repeat": 2,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.727111816,
-            "mean": 9.542205721,
-            "sha256Float32Le": "f79f74c0937853ec0b560ee98410ff7f52dd0b6bd855136c421529b2a0cf84b7"
-          },
-          "decoded": []
-        },
-        {
-          "repeat": 3,
-          "rawTensor": {
-            "elementCount": 705600,
-            "finiteCount": 705600,
-            "min": 0,
-            "max": 636.727111816,
-            "mean": 9.542205721,
-            "sha256Float32Le": "f79f74c0937853ec0b560ee98410ff7f52dd0b6bd855136c421529b2a0cf84b7"
-          },
-          "decoded": []
-        }
-      ],
-      "determinism": {
-        "allRawDigestsEqual": true,
-        "maxRawAbsoluteDifference": 0,
-        "allDecodedEqual": true
+      "coverage": {
+        "passed": true,
+        "detectionCount": 5,
+        "distinctClassIds": [
+          0,
+          5
+        ],
+        "nearestBoundaryDistance": 0,
+        "sourceAspectRatio": 1.33333333
       }
     },
     {
       "id": "boundary-box",
-      "imageSha256": "4c8030b8687c012a050d1d5b2a58ebb463dc1944d22a74f89ba51b3353394738",
+      "imageSha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057",
+      "canonicalInput": {
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "byteOrder": "little-endian",
+        "sha256Float32Le": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0",
+        "summary": {
+          "elementCount": 1228800,
+          "finiteCount": 1228800,
+          "min": 0,
+          "max": 1,
+          "mean": 0.456253137,
+          "sha256Float32Le": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0"
+        }
+      },
       "preprocessing": {
-        "algorithm": "letterbox-nearest-rgb-f32-v1",
-        "scale": 1,
-        "padX": 0,
-        "padY": 0
+        "contract": {
+          "kind": "letterbox",
+          "targetSize": [
+            640,
+            640
+          ],
+          "interpolation": "linear",
+          "samplerAddressMode": "clamp-to-edge",
+          "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+          "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+          "color": {
+            "sourceChannels": [
+              "R",
+              "G",
+              "B",
+              "A"
+            ],
+            "modelChannels": [
+              "R",
+              "G",
+              "B"
+            ],
+            "alpha": "ignored"
+          },
+          "valueRange": {
+            "minimum": 0,
+            "maximum": 1,
+            "inclusive": true
+          },
+          "normalize": {
+            "kind": "none",
+            "mean": null,
+            "standardDeviation": null,
+            "scale": null,
+            "offset": null
+          },
+          "letterbox": {
+            "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+            "scaledDimensionRounding": "none-continuous",
+            "paddingRule": "symmetric-continuous",
+            "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+            "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+            "insideRule": "0<=u<=1 && 0<=v<=1",
+            "fillRgb": [
+              0.447,
+              0.447,
+              0.447
+            ]
+          }
+        },
+        "scale": 0.59259259,
+        "padXNormalized": 0.12546296,
+        "padYNormalized": 0,
+        "padXPixels": 80.2962963,
+        "padYPixels": 0
       },
       "runs": [
         {
@@ -307,11 +711,67 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.936523438,
-            "mean": 9.868401555,
-            "sha256Float32Le": "fbef03da3e2eff844dbb4cc470bef104397e9a2cf3114798ee0fc87429f14cd7"
+            "max": 637.313171387,
+            "mean": 9.270817917,
+            "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.89919901,
+              "bbox": [
+                0.82997073,
+                0.35902824,
+                1,
+                0.8137332
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.89343339,
+              "bbox": [
+                0.27475377,
+                0.37873271,
+                0.42536454,
+                0.79227407
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87224633,
+              "bbox": [
+                0.06357714,
+                0.36876488,
+                0.30140089,
+                0.83895855
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85322976,
+              "bbox": [
+                0.03830887,
+                0.21416168,
+                0.99039402,
+                0.72011805
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.40938428,
+              "bbox": [
+                0.0016516,
+                0.50863459,
+                0.07152955,
+                0.80617235
+              ]
+            }
+          ]
         },
         {
           "repeat": 2,
@@ -319,11 +779,67 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.936523438,
-            "mean": 9.868401555,
-            "sha256Float32Le": "fbef03da3e2eff844dbb4cc470bef104397e9a2cf3114798ee0fc87429f14cd7"
+            "max": 637.313171387,
+            "mean": 9.270817917,
+            "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.89919901,
+              "bbox": [
+                0.82997073,
+                0.35902824,
+                1,
+                0.8137332
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.89343339,
+              "bbox": [
+                0.27475377,
+                0.37873271,
+                0.42536454,
+                0.79227407
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87224633,
+              "bbox": [
+                0.06357714,
+                0.36876488,
+                0.30140089,
+                0.83895855
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85322976,
+              "bbox": [
+                0.03830887,
+                0.21416168,
+                0.99039402,
+                0.72011805
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.40938428,
+              "bbox": [
+                0.0016516,
+                0.50863459,
+                0.07152955,
+                0.80617235
+              ]
+            }
+          ]
         },
         {
           "repeat": 3,
@@ -331,17 +847,251 @@
             "elementCount": 705600,
             "finiteCount": 705600,
             "min": 0,
-            "max": 636.936523438,
-            "mean": 9.868401555,
-            "sha256Float32Le": "fbef03da3e2eff844dbb4cc470bef104397e9a2cf3114798ee0fc87429f14cd7"
+            "max": 637.313171387,
+            "mean": 9.270817917,
+            "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
           },
-          "decoded": []
+          "decoded": [
+            {
+              "anchor": 8256,
+              "classId": 0,
+              "score": 0.89919901,
+              "bbox": [
+                0.82997073,
+                0.35902824,
+                1,
+                0.8137332
+              ]
+            },
+            {
+              "anchor": 8227,
+              "classId": 0,
+              "score": 0.89343339,
+              "bbox": [
+                0.27475377,
+                0.37873271,
+                0.42536454,
+                0.79227407
+              ]
+            },
+            {
+              "anchor": 8245,
+              "classId": 0,
+              "score": 0.87224633,
+              "bbox": [
+                0.06357714,
+                0.36876488,
+                0.30140089,
+                0.83895855
+              ]
+            },
+            {
+              "anchor": 8189,
+              "classId": 5,
+              "score": 0.85322976,
+              "bbox": [
+                0.03830887,
+                0.21416168,
+                0.99039402,
+                0.72011805
+              ]
+            },
+            {
+              "anchor": 7445,
+              "classId": 0,
+              "score": 0.40938428,
+              "bbox": [
+                0.0016516,
+                0.50863459,
+                0.07152955,
+                0.80617235
+              ]
+            }
+          ]
         }
       ],
       "determinism": {
         "allRawDigestsEqual": true,
         "maxRawAbsoluteDifference": 0,
         "allDecodedEqual": true
+      },
+      "coverage": {
+        "passed": true,
+        "detectionCount": 5,
+        "distinctClassIds": [
+          0,
+          5
+        ],
+        "nearestBoundaryDistance": 0,
+        "sourceAspectRatio": 1.33498146
+      }
+    },
+    {
+      "id": "extreme-aspect",
+      "imageSha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc",
+      "canonicalInput": {
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "byteOrder": "little-endian",
+        "sha256Float32Le": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf",
+        "summary": {
+          "elementCount": 1228800,
+          "finiteCount": 1228800,
+          "min": 0.001960784,
+          "max": 0.998039186,
+          "mean": 0.446503008,
+          "sha256Float32Le": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf"
+        }
+      },
+      "preprocessing": {
+        "contract": {
+          "kind": "letterbox",
+          "targetSize": [
+            640,
+            640
+          ],
+          "interpolation": "linear",
+          "samplerAddressMode": "clamp-to-edge",
+          "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+          "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5",
+          "color": {
+            "sourceChannels": [
+              "R",
+              "G",
+              "B",
+              "A"
+            ],
+            "modelChannels": [
+              "R",
+              "G",
+              "B"
+            ],
+            "alpha": "ignored"
+          },
+          "valueRange": {
+            "minimum": 0,
+            "maximum": 1,
+            "inclusive": true
+          },
+          "normalize": {
+            "kind": "none",
+            "mean": null,
+            "standardDeviation": null,
+            "scale": null,
+            "offset": null
+          },
+          "letterbox": {
+            "scaleRule": "min(targetWidth/sourceWidth,targetHeight/sourceHeight)",
+            "scaledDimensionRounding": "none-continuous",
+            "paddingRule": "symmetric-continuous",
+            "padXRule": "(1-sourceWidth*scale/targetWidth)/2",
+            "padYRule": "(1-sourceHeight*scale/targetHeight)/2",
+            "insideRule": "0<=u<=1 && 0<=v<=1",
+            "fillRgb": [
+              0.447,
+              0.447,
+              0.447
+            ]
+          }
+        },
+        "scale": 0.5,
+        "padXNormalized": 0,
+        "padYNormalized": 0.45,
+        "padXPixels": 0,
+        "padYPixels": 288
+      },
+      "runs": [
+        {
+          "repeat": 1,
+          "rawTensor": {
+            "elementCount": 705600,
+            "finiteCount": 705600,
+            "min": 0,
+            "max": 636.765319824,
+            "mean": 9.674305035,
+            "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+          },
+          "decoded": [
+            {
+              "anchor": 7220,
+              "classId": 16,
+              "score": 0.67399347,
+              "bbox": [
+                0.46178317,
+                0.14625525,
+                0.52741532,
+                0.96270394
+              ]
+            }
+          ]
+        },
+        {
+          "repeat": 2,
+          "rawTensor": {
+            "elementCount": 705600,
+            "finiteCount": 705600,
+            "min": 0,
+            "max": 636.765319824,
+            "mean": 9.674305035,
+            "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+          },
+          "decoded": [
+            {
+              "anchor": 7220,
+              "classId": 16,
+              "score": 0.67399347,
+              "bbox": [
+                0.46178317,
+                0.14625525,
+                0.52741532,
+                0.96270394
+              ]
+            }
+          ]
+        },
+        {
+          "repeat": 3,
+          "rawTensor": {
+            "elementCount": 705600,
+            "finiteCount": 705600,
+            "min": 0,
+            "max": 636.765319824,
+            "mean": 9.674305035,
+            "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+          },
+          "decoded": [
+            {
+              "anchor": 7220,
+              "classId": 16,
+              "score": 0.67399347,
+              "bbox": [
+                0.46178317,
+                0.14625525,
+                0.52741532,
+                0.96270394
+              ]
+            }
+          ]
+        }
+      ],
+      "determinism": {
+        "allRawDigestsEqual": true,
+        "maxRawAbsoluteDifference": 0,
+        "allDecodedEqual": true
+      },
+      "coverage": {
+        "passed": true,
+        "detectionCount": 1,
+        "distinctClassIds": [
+          16
+        ],
+        "nearestBoundaryDistance": 0.03729606,
+        "sourceAspectRatio": 10
       }
     }
   ]

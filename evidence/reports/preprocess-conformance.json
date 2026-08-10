@@ -1,0 +1,89 @@
+{
+  "adapter": {
+    "backend": "Vulkan",
+    "device": 6400,
+    "deviceType": "IntegratedGpu",
+    "driver": "radv",
+    "driverInfo": "Mesa 25.2.8-0ubuntu0.24.04.2",
+    "name": "AMD Radeon 780M Graphics (RADV PHOENIX)",
+    "vendor": 4098
+  },
+  "contract": {
+    "interpolation": "linear",
+    "outputPixelCoordinate": "u=x/targetWidth; v=y/targetHeight",
+    "samplerAddressMode": "clamp-to-edge",
+    "sourceTexelCoordinate": "texel=normalizedCoordinate*sourceSize-0.5"
+  },
+  "fixtures": [
+    {
+      "cpuSha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b",
+      "elements": 1228800,
+      "id": "no-detection",
+      "maxAbsoluteDifference": 0.0,
+      "meanAbsoluteDifference": 0.0,
+      "mismatchCount": 0,
+      "passed": true,
+      "toleranceAbsolute": 0.00005999999848427251,
+      "wgslSha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b"
+    },
+    {
+      "cpuSha256Float32Le": "1c6962074fbdd6f5224c759af47c04f6b7cc11a573361eabf74c5bc7016c6380",
+      "elements": 1228800,
+      "id": "single-target",
+      "maxAbsoluteDifference": 0.0000330507755279541,
+      "meanAbsoluteDifference": 2.248462128121194e-7,
+      "mismatchCount": 0,
+      "passed": true,
+      "toleranceAbsolute": 0.00005999999848427251,
+      "wgslSha256Float32Le": "481ee30780e326a8cc48c9e263360059f650e34e1b78544cc9eccecde3aff88a"
+    },
+    {
+      "cpuSha256Float32Le": "c565fa31426519a32f78c1c26cd732656579988189d4c712c6d8a299f0291412",
+      "elements": 1228800,
+      "id": "multi-class",
+      "maxAbsoluteDifference": 0.0000502467155456543,
+      "meanAbsoluteDifference": 2.45626175856323e-7,
+      "mismatchCount": 0,
+      "passed": true,
+      "toleranceAbsolute": 0.00005999999848427251,
+      "wgslSha256Float32Le": "78b67b687026d5ef645169018cf6ca366b1fe6c3486db98f828eab9706751550"
+    },
+    {
+      "cpuSha256Float32Le": "1e6ce45b1cd3f1ceb32433548e117e3fc823ade466da28e8dfe454daf258723d",
+      "elements": 1228800,
+      "id": "boundary-box",
+      "maxAbsoluteDifference": 0.00004774332046508789,
+      "meanAbsoluteDifference": 3.9345323295698607e-7,
+      "mismatchCount": 0,
+      "passed": true,
+      "toleranceAbsolute": 0.00005999999848427251,
+      "wgslSha256Float32Le": "8a012a13df81702dcf0742432a38d894bd7f0c10096156b458fc8b5e3c96a2af"
+    },
+    {
+      "cpuSha256Float32Le": "f15afbbc2903c815991e4c1bd12a36da316bd53ef6ceafc4c462910a5f0ebe95",
+      "elements": 1228800,
+      "id": "extreme-aspect",
+      "maxAbsoluteDifference": 0.00002676248550415039,
+      "meanAbsoluteDifference": 8.571263568531625e-9,
+      "mismatchCount": 0,
+      "passed": true,
+      "toleranceAbsolute": 0.00005999999848427251,
+      "wgslSha256Float32Le": "977ba4a550382573454ddd1b9ddba7b520a2c8a65cf222b9f7406cbd90d30d89"
+    }
+  ],
+  "schemaVersion": 1,
+  "shaderPath": "shaders/preprocess.wgsl",
+  "toleranceFreeze": {
+    "absolute": 0.00005999999848427251,
+    "basis": "CPU f32 bilinear interpolation versus production WGSL textureSampleLevel on the recorded Vulkan adapter; final real-image suite observed maximum was 5.02467155456543e-5",
+    "doesNotModifyModelOutputTolerances": true,
+    "reviewRecord": {
+      "date": "2026-08-10",
+      "decision": "accepted-before-native-candidate-results",
+      "previousPreliminaryAbsolute": 0.00002,
+      "reason": "preliminary synthetic fixtures understated hardware linear-filter interpolation error; the model-output tolerances in web-reference.json are unchanged",
+      "reviewerRole": "task1-evidence-implementation"
+    },
+    "status": "initial-freeze-before-native-candidate-results"
+  }
+}

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import sharp from '../tooling/web/node_modules/sharp/lib/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const imageDir = resolve(root, 'evidence/fixtures/images');
@@ -11,30 +12,61 @@ await mkdir(rawDir, { recursive: true });
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const json = (value) => JSON.stringify(value, null, 2) + '\n';
 
-const fixtures = [
-  { id: 'no-detection', scenario: '无检测', width: 640, height: 640, draw: () => [18, 18, 18] },
-  { id: 'single-target', scenario: '单目标', width: 640, height: 640, draw: (x, y) => x > 270 && x < 370 && y > 90 && y < 590 ? [220, 220, 220] : [40, 80, 110] },
-  { id: 'multi-class', scenario: '多类别', width: 640, height: 360, draw: (x, y) => y > 210 && x > 50 && x < 350 ? [210, 45, 45] : x > 450 && y > 80 ? [230, 230, 210] : [70, 120, 80] },
-  { id: 'overlap-nms', scenario: '重叠框/NMS', width: 640, height: 640, draw: (x, y) => x > 180 && x < 470 && y > 150 && y < 520 ? [205, 205, 205] : x > 290 && x < 560 && y > 230 && y < 600 ? [160, 160, 210] : [35, 45, 60] },
-  { id: 'extreme-aspect', scenario: '极端宽高比', width: 1280, height: 128, draw: (x, y) => x > 900 && x < 1170 && y > 15 && y < 115 ? [245, 190, 40] : [30, 95, 130] },
-  { id: 'boundary-box', scenario: '边界框', width: 640, height: 640, draw: (x, y) => x < 150 && y > 170 && y < 610 ? [235, 235, 225] : [80, 45, 95] },
+const upstream = {
+  repository: 'https://github.com/ultralytics/assets',
+  commit: '42ef8a125df038dcca49f6216f446fe9112946c1',
+  license: { spdx: 'AGPL-3.0-only', url: 'https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE' },
+};
+const sourceBus = { path: 'evidence/fixtures/sources/bus.jpg', upstreamPath: 'im/bus.jpg', gitBlobSha: '40eaaf5c330d0c498fbe1dcacf9bb8bf566797fe', sha256: 'c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63' };
+const sourceDogs = { path: 'evidence/fixtures/sources/ultralytics-dogs.avif', upstreamPath: 'docs/ultralytics-dogs.avif', gitBlobSha: '22b83c2fe27ce174e6b8df69803adf684119986f', sha256: '051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c' };
+for (const source of [sourceBus, sourceDogs]) {
+  const actual = sha256(await readFile(resolve(root, source.path)));
+  if (actual !== source.sha256) throw new Error(`${source.path}: 请先运行 fetch_fixture_sources.mjs；SHA-256 实际为 ${actual}`);
+}
+
+const rgb = async (pipeline) => {
+  const { data, info } = await pipeline.removeAlpha().toColourspace('srgb').raw().toBuffer({ resolveWithObject: true });
+  if (info.channels !== 3) throw new Error(`期望 RGB 三通道，实际 ${info.channels}`);
+  return { width: info.width, height: info.height, pixels: data };
+};
+const dogCrop = () => sharp(resolve(root, sourceDogs.path), { failOn: 'error' }).extract({ left: 650, top: 150, width: 768, height: 900 });
+const images = [
+  {
+    id: 'no-detection', scenario: '无检测', image: { width: 640, height: 640, pixels: Buffer.alloc(640 * 640 * 3, 18) },
+    license: { spdx: 'CC0-1.0', source: '由本仓库确定性脚本生成，不含人物、私人媒体或外部素材' },
+    transformation: 'Buffer.alloc(640*640*3,18)',
+    coverageExpectation: { detectionCount: { minimum: 0, maximum: 0 } },
+  },
+  {
+    id: 'single-target', scenario: '单目标', image: await rgb(dogCrop()), source: sourceDogs,
+    license: upstream.license, transformation: 'sharp@0.34.4 extract(left=650,top=150,width=768,height=900), removeAlpha, toColourspace(srgb), raw RGB',
+    coverageExpectation: { detectionCount: { minimum: 1, maximum: 1 }, requiredClassIds: [16] },
+  },
+  {
+    id: 'multi-class', scenario: '多类别', image: await rgb(sharp(resolve(root, sourceBus.path), { failOn: 'error' })), source: sourceBus,
+    license: upstream.license, transformation: 'sharp@0.34.4 decode, removeAlpha, toColourspace(srgb), raw RGB',
+    coverageExpectation: { detectionCount: { minimum: 2 }, minimumDistinctClassIds: 2, requiredClassIds: [0, 5] },
+  },
+  {
+    id: 'boundary-box', scenario: '边界框', image: await rgb(sharp(resolve(root, sourceBus.path), { failOn: 'error' }).extract({ left: 0, top: 0, width: 809, height: 1080 })), source: sourceBus,
+    license: upstream.license, transformation: 'sharp@0.34.4 extract(left=0,top=0,width=809,height=1080), removeAlpha, toColourspace(srgb), raw RGB',
+    coverageExpectation: { detectionCount: { minimum: 1 }, boundaryDistanceMaximum: 0.01 },
+  },
+  {
+    id: 'extreme-aspect', scenario: '极端宽高比', image: await rgb(dogCrop().resize({ width: 109, height: 128, fit: 'fill' }).extend({ top: 0, bottom: 0, left: 585, right: 586, background: { r: 114, g: 114, b: 114 } })), source: sourceDogs,
+    license: upstream.license, transformation: 'sharp@0.34.4 extract(650,150,768,900), resize(109x128,fill), extend(left=585,right=586,rgb=114), raw RGB',
+    coverageExpectation: { detectionCount: { minimum: 1 }, sourceAspectRatioMinimum: 8 },
+  },
 ];
 
 const manifestImages = [];
-for (const fixture of fixtures) {
-  const header = Buffer.from(`P6\n${fixture.width} ${fixture.height}\n255\n`, 'ascii');
-  const pixels = Buffer.alloc(fixture.width * fixture.height * 3);
-  for (let y = 0; y < fixture.height; y++) {
-    for (let x = 0; x < fixture.width; x++) {
-      const color = fixture.draw(x, y);
-      const offset = (y * fixture.width + x) * 3;
-      pixels[offset] = color[0]; pixels[offset + 1] = color[1]; pixels[offset + 2] = color[2];
-    }
-  }
+for (const fixture of images) {
+  const { width, height, pixels } = fixture.image;
+  const header = Buffer.from(`P6\n${width} ${height}\n255\n`, 'ascii');
   const bytes = Buffer.concat([header, pixels]);
   const path = `evidence/fixtures/images/${fixture.id}.ppm`;
   await writeFile(resolve(root, path), bytes);
-  manifestImages.push({ id: fixture.id, scenario: fixture.scenario, path, width: fixture.width, height: fixture.height, sha256: sha256(bytes), license: 'CC0-1.0', source: '由本仓库确定性脚本生成，不含人物或私人媒体' });
+  manifestImages.push({ id: fixture.id, scenario: fixture.scenario, path, width, height, sha256: sha256(bytes), license: fixture.license, source: fixture.source ? { ...upstream, ...fixture.source } : fixture.license.source, transformation: fixture.transformation, coverageExpectation: fixture.coverageExpectation });
 }
 
 const rawCases = [
@@ -57,10 +89,20 @@ for (const item of rawCases) {
 }
 const manifest = {
   schemaVersion: 1,
-  generatedBy: { name: 'generate_fixtures.mjs', version: '1.0.0' },
-  license: { spdx: 'CC0-1.0', privacy: '无人物、无私人媒体、无外部素材' },
+  generatedBy: { name: 'generate_fixtures.mjs', version: '2.0.0', imageLibrary: 'sharp@0.34.4', lockfile: 'evidence/tooling/web/bun.lock' },
+  license: { policy: '逐文件记录；仓库 MIT 不覆盖外部 fixture', privacy: '仅使用固定公开仓库素材；不使用素材/ 或私人媒体' },
   images: manifestImages,
   rawTensorFixtures: rawManifest,
 };
 await writeFile(resolve(root, 'evidence/fixtures/manifest.json'), json(manifest));
+const coverageMatrix = {
+  schemaVersion: 1,
+  generatedBy: { name: 'generate_fixtures.mjs', version: '2.0.0' },
+  layers: ['modelInference', 'preprocessing', 'decode', 'nms'],
+  cases: [
+    ...manifestImages.map((item) => ({ id: item.id, sourceKind: 'real-image-inference', modelInference: { covered: true, evidence: 'evidence/golden/web-reference.json' }, preprocessing: { covered: true, evidence: 'evidence/reports/preprocess-conformance.json' }, decode: { covered: true, evidence: 'evidence/golden/web-reference.json' }, nms: { covered: false, reason: '该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖' } })),
+    { id: 'overlap-nms', sourceKind: 'manually-constructed-raw-tensor', modelInference: { covered: false, reason: '人工 raw tensor 不来自图片推理' }, preprocessing: { covered: false, reason: '人工 raw tensor 绕过图片预处理' }, decode: { covered: true, evidence: 'tests/task1_raw_golden.rs' }, nms: { covered: true, evidence: 'tests/task1_raw_golden.rs' } },
+  ],
+};
+await writeFile(resolve(root, 'evidence/golden/coverage-matrix.json'), json(coverageMatrix));
 console.log(sha256(await readFile(resolve(root, 'evidence/fixtures/manifest.json'))));

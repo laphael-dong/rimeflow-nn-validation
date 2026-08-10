@@ -5,7 +5,22 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const entries = [];
-for (const path of ['models/yolov8n.onnx', 'evidence/model/model-contract.json', 'evidence/fixtures/manifest.json', 'evidence/golden/web-reference.json', 'evidence/conversions/conversion-spikes.json', 'evidence/reports/web-wasm-performance.json']) {
+const fixtures = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
+const paths = [
+  'models/yolov8n.onnx',
+  'evidence/model/model-contract.json',
+  'evidence/fixtures/manifest.json',
+  ...new Set(fixtures.images.flatMap((item) => [item.path, typeof item.source === 'object' ? item.source.path : null]).filter(Boolean)),
+  ...fixtures.rawTensorFixtures.map((item) => item.path),
+  'evidence/golden/coverage-matrix.json',
+  'evidence/golden/web-reference.json',
+  'evidence/conversions/conversion-spikes.json',
+  'evidence/reports/model-provenance.json',
+  'evidence/reports/preprocess-conformance.json',
+  'evidence/reports/web-wasm-performance.json',
+  'evidence/tooling/requirements.lock',
+];
+for (const path of paths) {
   const bytes = await readFile(resolve(root, path)); entries.push({ path, bytes: bytes.length, sha256: sha256(bytes) });
 }
 const value = { schemaVersion: 1, sourceCommit: 'eacbcf00dfc2fba941b494e2955e87fffd707382', artifacts: entries };

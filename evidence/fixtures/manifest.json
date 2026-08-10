@@ -2,11 +2,13 @@
   "schemaVersion": 1,
   "generatedBy": {
     "name": "generate_fixtures.mjs",
-    "version": "1.0.0"
+    "version": "2.0.0",
+    "imageLibrary": "sharp@0.34.4",
+    "lockfile": "evidence/tooling/web/bun.lock"
   },
   "license": {
-    "spdx": "CC0-1.0",
-    "privacy": "无人物、无私人媒体、无外部素材"
+    "policy": "逐文件记录；仓库 MIT 不覆盖外部 fixture",
+    "privacy": "仅使用固定公开仓库素材；不使用素材/ 或私人媒体"
   },
   "images": [
     {
@@ -16,38 +18,118 @@
       "width": 640,
       "height": 640,
       "sha256": "5a0d17c1055bd16e1b790fe8fcc048828c4112b50646ad217a25bd4a2fdf833f",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
+      "license": {
+        "spdx": "CC0-1.0",
+        "source": "由本仓库确定性脚本生成，不含人物、私人媒体或外部素材"
+      },
+      "source": "由本仓库确定性脚本生成，不含人物、私人媒体或外部素材",
+      "transformation": "Buffer.alloc(640*640*3,18)",
+      "coverageExpectation": {
+        "detectionCount": {
+          "minimum": 0,
+          "maximum": 0
+        }
+      }
     },
     {
       "id": "single-target",
       "scenario": "单目标",
       "path": "evidence/fixtures/images/single-target.ppm",
-      "width": 640,
-      "height": 640,
-      "sha256": "1c3986cc74b34f9cbe5a962bc9a331e849c6d4a0579c8cb9c9d38a0f48c4f5f3",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
+      "width": 768,
+      "height": 900,
+      "sha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18",
+      "license": {
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "source": {
+        "repository": "https://github.com/ultralytics/assets",
+        "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
+        "license": {
+          "spdx": "AGPL-3.0-only",
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        },
+        "path": "evidence/fixtures/sources/ultralytics-dogs.avif",
+        "upstreamPath": "docs/ultralytics-dogs.avif",
+        "gitBlobSha": "22b83c2fe27ce174e6b8df69803adf684119986f",
+        "sha256": "051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c"
+      },
+      "transformation": "sharp@0.34.4 extract(left=650,top=150,width=768,height=900), removeAlpha, toColourspace(srgb), raw RGB",
+      "coverageExpectation": {
+        "detectionCount": {
+          "minimum": 1,
+          "maximum": 1
+        },
+        "requiredClassIds": [
+          16
+        ]
+      }
     },
     {
       "id": "multi-class",
       "scenario": "多类别",
       "path": "evidence/fixtures/images/multi-class.ppm",
-      "width": 640,
-      "height": 360,
-      "sha256": "f4da086d8c2db702aa1c6fd5c869af2402e582341f2ff9537749d2a3dda53a97",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
+      "width": 810,
+      "height": 1080,
+      "sha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
+      "license": {
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "source": {
+        "repository": "https://github.com/ultralytics/assets",
+        "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
+        "license": {
+          "spdx": "AGPL-3.0-only",
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        },
+        "path": "evidence/fixtures/sources/bus.jpg",
+        "upstreamPath": "im/bus.jpg",
+        "gitBlobSha": "40eaaf5c330d0c498fbe1dcacf9bb8bf566797fe",
+        "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+      },
+      "transformation": "sharp@0.34.4 decode, removeAlpha, toColourspace(srgb), raw RGB",
+      "coverageExpectation": {
+        "detectionCount": {
+          "minimum": 2
+        },
+        "minimumDistinctClassIds": 2,
+        "requiredClassIds": [
+          0,
+          5
+        ]
+      }
     },
     {
-      "id": "overlap-nms",
-      "scenario": "重叠框/NMS",
-      "path": "evidence/fixtures/images/overlap-nms.ppm",
-      "width": 640,
-      "height": 640,
-      "sha256": "10633ea83ad6e2edb2589600b94bdbd0def1bef0303452d63d2b0ad6223dffba",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
+      "id": "boundary-box",
+      "scenario": "边界框",
+      "path": "evidence/fixtures/images/boundary-box.ppm",
+      "width": 809,
+      "height": 1080,
+      "sha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057",
+      "license": {
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "source": {
+        "repository": "https://github.com/ultralytics/assets",
+        "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
+        "license": {
+          "spdx": "AGPL-3.0-only",
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        },
+        "path": "evidence/fixtures/sources/bus.jpg",
+        "upstreamPath": "im/bus.jpg",
+        "gitBlobSha": "40eaaf5c330d0c498fbe1dcacf9bb8bf566797fe",
+        "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
+      },
+      "transformation": "sharp@0.34.4 extract(left=0,top=0,width=809,height=1080), removeAlpha, toColourspace(srgb), raw RGB",
+      "coverageExpectation": {
+        "detectionCount": {
+          "minimum": 1
+        },
+        "boundaryDistanceMaximum": 0.01
+      }
     },
     {
       "id": "extreme-aspect",
@@ -55,19 +137,30 @@
       "path": "evidence/fixtures/images/extreme-aspect.ppm",
       "width": 1280,
       "height": 128,
-      "sha256": "879cd48307923938d720ac05ce24c3a5043ab21207ce68d81c31703caf9656cf",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
-    },
-    {
-      "id": "boundary-box",
-      "scenario": "边界框",
-      "path": "evidence/fixtures/images/boundary-box.ppm",
-      "width": 640,
-      "height": 640,
-      "sha256": "4c8030b8687c012a050d1d5b2a58ebb463dc1944d22a74f89ba51b3353394738",
-      "license": "CC0-1.0",
-      "source": "由本仓库确定性脚本生成，不含人物或私人媒体"
+      "sha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc",
+      "license": {
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "source": {
+        "repository": "https://github.com/ultralytics/assets",
+        "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
+        "license": {
+          "spdx": "AGPL-3.0-only",
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        },
+        "path": "evidence/fixtures/sources/ultralytics-dogs.avif",
+        "upstreamPath": "docs/ultralytics-dogs.avif",
+        "gitBlobSha": "22b83c2fe27ce174e6b8df69803adf684119986f",
+        "sha256": "051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c"
+      },
+      "transformation": "sharp@0.34.4 extract(650,150,768,900), resize(109x128,fill), extend(left=585,right=586,rgb=114), raw RGB",
+      "coverageExpectation": {
+        "detectionCount": {
+          "minimum": 1
+        },
+        "sourceAspectRatioMinimum": 8
+      }
     }
   ],
   "rawTensorFixtures": [

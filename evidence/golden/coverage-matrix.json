@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": {
+    "name": "generate_fixtures.mjs",
+    "version": "2.0.0"
+  },
+  "layers": [
+    "modelInference",
+    "preprocessing",
+    "decode",
+    "nms"
+  ],
+  "cases": [
+    {
+      "id": "no-detection",
+      "sourceKind": "real-image-inference",
+      "modelInference": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "preprocessing": {
+        "covered": true,
+        "evidence": "evidence/reports/preprocess-conformance.json"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "nms": {
+        "covered": false,
+        "reason": "该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖"
+      }
+    },
+    {
+      "id": "single-target",
+      "sourceKind": "real-image-inference",
+      "modelInference": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "preprocessing": {
+        "covered": true,
+        "evidence": "evidence/reports/preprocess-conformance.json"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "nms": {
+        "covered": false,
+        "reason": "该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖"
+      }
+    },
+    {
+      "id": "multi-class",
+      "sourceKind": "real-image-inference",
+      "modelInference": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "preprocessing": {
+        "covered": true,
+        "evidence": "evidence/reports/preprocess-conformance.json"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "nms": {
+        "covered": false,
+        "reason": "该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖"
+      }
+    },
+    {
+      "id": "boundary-box",
+      "sourceKind": "real-image-inference",
+      "modelInference": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "preprocessing": {
+        "covered": true,
+        "evidence": "evidence/reports/preprocess-conformance.json"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "nms": {
+        "covered": false,
+        "reason": "该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖"
+      }
+    },
+    {
+      "id": "extreme-aspect",
+      "sourceKind": "real-image-inference",
+      "modelInference": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "preprocessing": {
+        "covered": true,
+        "evidence": "evidence/reports/preprocess-conformance.json"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "evidence/golden/web-reference.json"
+      },
+      "nms": {
+        "covered": false,
+        "reason": "该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖"
+      }
+    },
+    {
+      "id": "overlap-nms",
+      "sourceKind": "manually-constructed-raw-tensor",
+      "modelInference": {
+        "covered": false,
+        "reason": "人工 raw tensor 不来自图片推理"
+      },
+      "preprocessing": {
+        "covered": false,
+        "reason": "人工 raw tensor 绕过图片预处理"
+      },
+      "decode": {
+        "covered": true,
+        "evidence": "tests/task1_raw_golden.rs"
+      },
+      "nms": {
+        "covered": true,
+        "evidence": "tests/task1_raw_golden.rs"
+      }
+    }
+  ]
+}

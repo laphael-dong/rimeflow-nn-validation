@@ -3,11 +3,13 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ort from '../tooling/web/node_modules/onnxruntime-web/dist/ort.node.min.js';
+import { PREPROCESS_CONTRACT } from './preprocess_contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const modelPath = resolve(root, 'models/yolov8n.onnx');
 const shaderPath = resolve(root, 'shaders/preprocess.wgsl');
 const postprocessPath = resolve(root, 'src/postprocess.rs');
+const preprocessContractPath = resolve(root, 'evidence/scripts/preprocess_contract.mjs');
 const outPath = resolve(root, 'evidence/model/model-contract.json');
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -15,6 +17,7 @@ const stable = (value) => JSON.stringify(value, null, 2) + '\n';
 const modelBytes = await readFile(modelPath);
 const shader = await readFile(shaderPath, 'utf8');
 const postprocess = await readFile(postprocessPath, 'utf8');
+const preprocessContractSource = await readFile(preprocessContractPath);
 ort.env.wasm.numThreads = 1;
 ort.env.wasm.proxy = false;
 const session = await ort.InferenceSession.create(modelBytes, {
@@ -35,6 +38,12 @@ const shaderRoles = {
 if (!Object.values(shaderRoles).every(Boolean)) throw new Error('preprocess shader contract changed');
 if (!postprocess.includes('pub fn decode_yolo_output') || !postprocess.includes('pub fn nms')) {
   throw new Error('postprocess ownership markers missing');
+}
+if (input.shape.length !== 4 || input.shape[1] !== 3) throw new Error(`unsupported input shape: ${JSON.stringify(input.shape)}`);
+if (output.shape.length !== 3 || output.shape[1] !== 84) throw new Error(`unsupported YOLO output shape: ${JSON.stringify(output.shape)}`);
+const boxChannelReads = ['raw[0 * num_boxes + i]', 'raw[1 * num_boxes + i]', 'raw[2 * num_boxes + i]', 'raw[3 * num_boxes + i]'];
+if (!boxChannelReads.every((needle) => postprocess.includes(needle)) || !postprocess.includes('raw[(4 + c) * num_boxes + i]')) {
+  throw new Error('postprocess tensor indexing no longer matches [attribute, anchor]');
 }
 const contract = {
   schemaVersion: 1,
@@ -60,28 +69,38 @@ const contract = {
       runtimeName: input.name,
       index: 0,
       shape: input.shape,
+      axes: ['batch', 'channel', 'height', 'width'],
       dynamicDimensions: [],
       layout: 'NCHW',
       dtype: input.type,
-      colorChannels: 'RGB',
-      valueRange: [0, 1],
-      normalize: { kind: 'none', responsibility: 'preprocess-shader' },
-      preprocess: { kind: 'letterbox', size: [640, 640], fill: 0.4470588235294118, responsibility: 'preprocess-shader' },
+      quantization: null,
+      color: PREPROCESS_CONTRACT.color,
+      valueRange: PREPROCESS_CONTRACT.valueRange,
+      normalize: { ...PREPROCESS_CONTRACT.normalize, responsibility: 'preprocess-shader' },
+      preprocess: { ...PREPROCESS_CONTRACT, color: undefined, valueRange: undefined, normalize: undefined, responsibility: 'preprocess-shader' },
     },
     output: {
       role: 'detections',
       runtimeName: output.name,
       index: 0,
       shape: output.shape,
-      layout: 'CANDIDATE_MAJOR',
+      axes: ['batch', 'attribute', 'anchor'],
+      layout: 'N_ATTRIBUTES_ANCHORS',
       dtype: output.type,
-      semantics: { box: 'cxcywh-model-pixels', classScores: '80-coco-scores', nmsFused: false },
+      quantization: null,
+      memoryOrder: `row-major contiguous; offset=batch*${output.shape[1] * output.shape[2]}+attribute*${output.shape[2]}+anchor`,
+      semantics: {
+        attributes: { box: { indices: [0, 1, 2, 3], order: ['centerX', 'centerY', 'width', 'height'] }, classScores: { startIndex: 4, count: output.shape[1] - 4, activation: 'already-applied' } },
+        anchorDimension: { axis: 2, count: output.shape[2] },
+        boxEncoding: { format: 'center-x-center-y-width-height', coordinateSpace: 'letterboxed-model-pixels' },
+        nmsFused: false,
+      },
       postprocess: { decode: 'operator', threshold: 0.25, nms: 'operator', sourceSha256: sourceSha },
     },
   },
   responsibilities: { preprocessing: 'operator-shader', postprocessing: 'operator-rust', modelGraph: 'raw-boxes-and-class-scores' },
   runtimeMetadata: { inputMetadata: session.inputMetadata, outputMetadata: session.outputMetadata },
-  verification: { inputModelSha256: sha256(modelBytes), shaderSha256: sha256(Buffer.from(shader)), postprocessSha256: sourceSha },
+  verification: { inputModelSha256: sha256(modelBytes), shaderSha256: sha256(Buffer.from(shader)), postprocessSha256: sourceSha, preprocessContractSha256: sha256(preprocessContractSource) },
 };
 await writeFile(outPath, stable(contract));
 await session.release();
