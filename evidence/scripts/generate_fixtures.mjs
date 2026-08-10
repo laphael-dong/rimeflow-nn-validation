@@ -15,7 +15,12 @@ const json = (value) => JSON.stringify(value, null, 2) + '\n';
 const upstream = {
   repository: 'https://github.com/ultralytics/assets',
   commit: '42ef8a125df038dcca49f6216f446fe9112946c1',
-  license: { spdx: 'AGPL-3.0-only', url: 'https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE' },
+  license: {
+    spdx: 'AGPL-3.0-only',
+    url: 'https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE',
+    localPath: 'evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt',
+    noticePath: 'evidence/fixtures/THIRD_PARTY_NOTICES.md',
+  },
 };
 const sourceBus = { path: 'evidence/fixtures/sources/bus.jpg', upstreamPath: 'im/bus.jpg', gitBlobSha: '40eaaf5c330d0c498fbe1dcacf9bb8bf566797fe', sha256: 'c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63' };
 const sourceDogs = { path: 'evidence/fixtures/sources/ultralytics-dogs.avif', upstreamPath: 'docs/ultralytics-dogs.avif', gitBlobSha: '22b83c2fe27ce174e6b8df69803adf684119986f', sha256: '051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c' };
@@ -66,7 +71,7 @@ for (const fixture of images) {
   const bytes = Buffer.concat([header, pixels]);
   const path = `evidence/fixtures/images/${fixture.id}.ppm`;
   await writeFile(resolve(root, path), bytes);
-  manifestImages.push({ id: fixture.id, scenario: fixture.scenario, path, width, height, sha256: sha256(bytes), license: fixture.license, source: fixture.source ? { ...upstream, ...fixture.source } : fixture.license.source, transformation: fixture.transformation, coverageExpectation: fixture.coverageExpectation });
+  manifestImages.push({ id: fixture.id, scenario: fixture.scenario, path, width, height, sha256: sha256(bytes), license: fixture.license, source: fixture.source ? { ...upstream, ...fixture.source } : fixture.license.source, transformation: fixture.transformation, distribution: { scope: 'test-and-evidence-only', rimecutProductPackage: 'prohibited' }, coverageExpectation: fixture.coverageExpectation });
 }
 
 const rawCases = [
@@ -90,7 +95,7 @@ for (const item of rawCases) {
 const manifest = {
   schemaVersion: 1,
   generatedBy: { name: 'generate_fixtures.mjs', version: '2.0.0', imageLibrary: 'sharp@0.34.4', lockfile: 'evidence/tooling/web/bun.lock' },
-  license: { policy: '逐文件记录；仓库 MIT 不覆盖外部 fixture', privacy: '仅使用固定公开仓库素材；不使用素材/ 或私人媒体' },
+  license: { policy: '逐文件记录；仓库 MIT 不覆盖外部 fixture', privacy: '仅使用固定公开仓库素材；不使用素材/ 或私人媒体', productPackaging: 'excluded' },
   images: manifestImages,
   rawTensorFixtures: rawManifest,
 };
@@ -100,8 +105,8 @@ const coverageMatrix = {
   generatedBy: { name: 'generate_fixtures.mjs', version: '2.0.0' },
   layers: ['modelInference', 'preprocessing', 'decode', 'nms'],
   cases: [
-    ...manifestImages.map((item) => ({ id: item.id, sourceKind: 'real-image-inference', modelInference: { covered: true, evidence: 'evidence/golden/web-reference.json' }, preprocessing: { covered: true, evidence: 'evidence/reports/preprocess-conformance.json' }, decode: { covered: true, evidence: 'evidence/golden/web-reference.json' }, nms: { covered: false, reason: '该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖' } })),
-    { id: 'overlap-nms', sourceKind: 'manually-constructed-raw-tensor', modelInference: { covered: false, reason: '人工 raw tensor 不来自图片推理' }, preprocessing: { covered: false, reason: '人工 raw tensor 绕过图片预处理' }, decode: { covered: true, evidence: 'tests/task1_raw_golden.rs' }, nms: { covered: true, evidence: 'tests/task1_raw_golden.rs' } },
+    ...manifestImages.map((item) => ({ id: item.id, sourceKind: 'real-image-inference', modelInference: { covered: true, path: 'evidence/golden/web-reference.json', kind: 'report' }, preprocessing: { covered: true, path: 'evidence/reports/preprocess-conformance.json', kind: 'report' }, decode: { covered: true, path: 'evidence/golden/web-reference.json', kind: 'report' }, nms: { covered: false, reason: '该图片不用于证明重叠框抑制；NMS 由独立 raw tensor + 生产 Rust 测试覆盖' } })),
+    { id: 'overlap-nms', sourceKind: 'manually-constructed-raw-tensor', modelInference: { covered: false, reason: '人工 raw tensor 不来自图片推理' }, preprocessing: { covered: false, reason: '人工 raw tensor 绕过图片预处理' }, decode: { covered: true, path: 'evidence/tooling/raw-golden/src/lib.rs', kind: 'test', testId: 'task1_raw_golden_uses_production_decode_and_nms', command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml' }, nms: { covered: true, path: 'evidence/tooling/raw-golden/src/lib.rs', kind: 'test', testId: 'task1_raw_golden_uses_production_decode_and_nms', command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml' } },
   ],
 };
 await writeFile(resolve(root, 'evidence/golden/coverage-matrix.json'), json(coverageMatrix));

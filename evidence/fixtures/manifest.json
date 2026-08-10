@@ -8,7 +8,8 @@
   },
   "license": {
     "policy": "逐文件记录；仓库 MIT 不覆盖外部 fixture",
-    "privacy": "仅使用固定公开仓库素材；不使用素材/ 或私人媒体"
+    "privacy": "仅使用固定公开仓库素材；不使用素材/ 或私人媒体",
+    "productPackaging": "excluded"
   },
   "images": [
     {
@@ -24,6 +25,10 @@
       },
       "source": "由本仓库确定性脚本生成，不含人物、私人媒体或外部素材",
       "transformation": "Buffer.alloc(640*640*3,18)",
+      "distribution": {
+        "scope": "test-and-evidence-only",
+        "rimecutProductPackage": "prohibited"
+      },
       "coverageExpectation": {
         "detectionCount": {
           "minimum": 0,
@@ -40,14 +45,18 @@
       "sha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18",
       "license": {
         "spdx": "AGPL-3.0-only",
-        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
       },
       "source": {
         "repository": "https://github.com/ultralytics/assets",
         "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
         "license": {
           "spdx": "AGPL-3.0-only",
-          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+          "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+          "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
         },
         "path": "evidence/fixtures/sources/ultralytics-dogs.avif",
         "upstreamPath": "docs/ultralytics-dogs.avif",
@@ -55,6 +64,10 @@
         "sha256": "051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c"
       },
       "transformation": "sharp@0.34.4 extract(left=650,top=150,width=768,height=900), removeAlpha, toColourspace(srgb), raw RGB",
+      "distribution": {
+        "scope": "test-and-evidence-only",
+        "rimecutProductPackage": "prohibited"
+      },
       "coverageExpectation": {
         "detectionCount": {
           "minimum": 1,
@@ -74,14 +87,18 @@
       "sha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
       "license": {
         "spdx": "AGPL-3.0-only",
-        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
       },
       "source": {
         "repository": "https://github.com/ultralytics/assets",
         "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
         "license": {
           "spdx": "AGPL-3.0-only",
-          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+          "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+          "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
         },
         "path": "evidence/fixtures/sources/bus.jpg",
         "upstreamPath": "im/bus.jpg",
@@ -89,6 +106,10 @@
         "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
       },
       "transformation": "sharp@0.34.4 decode, removeAlpha, toColourspace(srgb), raw RGB",
+      "distribution": {
+        "scope": "test-and-evidence-only",
+        "rimecutProductPackage": "prohibited"
+      },
       "coverageExpectation": {
         "detectionCount": {
           "minimum": 2
@@ -109,14 +130,18 @@
       "sha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057",
       "license": {
         "spdx": "AGPL-3.0-only",
-        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
       },
       "source": {
         "repository": "https://github.com/ultralytics/assets",
         "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
         "license": {
           "spdx": "AGPL-3.0-only",
-          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+          "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+          "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
         },
         "path": "evidence/fixtures/sources/bus.jpg",
         "upstreamPath": "im/bus.jpg",
@@ -124,6 +149,10 @@
         "sha256": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63"
       },
       "transformation": "sharp@0.34.4 extract(left=0,top=0,width=809,height=1080), removeAlpha, toColourspace(srgb), raw RGB",
+      "distribution": {
+        "scope": "test-and-evidence-only",
+        "rimecutProductPackage": "prohibited"
+      },
       "coverageExpectation": {
         "detectionCount": {
           "minimum": 1
@@ -140,14 +169,18 @@
       "sha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc",
       "license": {
         "spdx": "AGPL-3.0-only",
-        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
       },
       "source": {
         "repository": "https://github.com/ultralytics/assets",
         "commit": "42ef8a125df038dcca49f6216f446fe9112946c1",
         "license": {
           "spdx": "AGPL-3.0-only",
-          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+          "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE",
+          "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+          "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md"
         },
         "path": "evidence/fixtures/sources/ultralytics-dogs.avif",
         "upstreamPath": "docs/ultralytics-dogs.avif",
@@ -155,6 +188,10 @@
         "sha256": "051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c"
       },
       "transformation": "sharp@0.34.4 extract(650,150,768,900), resize(109x128,fill), extend(left=585,right=586,rgb=114), raw RGB",
+      "distribution": {
+        "scope": "test-and-evidence-only",
+        "rimecutProductPackage": "prohibited"
+      },
       "coverageExpectation": {
         "detectionCount": {
           "minimum": 1

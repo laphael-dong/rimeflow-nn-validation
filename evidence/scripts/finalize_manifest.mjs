@@ -10,6 +10,8 @@ const paths = [
   'models/yolov8n.onnx',
   'evidence/model/model-contract.json',
   'evidence/fixtures/manifest.json',
+  'evidence/fixtures/THIRD_PARTY_NOTICES.md',
+  'evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt',
   ...new Set(fixtures.images.flatMap((item) => [item.path, typeof item.source === 'object' ? item.source.path : null]).filter(Boolean)),
   ...fixtures.rawTensorFixtures.map((item) => item.path),
   'evidence/golden/coverage-matrix.json',
@@ -19,6 +21,8 @@ const paths = [
   'evidence/reports/preprocess-conformance.json',
   'evidence/reports/web-wasm-performance.json',
   'evidence/tooling/requirements.lock',
+  'evidence/tooling/raw-golden/src/lib.rs',
+  'evidence/tooling/raw-golden/src/main.rs',
 ];
 for (const path of paths) {
   const bytes = await readFile(resolve(root, path)); entries.push({ path, bytes: bytes.length, sha256: sha256(bytes) });

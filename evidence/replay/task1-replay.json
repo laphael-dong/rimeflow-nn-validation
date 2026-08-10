@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "repository": "rimeflow-yolov8n",
+  "repositoryHeadAtReplay": {
+    "commit": "25630a1a9125a5de776c5af43539dcefe32e5aea",
+    "kind": "evidence-input-head",
+    "finalEvidenceCommitRecordedByGit": true
+  },
+  "inputs": {
+    "operatorSourceCommit": "eacbcf00dfc2fba941b494e2955e87fffd707382",
+    "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "fixtureSourceCommit": "42ef8a125df038dcca49f6216f446fe9112946c1"
+  },
+  "tools": {
+    "node": "v24.15.0",
+    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)",
+    "onnxruntimeWeb": "1.27.0"
+  },
+  "steps": [
+    {
+      "id": "contract-fixture-golden",
+      "command": "bun run evidence/scripts/generate_all.mjs",
+      "executed": true,
+      "blockedReason": null,
+      "repeatComparison": {
+        "runs": 2,
+        "deterministicDigestEqual": true
+      }
+    },
+    {
+      "id": "production-raw-golden",
+      "command": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
+      "executed": true,
+      "blockedReason": null,
+      "repeatComparison": {
+        "runs": 1,
+        "passed": true
+      }
+    },
+    {
+      "id": "conversion-report-regeneration",
+      "command": "node evidence/scripts/run_conversion_spikes.mjs",
+      "executed": true,
+      "blockedReason": "报告可重现，但模型授权、Windows ML x64/ARM64 Load/Run、Core ML/LiteRT 同源链仍未闭环；不代表任务 1.4 完成。",
+      "repeatComparison": {
+        "runs": 2,
+        "deterministicDigestEqual": true
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "path": "evidence/model/model-contract.json",
+      "bytes": 4749,
+      "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
+    },
+    {
+      "path": "evidence/fixtures/manifest.json",
+      "bytes": 9945,
+      "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+    },
+    {
+      "path": "evidence/golden/coverage-matrix.json",
+      "bytes": 4476,
+      "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
+    },
+    {
+      "path": "evidence/golden/manifest.json",
+      "bytes": 4829,
+      "sha256": "64ec6c25ef1c7e15d9f98b0c0252a8f93abf034d9ffb56051405607eca9383b6"
+    },
+    {
+      "path": "evidence/golden/web-reference.json",
+      "bytes": 29752,
+      "sha256": "7f87ca5896bdff373162d148d8ca6f545f9aa9b6e7323a0d3505eccb1172b654"
+    },
+    {
+      "path": "evidence/reports/preprocess-conformance.json",
+      "bytes": 3624,
+      "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+    },
+    {
+      "path": "evidence/conversions/conversion-spikes.json",
+      "bytes": 39389,
+      "sha256": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886"
+    }
+  ],
+  "task1_7OwnershipReplayComplete": true,
+  "task1_4Complete": false
+}

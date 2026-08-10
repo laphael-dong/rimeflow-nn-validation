@@ -8,4 +8,5 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
+bytemuck = "1"
 serde_json = "1"

@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
+import { validateCoverageEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -54,10 +55,11 @@ if (fixtures.rawTensorFixtures.some((item) => item.sourceImage !== null)) fail('
 for (const item of fixtures.images) {
   if (!item.license?.spdx) fail(`fixture license missing: ${item.id}`);
   if (typeof item.source === 'object') {
-    if (!item.source.commit || !item.source.upstreamPath || !item.source.gitBlobSha || !item.source.sha256 || !item.source.license?.url) fail(`external source provenance missing: ${item.id}`);
+    if (!item.source.commit || !item.source.upstreamPath || !item.source.gitBlobSha || !item.source.sha256 || !item.source.license?.url || !item.source.license?.localPath || !item.source.license?.noticePath) fail(`external source provenance missing: ${item.id}`);
     if (sha256(await readFile(resolve(root, item.source.path))) !== item.source.sha256) fail(`external source sha mismatch: ${item.id}`);
   }
 }
+await validateThirdPartyFixtureLicenses(root, fixtures);
 const reference = await readJson('evidence/golden/web-reference.json');
 if (reference.runtime.name !== 'onnxruntime-web' || reference.runtime.version !== '1.27.0' || reference.runtime.actualExecutionProvider !== 'wasm') fail('runtime/EP mismatch');
 if (reference.fixtures.length !== fixtures.images.length) fail('reference fixture count');
@@ -83,6 +85,7 @@ if (!multiClasses.has(0) || !multiClasses.has(5) || multiClasses.size < 2) fail(
 for (const value of [reference.tolerances.confidenceAbsolute, reference.tolerances.boxIouMinimum, reference.tolerances.rawTensorAbsolute, reference.tolerances.rawTensorRelative]) if (!Number.isFinite(value)) fail('non-finite tolerance');
 if (!reference.tolerances.frozenBeforeNativeAdapterResults) fail('model tolerances not frozen');
 const coverageMatrix = await readJson('evidence/golden/coverage-matrix.json');
+await validateCoverageEvidence(root, coverageMatrix);
 const overlap = coverageMatrix.cases.find((item) => item.id === 'overlap-nms');
 if (overlap.sourceKind !== 'manually-constructed-raw-tensor' || overlap.modelInference.covered || overlap.preprocessing.covered || !overlap.decode.covered || !overlap.nms.covered) fail('coverage matrix conflates raw NMS with image inference');
 const conformance = await readJson('evidence/reports/preprocess-conformance.json');
@@ -106,4 +109,11 @@ for (const provider of ['openvino', 'cuda', 'tensorrt']) if (conversion.spikes.f
 const provenance = await readJson('evidence/reports/model-provenance.json');
 if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'unverifiable') fail('model provenance');
 if (provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'prohibited') fail('unsafe model license decision');
+const replay = await readJson('evidence/replay/task1-replay.json');
+if (replay.schemaVersion !== 1 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true) fail('operator replay metadata');
+for (const output of replay.outputs) {
+  const bytes = await readFile(resolve(root, output.path));
+  if (bytes.length !== output.bytes || sha256(bytes) !== output.sha256) fail(`operator replay output drift: ${output.path}`);
+}
+if (replay.steps.find((item) => item.id === 'contract-fixture-golden').executed !== true || replay.steps.find((item) => item.id === 'conversion-report-regeneration').blockedReason === null || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay execution semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));

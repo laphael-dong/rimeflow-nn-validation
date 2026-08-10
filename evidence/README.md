@@ -21,6 +21,8 @@ node evidence/scripts/prepare_mindspore_lite.mjs
 bun run evidence/scripts/generate_all.mjs
 sha256sum models/yolov8n.onnx evidence/model/model-contract.json evidence/fixtures/manifest.json evidence/golden/web-reference.json evidence/reports/preprocess-conformance.json evidence/reports/model-provenance.json evidence/conversions/conversion-spikes.json
 cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml
+node evidence/scripts/test_validator_negative.mjs
+node evidence/scripts/generate_task1_replay_manifest.mjs
 bun run evidence/scripts/validate_evidence.mjs
 git diff --check
 ```
@@ -29,7 +31,7 @@ git diff --check
 
 Python 转换工具固定为 CPython 3.12/Linux x86_64 wheel，并由 `requirements.lock` 逐包记录 PyPI 官方 SHA-256。`prepare_python_tooling.mjs` 使用 `--require-hashes --no-deps` 安装后执行 `pip check`。LiteRT 2.1.6 对 `backports.strenum` 的 metadata 仍是无条件依赖，但该包声明 Python `<3.11`；Python 3.12 的 LiteRT 实现实际使用标准库 `enum.StrEnum`，因此准备命令显式使用 `--ignore-requires-python` 安装该已锁纯 Python wheel，不能省略或隐藏该上游元数据例外。MindSpore Lite 2.7.0 tarball 使用官方发布页给出的 SHA-256 校验。
 
-外部源文件逐文件记录在 `evidence/fixtures/manifest.json`：`im/bus.jpg` 和 `docs/ultralytics-dogs.avif` 均锁定 upstream commit、Git blob SHA、内容 SHA-256、准确转换与 upstream 根 `AGPL-3.0-only` LICENSE URL。仓库的 MIT LICENSE 不覆盖这些图片。无检测图由脚本生成并标记 CC0；不使用本机 `素材/` 或私人媒体。
+外部源文件逐文件记录在 `evidence/fixtures/manifest.json`：`im/bus.jpg` 和 `docs/ultralytics-dogs.avif` 均锁定 upstream commit、Git blob SHA、内容 SHA-256、准确转换与 upstream 根 `AGPL-3.0-only` LICENSE。完整 AGPL-3.0 文本保存为 `evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt`，固定来源与文件清单保存在 `evidence/fixtures/THIRD_PARTY_NOTICES.md`；validator 要求两者存在且由 Git 跟踪。仓库的 MIT LICENSE 不覆盖这些图片，所有外部图片只允许用于测试/evidence，禁止进入 RimeCut 产品安装包。无检测图由脚本生成并标记 CC0；不使用本机 `素材/` 或私人媒体。
 
 模型级图片只覆盖无检测、单目标、多类别、边界框和极端宽高比。重叠框/NMS 由 `evidence/fixtures/raw/overlap-nms.json` 与隔离的 `evidence/tooling/raw-golden` harness 通过 `#[path]` 直接编译生产 `src/postprocess.rs`，并调用真实 `decode_yolo_output`/`nms` 验证；该 raw tensor 明确不来自图片推理。分层关系见 `evidence/golden/coverage-matrix.json`。
 

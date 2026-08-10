@@ -14,8 +14,18 @@
     },
     {
       "path": "evidence/fixtures/manifest.json",
-      "bytes": 8091,
-      "sha256": "e460e435c5c0cea346697e7edeaacf6e38b6c4f641dd8dd4b11e446094ab5e7c"
+      "bytes": 9945,
+      "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+    },
+    {
+      "path": "evidence/fixtures/THIRD_PARTY_NOTICES.md",
+      "bytes": 1442,
+      "sha256": "741b3b748616dad791c749e035924de0f148c1c40faaaf0468c221afa9ce8bfe"
+    },
+    {
+      "path": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+      "bytes": 34523,
+      "sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
     },
     {
       "path": "evidence/fixtures/images/no-detection.ppm",
@@ -84,8 +94,8 @@
     },
     {
       "path": "evidence/golden/coverage-matrix.json",
-      "bytes": 3746,
-      "sha256": "d87ffcd8653f46e47103c904e09c7e50bd15fe736b15dd9f27fd5033ffb0ba45"
+      "bytes": 4476,
+      "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
     },
     {
       "path": "evidence/golden/web-reference.json",
@@ -116,6 +126,16 @@
       "path": "evidence/tooling/requirements.lock",
       "bytes": 1869,
       "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+    },
+    {
+      "path": "evidence/tooling/raw-golden/src/lib.rs",
+      "bytes": 4428,
+      "sha256": "90b7a373ee51547ef5543bd61f37a39c36471d70a0afc7e91917566711933e31"
+    },
+    {
+      "path": "evidence/tooling/raw-golden/src/main.rs",
+      "bytes": 1770,
+      "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
     }
   ]
 }
