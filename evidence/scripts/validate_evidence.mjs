@@ -110,10 +110,17 @@ const provenance = await readJson('evidence/reports/model-provenance.json');
 if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'unverifiable') fail('model provenance');
 if (provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'prohibited') fail('unsafe model license decision');
 const replay = await readJson('evidence/replay/task1-replay.json');
-if (replay.schemaVersion !== 1 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true) fail('operator replay metadata');
+if (replay.schemaVersion !== 2 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true || replay.immutableLogEvidence.kind !== 'embedded-in-manifest') fail('operator replay metadata');
 for (const output of replay.outputs) {
   const bytes = await readFile(resolve(root, output.path));
   if (bytes.length !== output.bytes || sha256(bytes) !== output.sha256) fail(`operator replay output drift: ${output.path}`);
 }
-if (replay.steps.find((item) => item.id === 'contract-fixture-golden').executed !== true || replay.steps.find((item) => item.id === 'conversion-report-regeneration').blockedReason === null || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay execution semantics');
+for (const id of ['contract-fixture-golden', 'production-raw-golden', 'conversion-report-regeneration']) {
+  const step = replay.steps.find((item) => item.id === id);
+  if (!step?.executed || step.rounds.length !== 2 || !step.repeatComparison.allExitCodesZero) fail(`operator replay execution semantics: ${id}`);
+  for (const round of step.rounds) {
+    if (!round.startedAt || !round.endedAt || round.exitCode !== 0 || !round.repositoryHead || !round.runnerId || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || !/^[0-9a-f]{64}$/.test(round.log.sha256)) fail(`operator replay round metadata: ${id}`);
+  }
+}
+if (replay.steps.find((item) => item.id === 'authorized-platform-artifacts').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));

@@ -1,15 +1,13 @@
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
+import { blockedStep, runRepeatedStep, runnerIdentity, sha256, toolVersion } from './task1_replay_execution.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const outputPath = resolve(root, 'evidence/replay/task1-replay.json');
-const repositoryHeadAtReplay = '25630a1a9125a5de776c5af43539dcefe32e5aea';
-const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const git = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
-if (git(['merge-base', '--is-ancestor', repositoryHeadAtReplay, 'HEAD']) !== '') throw new Error('unexpected git output');
+const repositoryHeadAtReplay = git(['rev-parse', 'HEAD']);
 const outputs = [
   'evidence/model/model-contract.json',
   'evidence/fixtures/manifest.json',
@@ -19,13 +17,47 @@ const outputs = [
   'evidence/reports/preprocess-conformance.json',
   'evidence/conversions/conversion-spikes.json',
 ];
+const commonInputs = ['models/yolov8n.onnx', 'evidence/fixtures/manifest.json'];
+const steps = [];
+steps.push(await runRepeatedStep({
+  root,
+  id: 'contract-fixture-golden',
+  command: 'bun run evidence/scripts/generate_all.mjs',
+  executable: 'bun',
+  args: ['run', 'evidence/scripts/generate_all.mjs'],
+  inputPaths: commonInputs,
+  outputPaths: outputs.slice(0, 6),
+}));
+steps.push(await runRepeatedStep({
+  root,
+  id: 'production-raw-golden',
+  command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml',
+  executable: 'cargo',
+  args: ['test', '--offline', '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml'],
+  inputPaths: ['evidence/fixtures/raw/overlap-nms.json', 'src/postprocess.rs'],
+  outputPaths: [],
+}));
+steps.push(await runRepeatedStep({
+  root,
+  id: 'conversion-report-regeneration',
+  command: 'node evidence/scripts/run_conversion_spikes.mjs',
+  executable: 'node',
+  args: ['evidence/scripts/run_conversion_spikes.mjs'],
+  inputPaths: ['models/yolov8n.onnx', 'evidence/tooling/requirements.lock'],
+  outputPaths: ['evidence/conversions/conversion-spikes.json'],
+}));
+steps.push(blockedStep(
+  'authorized-platform-artifacts',
+  'Core ML/LiteRT/Windows ML/MindSpore/Linux accelerated provider platform commands',
+  '缺少可追溯且获准的源模型、Windows x64/ARM64 与 Apple/Android/HarmonyOS 真实 runner，以及 CUDA/TensorRT/OpenVINO 环境。',
+));
 const artifacts = [];
 for (const path of outputs) {
   const bytes = await readFile(resolve(root, path));
   artifacts.push({ path, bytes: bytes.length, sha256: sha256(bytes) });
 }
 const manifest = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   repository: 'rimeflow-yolov8n',
   repositoryHeadAtReplay: { commit: repositoryHeadAtReplay, kind: 'evidence-input-head', finalEvidenceCommitRecordedByGit: true },
   inputs: {
@@ -33,14 +65,12 @@ const manifest = {
     modelSha256: '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad',
     fixtureSourceCommit: '42ef8a125df038dcca49f6216f446fe9112946c1',
   },
-  tools: { node: process.version, cargo: execFileSync('cargo', ['--version'], { encoding: 'utf8' }).trim(), onnxruntimeWeb: '1.27.0' },
-  steps: [
-    { id: 'contract-fixture-golden', command: 'bun run evidence/scripts/generate_all.mjs', executed: true, blockedReason: null, repeatComparison: { runs: 2, deterministicDigestEqual: true } },
-    { id: 'production-raw-golden', command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml', executed: true, blockedReason: null, repeatComparison: { runs: 1, passed: true } },
-    { id: 'conversion-report-regeneration', command: 'node evidence/scripts/run_conversion_spikes.mjs', executed: true, blockedReason: '报告可重现，但模型授权、Windows ML x64/ARM64 Load/Run、Core ML/LiteRT 同源链仍未闭环；不代表任务 1.4 完成。', repeatComparison: { runs: 2, deterministicDigestEqual: true } },
-  ],
+  runner: runnerIdentity(),
+  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0' },
+  immutableLogEvidence: { kind: 'embedded-in-manifest', path: 'evidence/replay/task1-replay.json', ciJobUrl: process.env.CI_JOB_URL ?? null },
+  steps,
   outputs: artifacts,
-  task1_7OwnershipReplayComplete: true,
+  task1_7OwnershipReplayComplete: steps.filter((step) => step.executed).every((step) => step.repeatComparison.allExitCodesZero),
   task1_4Complete: false,
 };
 await mkdir(dirname(outputPath), { recursive: true });
