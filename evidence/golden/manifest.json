@@ -100,7 +100,7 @@
     {
       "path": "evidence/golden/web-reference.json",
       "bytes": 29752,
-      "sha256": "7f87ca5896bdff373162d148d8ca6f545f9aa9b6e7323a0d3505eccb1172b654"
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",

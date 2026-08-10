@@ -67,12 +67,12 @@
     {
       "path": "evidence/golden/manifest.json",
       "bytes": 4829,
-      "sha256": "64ec6c25ef1c7e15d9f98b0c0252a8f93abf034d9ffb56051405607eca9383b6"
+      "sha256": "d813b1536633d0229a7bb648c91c6042d654eec2a5f0874e0360c077e104cd01"
     },
     {
       "path": "evidence/golden/web-reference.json",
       "bytes": 29752,
-      "sha256": "7f87ca5896bdff373162d148d8ca6f545f9aa9b6e7323a0d3505eccb1172b654"
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
     },
     {
       "path": "evidence/reports/preprocess-conformance.json",

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
-    "fixtureManifestSha256": "e460e435c5c0cea346697e7edeaacf6e38b6c4f641dd8dd4b11e446094ab5e7c"
+    "fixtureManifestSha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
   },
   "runtime": {
     "name": "onnxruntime-web",
