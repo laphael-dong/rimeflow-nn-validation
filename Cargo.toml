@@ -53,6 +53,3 @@ web-sys = { version = "0.3", features = [
 
 [build-dependencies]
 rimeflow-onnx-base = { git = "https://github.com/caozisheng/rimeflow-onnx-base", branch = "main", features = ["build-helper"] }
-
-[dev-dependencies]
-serde_json = "1"

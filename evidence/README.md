@@ -20,7 +20,7 @@ node evidence/scripts/prepare_python_tooling.mjs
 node evidence/scripts/prepare_mindspore_lite.mjs
 bun run evidence/scripts/generate_all.mjs
 sha256sum models/yolov8n.onnx evidence/model/model-contract.json evidence/fixtures/manifest.json evidence/golden/web-reference.json evidence/reports/preprocess-conformance.json evidence/reports/model-provenance.json evidence/conversions/conversion-spikes.json
-cargo test --offline --test task1_raw_golden --config 'patch."https://github.com/caozisheng/rimeflow-onnx-base".rimeflow-onnx-base.path="../rimeflow-onnx-base"'
+cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml
 bun run evidence/scripts/validate_evidence.mjs
 git diff --check
 ```
@@ -31,7 +31,7 @@ Python 转换工具固定为 CPython 3.12/Linux x86_64 wheel，并由 `requireme
 
 外部源文件逐文件记录在 `evidence/fixtures/manifest.json`：`im/bus.jpg` 和 `docs/ultralytics-dogs.avif` 均锁定 upstream commit、Git blob SHA、内容 SHA-256、准确转换与 upstream 根 `AGPL-3.0-only` LICENSE URL。仓库的 MIT LICENSE 不覆盖这些图片。无检测图由脚本生成并标记 CC0；不使用本机 `素材/` 或私人媒体。
 
-模型级图片只覆盖无检测、单目标、多类别、边界框和极端宽高比。重叠框/NMS 由 `evidence/fixtures/raw/overlap-nms.json` 与 `tests/task1_raw_golden.rs` 调用生产 Rust `decode_yolo_output`/`nms` 验证；该 raw tensor 明确不来自图片推理。分层关系见 `evidence/golden/coverage-matrix.json`。
+模型级图片只覆盖无检测、单目标、多类别、边界框和极端宽高比。重叠框/NMS 由 `evidence/fixtures/raw/overlap-nms.json` 与隔离的 `evidence/tooling/raw-golden` harness 通过 `#[path]` 直接编译生产 `src/postprocess.rs`，并调用真实 `decode_yolo_output`/`nms` 验证；该 raw tensor 明确不来自图片推理。分层关系见 `evidence/golden/coverage-matrix.json`。
 
 性能重新采样使用 `RIMEFLOW_RECORD_PERFORMANCE=1 bun run evidence/scripts/run_web_golden.mjs`，随后运行 `bun run evidence/scripts/finalize_manifest.mjs`。计时与 RSS 是环境测量值，重新采样预期会变化；contract、fixture、raw tensor、Web 原始 tensor 与 decode reference 则必须重复生成相同 digest。
 
