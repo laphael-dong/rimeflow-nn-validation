@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "repository": "rimeflow-yolov8n",
   "repositoryHeadAtReplay": {
-    "commit": "25630a1a9125a5de776c5af43539dcefe32e5aea",
+    "commit": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
     "kind": "evidence-input-head",
     "finalEvidenceCommitRecordedByGit": true
   },
@@ -11,10 +11,46 @@
     "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
     "fixtureSourceCommit": "42ef8a125df038dcca49f6216f446fe9112946c1"
   },
+  "runner": {
+    "id": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+    "owner": "raffael",
+    "os": "linux",
+    "architecture": "x64"
+  },
   "tools": {
-    "node": "v24.15.0",
-    "cargo": "cargo 1.97.1 (c980f4866 2026-06-30)",
+    "node": {
+      "command": [
+        "node",
+        "--version"
+      ],
+      "exitCode": 0,
+      "value": "v24.15.0",
+      "stderr": ""
+    },
+    "bun": {
+      "command": [
+        "bun",
+        "--version"
+      ],
+      "exitCode": 0,
+      "value": "1.3.14",
+      "stderr": ""
+    },
+    "cargo": {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "exitCode": 0,
+      "value": "cargo 1.97.1 (c980f4866 2026-06-30)",
+      "stderr": ""
+    },
     "onnxruntimeWeb": "1.27.0"
+  },
+  "immutableLogEvidence": {
+    "kind": "embedded-in-manifest",
+    "path": "evidence/replay/task1-replay.json",
+    "ciJobUrl": null
   },
   "steps": [
     {
@@ -22,9 +58,166 @@
       "command": "bun run evidence/scripts/generate_all.mjs",
       "executed": true,
       "blockedReason": null,
+      "rounds": [
+        {
+          "run": 1,
+          "actualCommand": "bun run evidence/scripts/generate_all.mjs",
+          "startedAt": "2026-08-10T13:22:37.568Z",
+          "endedAt": "2026-08-10T13:22:46.164Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "models/yolov8n.onnx",
+              "exists": true,
+              "bytes": 12851098,
+              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+            },
+            {
+              "path": "evidence/fixtures/manifest.json",
+              "exists": true,
+              "bytes": 9945,
+              "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+            }
+          ],
+          "outputs": [
+            {
+              "path": "evidence/model/model-contract.json",
+              "exists": true,
+              "bytes": 4749,
+              "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
+            },
+            {
+              "path": "evidence/fixtures/manifest.json",
+              "exists": true,
+              "bytes": 9945,
+              "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+            },
+            {
+              "path": "evidence/golden/coverage-matrix.json",
+              "exists": true,
+              "bytes": 4476,
+              "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
+            },
+            {
+              "path": "evidence/golden/manifest.json",
+              "exists": true,
+              "bytes": 4829,
+              "sha256": "d813b1536633d0229a7bb648c91c6042d654eec2a5f0874e0360c077e104cd01"
+            },
+            {
+              "path": "evidence/golden/web-reference.json",
+              "exists": true,
+              "bytes": 29752,
+              "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+            },
+            {
+              "path": "evidence/reports/preprocess-conformance.json",
+              "exists": true,
+              "bytes": 3624,
+              "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63  evidence/fixtures/sources/bus.jpg\n051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c  evidence/fixtures/sources/ultralytics-dogs.avif\n/home/raffael/algo/github/rimeflow-yolov8n/evidence/model/model-contract.json\n430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc\n114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\n71465f80c5c34bb377b5281dff6ed27d87226234414066f475d02349d7ab9d9a\n00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886\nd813b1536633d0229a7bb648c91c6042d654eec2a5f0874e0360c077e104cd01\n",
+            "stderr": "\u001b[1;31m2026-08-10 21:22:45.691525929 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-10 21:22:45.693914211 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n    Finished `release` profile [optimized] target(s) in 0.11s\n     Running `evidence/tooling/preprocess-conformance/target/release/rimeflow-preprocess-conformance .`\n",
+            "bytes": 2117,
+            "sha256": "113059e93e39059d4b90b399af05feb121938d54dd7c608394fabb65a4ecef86"
+          }
+        },
+        {
+          "run": 2,
+          "actualCommand": "bun run evidence/scripts/generate_all.mjs",
+          "startedAt": "2026-08-10T13:22:46.164Z",
+          "endedAt": "2026-08-10T13:22:54.425Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "models/yolov8n.onnx",
+              "exists": true,
+              "bytes": 12851098,
+              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+            },
+            {
+              "path": "evidence/fixtures/manifest.json",
+              "exists": true,
+              "bytes": 9945,
+              "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+            }
+          ],
+          "outputs": [
+            {
+              "path": "evidence/model/model-contract.json",
+              "exists": true,
+              "bytes": 4749,
+              "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
+            },
+            {
+              "path": "evidence/fixtures/manifest.json",
+              "exists": true,
+              "bytes": 9945,
+              "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+            },
+            {
+              "path": "evidence/golden/coverage-matrix.json",
+              "exists": true,
+              "bytes": 4476,
+              "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
+            },
+            {
+              "path": "evidence/golden/manifest.json",
+              "exists": true,
+              "bytes": 4829,
+              "sha256": "d813b1536633d0229a7bb648c91c6042d654eec2a5f0874e0360c077e104cd01"
+            },
+            {
+              "path": "evidence/golden/web-reference.json",
+              "exists": true,
+              "bytes": 29752,
+              "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+            },
+            {
+              "path": "evidence/reports/preprocess-conformance.json",
+              "exists": true,
+              "bytes": 3624,
+              "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "c02019c4979c191eb739ddd944445ef408dad5679acab6fd520ef9d434bfbc63  evidence/fixtures/sources/bus.jpg\n051adc223b922b391588ced5594c0868cf4e3944fbdb80a0c00f9ee14abfa15c  evidence/fixtures/sources/ultralytics-dogs.avif\n/home/raffael/algo/github/rimeflow-yolov8n/evidence/model/model-contract.json\n430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc\n114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\n71465f80c5c34bb377b5281dff6ed27d87226234414066f475d02349d7ab9d9a\n00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886\nd813b1536633d0229a7bb648c91c6042d654eec2a5f0874e0360c077e104cd01\n",
+            "stderr": "\u001b[1;31m2026-08-10 21:22:54.030104421 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-10 21:22:54.033101153 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n    Finished `release` profile [optimized] target(s) in 0.04s\n     Running `evidence/tooling/preprocess-conformance/target/release/rimeflow-preprocess-conformance .`\n",
+            "bytes": 2117,
+            "sha256": "9cdd7a8e5cc143e70e877729e9dc1452da787e1c28da555ff2874c9b1dae214c"
+          }
+        }
+      ],
       "repeatComparison": {
         "runs": 2,
-        "deterministicDigestEqual": true
+        "allExitCodesZero": true,
+        "deterministicOutputDigestsEqual": true
       }
     },
     {
@@ -32,20 +225,208 @@
       "command": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
       "executed": true,
       "blockedReason": null,
+      "rounds": [
+        {
+          "run": 1,
+          "actualCommand": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
+          "startedAt": "2026-08-10T13:22:54.425Z",
+          "endedAt": "2026-08-10T13:22:54.529Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "evidence/fixtures/raw/overlap-nms.json",
+              "exists": true,
+              "bytes": 1370,
+              "sha256": "4102c7d3db23926386c5ed37c320c22782ddcbaf3b06a8e3632b63e3c4b3380f"
+            },
+            {
+              "path": "src/postprocess.rs",
+              "exists": true,
+              "bytes": 2910,
+              "sha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+            }
+          ],
+          "outputs": [],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "\nrunning 1 test\ntest tests::task1_raw_golden_uses_production_decode_and_nms ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+            "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s\n     Running unittests src/lib.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-940e61cd9b9d0790)\n     Running unittests src/main.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-0df42c8736da7960)\n   Doc-tests rimeflow_raw_golden\n",
+            "bytes": 750,
+            "sha256": "c276f95c62bc612ce485a225eef6f7375e46f350d4ce3cac94705c07c3da3ac8"
+          }
+        },
+        {
+          "run": 2,
+          "actualCommand": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
+          "startedAt": "2026-08-10T13:22:54.530Z",
+          "endedAt": "2026-08-10T13:22:54.634Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "evidence/fixtures/raw/overlap-nms.json",
+              "exists": true,
+              "bytes": 1370,
+              "sha256": "4102c7d3db23926386c5ed37c320c22782ddcbaf3b06a8e3632b63e3c4b3380f"
+            },
+            {
+              "path": "src/postprocess.rs",
+              "exists": true,
+              "bytes": 2910,
+              "sha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+            }
+          ],
+          "outputs": [],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "\nrunning 1 test\ntest tests::task1_raw_golden_uses_production_decode_and_nms ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+            "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s\n     Running unittests src/lib.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-940e61cd9b9d0790)\n     Running unittests src/main.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-0df42c8736da7960)\n   Doc-tests rimeflow_raw_golden\n",
+            "bytes": 750,
+            "sha256": "c276f95c62bc612ce485a225eef6f7375e46f350d4ce3cac94705c07c3da3ac8"
+          }
+        }
+      ],
       "repeatComparison": {
-        "runs": 1,
-        "passed": true
+        "runs": 2,
+        "allExitCodesZero": true,
+        "deterministicOutputDigestsEqual": true
       }
     },
     {
       "id": "conversion-report-regeneration",
       "command": "node evidence/scripts/run_conversion_spikes.mjs",
       "executed": true,
-      "blockedReason": "报告可重现，但模型授权、Windows ML x64/ARM64 Load/Run、Core ML/LiteRT 同源链仍未闭环；不代表任务 1.4 完成。",
+      "blockedReason": null,
+      "rounds": [
+        {
+          "run": 1,
+          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs",
+          "startedAt": "2026-08-10T13:22:54.634Z",
+          "endedAt": "2026-08-10T13:22:56.207Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "models/yolov8n.onnx",
+              "exists": true,
+              "bytes": 12851098,
+              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+            },
+            {
+              "path": "evidence/tooling/requirements.lock",
+              "exists": true,
+              "bytes": 1869,
+              "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+            }
+          ],
+          "outputs": [
+            {
+              "path": "evidence/conversions/conversion-spikes.json",
+              "exists": true,
+              "bytes": 39389,
+              "sha256": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886"
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886\n",
+            "stderr": "\u001b[1;31m2026-08-10 21:22:56.145738882 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-10 21:22:56.148479042 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n",
+            "bytes": 1399,
+            "sha256": "e208f6da629209d627c19c356a8f4b99964983cb81dbcf72d0371a9b2d798fb0"
+          }
+        },
+        {
+          "run": 2,
+          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs",
+          "startedAt": "2026-08-10T13:22:56.207Z",
+          "endedAt": "2026-08-10T13:22:57.887Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "7bbbe44e654ad72f5169d7e6984297dee2545eec",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "tracked": "",
+            "full": ""
+          },
+          "worktreeAfter": {
+            "tracked": "",
+            "full": ""
+          },
+          "inputs": [
+            {
+              "path": "models/yolov8n.onnx",
+              "exists": true,
+              "bytes": 12851098,
+              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+            },
+            {
+              "path": "evidence/tooling/requirements.lock",
+              "exists": true,
+              "bytes": 1869,
+              "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+            }
+          ],
+          "outputs": [
+            {
+              "path": "evidence/conversions/conversion-spikes.json",
+              "exists": true,
+              "bytes": 39389,
+              "sha256": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886"
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886\n",
+            "stderr": "\u001b[1;31m2026-08-10 21:22:57.822005981 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-10 21:22:57.824543328 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n",
+            "bytes": 1399,
+            "sha256": "117c07201c15419fe9b2456df4d6f47093597f1d2674f659b1f4053d8fb6168b"
+          }
+        }
+      ],
       "repeatComparison": {
         "runs": 2,
-        "deterministicDigestEqual": true
+        "allExitCodesZero": true,
+        "deterministicOutputDigestsEqual": true
       }
+    },
+    {
+      "id": "authorized-platform-artifacts",
+      "command": "Core ML/LiteRT/Windows ML/MindSpore/Linux accelerated provider platform commands",
+      "executed": false,
+      "blockedReason": "缺少可追溯且获准的源模型、Windows x64/ARM64 与 Apple/Android/HarmonyOS 真实 runner，以及 CUDA/TensorRT/OpenVINO 环境。",
+      "rounds": [],
+      "repeatComparison": null
     }
   ],
   "outputs": [
