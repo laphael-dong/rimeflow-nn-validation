@@ -5,13 +5,13 @@
     "trackedByGit": false,
     "tree": {
       "canonicalization": "sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded",
-      "digest": "11ec6908db348cd5c251e2423bb20cca4989a975584834c73a09a6020b32fc63",
+      "digest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98",
       "fileCount": 3,
       "files": [
         {
           "bytes": 108049,
           "path": "Data/com.apple.CoreML/model.mlmodel",
-          "sha256": "5d10aa33d749e4843af6e6316c99c7d9c1970e4c048f3baea6e6d22bb3e833bb"
+          "sha256": "0338fda1a24dcf7671afe21d5b4cbf5bf010a5e886e52ad291ce80ee86911603"
         },
         {
           "bytes": 12716736,
@@ -21,7 +21,7 @@
         {
           "bytes": 617,
           "path": "Manifest.json",
-          "sha256": "0e987bab01abc156ee0c2ffeaba22243a9deba3fd82fc50837fb1b80b35d2c01"
+          "sha256": "a98adb9a96acb8c87d1cd49dc319962d44fec8302418e6503fa8d73b8ec17367"
         }
       ],
       "totalFileBytes": 12825402
@@ -94,12 +94,12 @@
         "round1": {
           "bytes": 108049,
           "path": "Data/com.apple.CoreML/model.mlmodel",
-          "sha256": "5c6957127620b70bc760aa29a1c9dcd3f93e6da2ba4ab39178251bf03656941b"
+          "sha256": "8a8ada492085f47317c438fca1cded1c296f396f8d8496c434f217b031821fee"
         },
         "round2": {
           "bytes": 108049,
           "path": "Data/com.apple.CoreML/model.mlmodel",
-          "sha256": "5d10aa33d749e4843af6e6316c99c7d9c1970e4c048f3baea6e6d22bb3e833bb"
+          "sha256": "0338fda1a24dcf7671afe21d5b4cbf5bf010a5e886e52ad291ce80ee86911603"
         }
       },
       {
@@ -107,12 +107,12 @@
         "round1": {
           "bytes": 617,
           "path": "Manifest.json",
-          "sha256": "0dcfbfd4ba11979959fa03f7b2f7890154eb4f6deb200c83ea457a7ff521d212"
+          "sha256": "bdc051fb95c703810eb6195685b42cc79999ed153fb9906d42da566c848efbc9"
         },
         "round2": {
           "bytes": 617,
           "path": "Manifest.json",
-          "sha256": "0e987bab01abc156ee0c2ffeaba22243a9deba3fd82fc50837fb1b80b35d2c01"
+          "sha256": "a98adb9a96acb8c87d1cd49dc319962d44fec8302418e6503fa8d73b8ec17367"
         }
       }
     ],
@@ -133,10 +133,10 @@
     "sourceStateEqualAndUnchanged": true,
     "volatileMetadata": {
       "round1": {
-        "date": "2026-08-11T20:25:59.118472"
+        "date": "2026-08-11T21:00:18.135078"
       },
       "round2": {
-        "date": "2026-08-11T20:26:03.406989"
+        "date": "2026-08-11T21:00:22.534682"
       }
     },
     "weightBlobDigestEqual": true
@@ -162,7 +162,24 @@
     },
     "normalizedSha256": "dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2"
   },
+  "recordedArtifactTreeDigest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98",
+  "recordedArtifactVerification": {
+    "afterTreeDigest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98",
+    "availableAfter": true,
+    "availableBefore": true,
+    "beforeTreeDigest": "11ec6908db348cd5c251e2423bb20cca4989a975584834c73a09a6020b32fc63",
+    "exactIdentityVerifiedAfter": true,
+    "exactIdentityVerifiedBefore": false,
+    "expectedTreeDigest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98",
+    "status": "recorded",
+    "unchanged": false
+  },
   "schemaVersion": 1,
+  "semanticReplayDigests": {
+    "normalizedPackageManifestSha256": "dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2",
+    "normalizedSpecSha256": "47861286655df41486c8ad6372ae03238f90d4830d59f30d730acf03d13d426b",
+    "weightBlobSha256": "d5ad84a03983780fe37c243e55ccd82d8fe76040b96140de929bb011e61ecf2c"
+  },
   "source": {
     "after": {
       "bytes": 6549796,
@@ -306,7 +323,7 @@
     },
     "specificationVersion": 6,
     "volatileMetadata": {
-      "date": "2026-08-11T20:26:03.406989"
+      "date": "2026-08-11T21:00:22.534682"
     }
   },
   "status": {

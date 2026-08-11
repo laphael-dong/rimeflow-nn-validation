@@ -24,6 +24,11 @@ def json_bytes(value: object) -> bytes:
     return (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
 
 
+def stable_digest(value: object) -> str:
+    payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(payload).hexdigest()
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -73,6 +78,134 @@ def file_map(result: dict[str, object]) -> dict[str, dict[str, object]]:
     return {item["path"]: item for item in result["artifact"]["tree"]["files"]}
 
 
+def package_tree(package: Path) -> dict[str, object]:
+    files = []
+    for path in sorted(item for item in package.rglob("*") if item.is_file()):
+        files.append(
+            {
+                "bytes": path.stat().st_size,
+                "path": path.relative_to(package).as_posix(),
+                "sha256": sha256(path),
+            }
+        )
+    return {
+        "canonicalization": "sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded",
+        "digest": stable_digest(files),
+        "fileCount": len(files),
+        "files": files,
+        "totalFileBytes": sum(item["bytes"] for item in files),
+    }
+
+
+def artifact_snapshot(package: Path) -> dict[str, object]:
+    if not package.exists():
+        return {
+            "available": False,
+            "treeDigest": None,
+            "totalFileBytes": None,
+            "weightBlobSha256": None,
+        }
+    if not package.is_dir():
+        raise SystemExit(f"recorded Core ML artifact is not a directory: {package}")
+    tree = package_tree(package)
+    files = {item["path"]: item for item in tree["files"]}
+    weight = files.get("Data/com.apple.CoreML/weights/weight.bin")
+    if tree["fileCount"] != 3 or weight is None:
+        raise SystemExit(f"recorded Core ML artifact has an invalid package tree: {tree}")
+    return {
+        "available": True,
+        "treeDigest": tree["digest"],
+        "totalFileBytes": tree["totalFileBytes"],
+        "weightBlobSha256": weight["sha256"],
+    }
+
+
+def weight_blob_sha256(result: dict[str, object]) -> str:
+    return file_map(result)["Data/com.apple.CoreML/weights/weight.bin"]["sha256"]
+
+
+def semantic_digests(result: dict[str, object]) -> dict[str, str]:
+    return {
+        "normalizedPackageManifestSha256": result["packageManifest"]["normalizedSha256"],
+        "normalizedSpecSha256": result["spec"]["normalizedSpecSha256"],
+        "weightBlobSha256": weight_blob_sha256(result),
+    }
+
+
+def validate_manifest_tree(manifest: dict[str, object]) -> None:
+    tree = manifest["artifact"]["tree"]
+    if stable_digest(tree["files"]) != tree["digest"]:
+        raise SystemExit("tracked Core ML manifest canonical tree digest is invalid")
+    if tree["fileCount"] != len(tree["files"]):
+        raise SystemExit("tracked Core ML manifest file count is invalid")
+    if tree["totalFileBytes"] != sum(item["bytes"] for item in tree["files"]):
+        raise SystemExit("tracked Core ML manifest byte count is invalid")
+
+
+def load_recorded_evidence(root: Path) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
+    manifest_path = root / "evidence/conversions/coreml-artifact-manifest.json"
+    report_path = root / "evidence/reports/coreml-conversion-report.json"
+    manifest_bytes = manifest_path.read_bytes()
+    report_bytes = report_path.read_bytes()
+    manifest = json.loads(manifest_bytes)
+    report = json.loads(report_bytes)
+    validate_manifest_tree(manifest)
+    recorded_digest = manifest["artifact"]["tree"]["digest"]
+    if manifest.get("recordedArtifactTreeDigest") != recorded_digest:
+        raise SystemExit("tracked Core ML manifest does not distinguish recorded artifact identity")
+    if report.get("mode") != "record" or report.get("recordedArtifactTreeDigest") != recorded_digest:
+        raise SystemExit("tracked Core ML conversion report is not synchronized with the recorded artifact")
+    if report.get("semanticReplayDigests", {}).get("recorded") != manifest.get("semanticReplayDigests"):
+        raise SystemExit("tracked Core ML semantic digests are not synchronized")
+    if report["rounds"][-1]["artifactTree"] != manifest["artifact"]["tree"]:
+        raise SystemExit("tracked Core ML report does not identify the recorded package tree")
+    return manifest, report, {
+        "manifest": {
+            "bytes": len(manifest_bytes),
+            "path": "evidence/conversions/coreml-artifact-manifest.json",
+            "sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        },
+        "report": {
+            "bytes": len(report_bytes),
+            "path": "evidence/reports/coreml-conversion-report.json",
+            "sha256": hashlib.sha256(report_bytes).hexdigest(),
+        },
+    }
+
+
+def validate_semantic_replay(
+    root: Path,
+    manifest: dict[str, object],
+    report: dict[str, object],
+    results: list[dict[str, object]],
+) -> dict[str, object]:
+    recorded = manifest["semanticReplayDigests"]
+    lock_path = root / manifest["dependencies"]["lock"]["path"]
+    expected_versions = {
+        key: manifest["toolchain"][key]
+        for key in ["coremltools", "numpy", "torch", "torchvision", "ultralytics"]
+    }
+    checks = {
+        "coordinates": all(item["spec"]["coordinates"] == manifest["spec"]["coordinates"] for item in results),
+        "float32Precision": all(item["spec"]["computePrecision"] == manifest["spec"]["computePrecision"] for item in results),
+        "inputContract": all(item["spec"]["input"] == manifest["spec"]["input"] for item in results),
+        "nmsResponsibility": all(item["spec"]["nms"] == manifest["spec"]["nms"] for item in results),
+        "normalizedPackageManifestDigest": all(semantic_digests(item)["normalizedPackageManifestSha256"] == recorded["normalizedPackageManifestSha256"] for item in results),
+        "normalizedSpecDigest": all(semantic_digests(item)["normalizedSpecSha256"] == recorded["normalizedSpecSha256"] for item in results),
+        "outputContract": all(item["spec"]["output"] == manifest["spec"]["output"] for item in results),
+        "preprocessingResponsibility": all(item["spec"]["preprocessing"] == manifest["spec"]["preprocessing"] for item in results),
+        "recordedReport": report["semanticReplayDigests"]["recorded"] == recorded,
+        "source": all(item["source"]["before"] == manifest["source"]["before"] and item["source"]["after"] == manifest["source"]["after"] for item in results),
+        "toolchain": all(item["versions"] == expected_versions and item["host"]["python"] == manifest["toolchain"]["python"] for item in results),
+        "toolchainLock": lock_path.stat().st_size == manifest["dependencies"]["lock"]["bytes"] and sha256(lock_path) == manifest["dependencies"]["lock"]["sha256"],
+        "weightBlob": all(semantic_digests(item)["weightBlobSha256"] == recorded["weightBlobSha256"] for item in results),
+    }
+    checks["allMatched"] = all(checks.values())
+    if not checks["allMatched"]:
+        raise SystemExit(f"Core ML replay differs from recorded semantic evidence: {checks}")
+    return checks
+
+
 def compare_rounds(first: dict[str, object], second: dict[str, object]) -> dict[str, object]:
     first_files = file_map(first)
     second_files = file_map(second)
@@ -115,6 +248,8 @@ def compare_rounds(first: dict[str, object], second: dict[str, object]) -> dict[
 def tracked_manifest(root: Path, result: dict[str, object], comparison: dict[str, object]) -> dict[str, object]:
     input_path = root / "evidence/tooling/coreml-requirements.in"
     lock_path = root / "evidence/tooling/coreml-requirements.lock"
+    recorded_tree_digest = result["artifact"]["tree"]["digest"]
+    recorded_semantic_digests = semantic_digests(result)
     return {
         "artifact": {
             "format": result["artifact"]["format"],
@@ -154,7 +289,9 @@ def tracked_manifest(root: Path, result: dict[str, object], comparison: dict[str
         },
         "determinism": comparison,
         "packageManifest": result["packageManifest"],
+        "recordedArtifactTreeDigest": recorded_tree_digest,
         "schemaVersion": 1,
+        "semanticReplayDigests": recorded_semantic_digests,
         "source": result["source"],
         "spec": result["spec"],
         "status": {
@@ -184,6 +321,39 @@ def tracked_manifest(root: Path, result: dict[str, object], comparison: dict[str
     }
 
 
+def recorded_artifact_verification(
+    before: dict[str, object],
+    after: dict[str, object],
+    expected_digest: str,
+    record_mode: bool,
+) -> dict[str, object]:
+    unchanged = (
+        before["available"] == after["available"]
+        and before["treeDigest"] == after["treeDigest"]
+    )
+    exact_before = before["available"] and before["treeDigest"] == expected_digest
+    exact_after = after["available"] and after["treeDigest"] == expected_digest
+    if record_mode:
+        status = "recorded" if exact_after else "recording-failed"
+    elif not before["available"] and not after["available"]:
+        status = "recorded-artifact-unavailable"
+    elif unchanged and exact_before and exact_after:
+        status = "verified-preserved"
+    else:
+        status = "recorded-artifact-changed"
+    return {
+        "afterTreeDigest": after["treeDigest"],
+        "availableAfter": after["available"],
+        "availableBefore": before["available"],
+        "beforeTreeDigest": before["treeDigest"],
+        "exactIdentityVerifiedAfter": exact_after,
+        "exactIdentityVerifiedBefore": exact_before,
+        "expectedTreeDigest": expected_digest,
+        "status": status,
+        "unchanged": unchanged,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pt", required=True, type=Path)
@@ -195,8 +365,28 @@ def main() -> int:
     source = args.pt.resolve(strict=True)
     workspace = (root / args.workspace).resolve()
     allowed_root = (root / ".evidence/coreml").resolve()
+    final_artifact = root / ".evidence/coreml/artifacts/yolov8n-fp32.mlpackage"
     if workspace != allowed_root and allowed_root not in workspace.parents:
         raise SystemExit("Core ML replay workspace must stay under .evidence/coreml")
+    if (
+        workspace == final_artifact
+        or workspace in final_artifact.parents
+        or final_artifact in workspace.parents
+    ):
+        raise SystemExit("Core ML replay workspace must not overlap the recorded artifact")
+
+    recorded_manifest = None
+    recorded_report = None
+    tracked_evidence_before = None
+    if not args.record:
+        recorded_manifest, recorded_report, tracked_evidence_before = load_recorded_evidence(root)
+    recorded_before = artifact_snapshot(final_artifact)
+    if (
+        not args.record
+        and recorded_before["available"]
+        and recorded_before["treeDigest"] != recorded_manifest["recordedArtifactTreeDigest"]
+    ):
+        raise SystemExit("recorded Core ML artifact tree drifted before non-record replay")
     workspace.mkdir(parents=True, exist_ok=True)
 
     rounds = []
@@ -257,17 +447,84 @@ def main() -> int:
     if not comparison["packageTreeDigestEqual"] and changed_paths != expected_changed:
         raise SystemExit(f"unexpected Core ML package nondeterminism: {changed_paths}")
 
-    final_artifact = root / ".evidence/coreml/artifacts/yolov8n-fp32.mlpackage"
-    if final_artifact.exists():
-        shutil.rmtree(final_artifact)
-    final_artifact.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(workspace / "round-2/conversion/yolov8n.mlpackage", final_artifact)
-    manifest = tracked_manifest(root, results[1], comparison)
+    if args.record:
+        manifest = tracked_manifest(root, results[1], comparison)
+        expected_recorded_digest = manifest["recordedArtifactTreeDigest"]
+        staging_artifact = final_artifact.parent / ".yolov8n-fp32.mlpackage.recording"
+        final_artifact.parent.mkdir(parents=True, exist_ok=True)
+        if staging_artifact.exists():
+            shutil.rmtree(staging_artifact)
+        shutil.copytree(workspace / "round-2/conversion/yolov8n.mlpackage", staging_artifact)
+        if package_tree(staging_artifact)["digest"] != expected_recorded_digest:
+            raise SystemExit("staged Core ML artifact differs from the recorded manifest")
+        if final_artifact.exists():
+            shutil.rmtree(final_artifact)
+        staging_artifact.rename(final_artifact)
+        recorded_after = artifact_snapshot(final_artifact)
+        recorded_verification = recorded_artifact_verification(
+            recorded_before, recorded_after, expected_recorded_digest, True
+        )
+        if not recorded_verification["exactIdentityVerifiedAfter"]:
+            raise SystemExit("recorded Core ML artifact identity verification failed")
+        manifest["recordedArtifactVerification"] = recorded_verification
+        semantic_replay_digests = {
+            "recorded": manifest["semanticReplayDigests"],
+            "rounds": [semantic_digests(item) for item in results],
+        }
+        semantic_validation = {
+            "allMatched": all(
+                item == manifest["semanticReplayDigests"]
+                for item in semantic_replay_digests["rounds"]
+            ),
+            "scope": "normalized spec/package manifest and weight blob; never an artifact identity",
+        }
+        if not semantic_validation["allMatched"]:
+            raise SystemExit("recorded Core ML conversion rounds are not semantically deterministic")
+        tracked_evidence = None
+    else:
+        manifest = recorded_manifest
+        expected_recorded_digest = manifest["recordedArtifactTreeDigest"]
+        semantic_validation = validate_semantic_replay(root, manifest, recorded_report, results)
+        semantic_validation["scope"] = (
+            "normalized spec/package manifest, weight, contracts, source and toolchain; "
+            "never an artifact identity"
+        )
+        semantic_replay_digests = {
+            "recorded": manifest["semanticReplayDigests"],
+            "rounds": [semantic_digests(item) for item in results],
+        }
+        recorded_after = artifact_snapshot(final_artifact)
+        recorded_verification = recorded_artifact_verification(
+            recorded_before, recorded_after, expected_recorded_digest, False
+        )
+        if not recorded_verification["unchanged"]:
+            raise SystemExit("non-record Core ML replay changed the recorded artifact")
+        if recorded_before["available"] and not recorded_verification["exactIdentityVerifiedAfter"]:
+            raise SystemExit("non-record Core ML replay lost the recorded artifact identity")
+        _, _, tracked_evidence_after = load_recorded_evidence(root)
+        tracked_evidence = {
+            key: {
+                **tracked_evidence_before[key],
+                "sha256After": tracked_evidence_after[key]["sha256"],
+                "unchanged": tracked_evidence_before[key]["sha256"]
+                == tracked_evidence_after[key]["sha256"],
+            }
+            for key in ["manifest", "report"]
+        }
+        if not all(item["unchanged"] for item in tracked_evidence.values()):
+            raise SystemExit("non-record Core ML replay changed tracked evidence")
+
     replay = {
         "artifactLocation": ".evidence/coreml/artifacts/yolov8n-fp32.mlpackage",
         "comparison": comparison,
+        "mode": "record" if args.record else "replay",
+        "recordedArtifactTreeDigest": expected_recorded_digest,
+        "recordedArtifactVerification": recorded_verification,
         "rounds": rounds,
         "schemaVersion": 1,
+        "semanticReplayDigests": semantic_replay_digests,
+        "semanticReplayValidation": semantic_validation,
+        "trackedEvidence": tracked_evidence,
     }
     replay_path = workspace / "coreml-replay.json"
     replay_path.write_bytes(json_bytes(replay))
@@ -279,8 +536,13 @@ def main() -> int:
                 {
                     "commands": {"conversion": rounds[0]["conversion"]["command"]},
                     "comparison": comparison,
+                    "mode": "record",
+                    "recordedArtifactTreeDigest": expected_recorded_digest,
+                    "recordedArtifactVerification": recorded_verification,
                     "rounds": rounds,
                     "schemaVersion": 1,
+                    "semanticReplayDigests": semantic_replay_digests,
+                    "semanticReplayValidation": semantic_validation,
                 }
             )
         )
@@ -290,8 +552,11 @@ def main() -> int:
             {
                 "comparison": comparison,
                 "recorded": args.record,
+                "recordedArtifactTreeDigest": expected_recorded_digest,
+                "recordedArtifactVerification": recorded_verification,
                 "replay": str(replay_path.relative_to(root)),
-                "round2Tree": results[1]["artifact"]["tree"],
+                "semanticReplayDigests": semantic_replay_digests,
+                "workspaceRound2Tree": results[1]["artifact"]["tree"],
             },
             sort_keys=True,
         )

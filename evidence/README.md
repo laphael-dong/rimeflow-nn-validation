@@ -61,7 +61,9 @@ HANDOFF_ASSETS=/home/raffael/下载/yolov8n_ios_benchmark_handoff/Assets
 node evidence/scripts/run_conversion_spikes.mjs --coreml-only
 ```
 
-Core ML worker 在导入 Ultralytics/PyTorch 前校验 `.pt` 的 6,549,796 字节和锁定 SHA-256，并在转换结束后复核 size、SHA-256、mtime_ns 均未变化。正式路径为 `YOLO.export(format="coreml", batch=1, imgsz=640, dynamic=false, nms=false, device="cpu", half=false, quantize=None)`，内部执行 `torch.jit.trace` 和 coremltools MIL/ML Program conversion。转换器未显式接收 minimum deployment target；真实 spec 是 specificationVersion 6/CoreML5，对应 iOS 15、macOS 12、watchOS 8、tvOS 15。
+只有 `--record` 模式可以创建或替换 `.evidence/coreml/artifacts/yolov8n-fp32.mlpackage`，并同步刷新 tracked artifact manifest 与 conversion report。普通 replay 必须省略 `--record` 并使用独立 `--workspace`；它只在 workspace 生成 package，读取 tracked manifest/report 验证 normalized spec、normalized package manifest、`weight.bin`、I/O、FLOAT32、预处理、坐标、NMS、source 和工具链锁，绝不创建、删除或修改固定候选。若固定候选存在，replay 保存其前后精确 tree digest 并要求一致；若不存在，则报告 `recorded-artifact-unavailable`，不能声称本机已验证精确 artifact identity。
+
+Core ML worker 在导入 Ultralytics/PyTorch 前校验 `.pt` 的 6,549,796 字节和锁定 SHA-256，并在转换结束后复核 size、SHA-256、mtime_ns 均未变化。正式路径为 `YOLO.export(format="coreml", batch=1, imgsz=640, dynamic=false, nms=false, device="cpu", half=false, quantize=None)`，内部执行 `torch.jit.trace` 和 coremltools MIL/ML Program conversion。转换器未显式接收 minimum deployment target；真实 spec 是 specificationVersion 6/CoreML5，对应 iOS 15、macOS 12、watchOS 8、tvOS 15。证据明确区分 `recordedArtifactTreeDigest`（固定候选逐字节身份）与 `semanticReplayDigests`（忽略合法 UUID/date 波动后的可重复转换语义）；后者不得作为 artifact digest。
 
 候选产物位于 `.evidence/coreml/artifacts/yolov8n-fp32.mlpackage`，只含 `model.mlmodel`、`weight.bin` 和 `Manifest.json` 三个文件，总计 12,825,402 字节；该路径被 Git 忽略。每轮均按排序后的 POSIX 相对路径、文件字节数和逐文件 SHA-256 计算 canonical tree digest，不读取目录时间戳。两轮原始 tree digest 不同：`weight.bin` 完全一致，差异仅为 `Manifest.json` 的随机 UUID 和 `model.mlmodel` 中 `description.metadata.userDefined.date`。比较层只为诊断计算移除这些字段后的 digest，未修改任何 package、模型图或权重；归一化 spec/manifest digest、I/O、精度和坐标契约均一致。
 

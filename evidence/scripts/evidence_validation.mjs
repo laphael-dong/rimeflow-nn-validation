@@ -87,6 +87,11 @@ export function validateCoremlEvidence(manifest, replay) {
   if (sha256(Buffer.from(JSON.stringify(manifest.artifact.tree.files))) !== manifest.artifact.tree.digest) throw new Error('Core ML canonical tree digest mismatch');
   const paths = manifest.artifact.tree.files.map((item) => item.path);
   if (JSON.stringify(paths) !== JSON.stringify(['Data/com.apple.CoreML/model.mlmodel', 'Data/com.apple.CoreML/weights/weight.bin', 'Manifest.json']) || manifest.artifact.tree.files.some((item) => item.bytes <= 0 || !/^[0-9a-f]{64}$/.test(item.sha256))) throw new Error('Core ML package tree drift');
+  const weightBlob = manifest.artifact.tree.files.find((item) => item.path === 'Data/com.apple.CoreML/weights/weight.bin');
+  const semantic = manifest.semanticReplayDigests;
+  if (manifest.recordedArtifactTreeDigest !== manifest.artifact.tree.digest) throw new Error('Core ML recorded artifact identity drift');
+  if (!semantic || semantic.normalizedSpecSha256 !== manifest.spec.normalizedSpecSha256 || semantic.normalizedPackageManifestSha256 !== manifest.packageManifest.normalizedSha256 || semantic.weightBlobSha256 !== weightBlob.sha256) throw new Error('Core ML recorded semantic digest drift');
+  if (Object.values(semantic).includes(manifest.recordedArtifactTreeDigest)) throw new Error('Core ML semantic digest impersonates artifact identity');
   const spec = manifest.spec;
   if (spec.modelType !== 'mlProgram' || spec.specificationVersion !== 6 || spec.opset !== 'CoreML5' || spec.minimumDeploymentTarget.iOS !== '15.0' || spec.minimumDeploymentTarget.macOS !== '12.0') throw new Error('Core ML model/deployment spec drift');
   if (spec.input.name !== 'image' || spec.input.index !== 0 || spec.input.featureType !== 'IMAGE' || spec.input.colorSpace !== 'RGB' || spec.input.functionTensorDtype !== 'FLOAT32' || JSON.stringify(spec.input.shape) !== '[1,3,640,640]' || spec.input.width !== 640 || spec.input.height !== 640 || Math.abs(spec.input.scale - 1 / 255) > 1e-9 || JSON.stringify(spec.input.bias) !== '[0,0,0]') throw new Error('Core ML input contract drift');
@@ -95,10 +100,36 @@ export function validateCoremlEvidence(manifest, replay) {
   if (spec.nms.fused || spec.nms.operators.length !== 0 || spec.nms.responsibility !== 'operator postprocess') throw new Error('Core ML NMS responsibility drift');
   if (!spec.preprocessing.fused.includes('multiply by 1/255') || !spec.preprocessing.notFused.includes('letterbox resize') || spec.coordinates.bboxEncoding !== 'xywh in 640x640 model-input pixel units' || JSON.stringify(spec.coordinates.strideTensor.uniqueValues) !== '[8,16,32]') throw new Error('Core ML preprocessing/coordinate contract drift');
   const comparison = replay.comparison;
+  if (replay.mode !== 'record' || replay.recordedArtifactTreeDigest !== manifest.recordedArtifactTreeDigest) throw new Error('Core ML record report identity drift');
+  if (JSON.stringify(replay.semanticReplayDigests?.recorded) !== JSON.stringify(semantic) || replay.semanticReplayDigests.rounds.some((item) => JSON.stringify(item) !== JSON.stringify(semantic)) || !replay.semanticReplayValidation?.allMatched) throw new Error('Core ML record report semantic digest drift');
+  const recordedVerification = replay.recordedArtifactVerification;
+  if (!recordedVerification?.availableAfter || !recordedVerification.exactIdentityVerifiedAfter || recordedVerification.afterTreeDigest !== manifest.recordedArtifactTreeDigest || recordedVerification.expectedTreeDigest !== manifest.recordedArtifactTreeDigest || recordedVerification.status !== 'recorded') throw new Error('Core ML recorded artifact verification drift');
+  if (JSON.stringify(manifest.recordedArtifactVerification) !== JSON.stringify(recordedVerification)) throw new Error('Core ML manifest/report artifact verification mismatch');
   if (replay.rounds.length !== 2 || comparison.packageTreeDigestEqual || !comparison.weightBlobDigestEqual || !comparison.normalizedSpecDigestEqual || !comparison.normalizedPackageManifestDigestEqual || !comparison.precisionContractEqual || !comparison.sourceStateEqualAndUnchanged || Object.values(comparison.ioMetadataEqual).some((value) => value !== true)) throw new Error('Core ML replay determinism characterization drift');
   const changedPaths = comparison.changedFiles.map((item) => item.path).sort();
   if (JSON.stringify(changedPaths) !== JSON.stringify(['Data/com.apple.CoreML/model.mlmodel', 'Manifest.json'])) throw new Error('Core ML unexpected nondeterministic files');
   for (const round of replay.rounds) {
     if (round.conversion.exitCode !== 0 || !round.conversion.startedAt || !round.conversion.endedAt || !round.conversion.stdout || round.worktreeBefore.tracked !== round.worktreeAfter.tracked || round.source.before.sha256 !== expectedPtSha || JSON.stringify(round.source.before) !== JSON.stringify(round.source.after)) throw new Error(`Core ML replay round invalid: ${round.round}`);
   }
+}
+
+export function validateCoremlReplayEvidence(manifest, replay) {
+  const recordedDigest = manifest.recordedArtifactTreeDigest;
+  const semantic = manifest.semanticReplayDigests;
+  if (replay.mode !== 'replay' || replay.recordedArtifactTreeDigest !== recordedDigest) throw new Error('Core ML non-record replay identity drift');
+  if (Object.values(semantic).includes(recordedDigest)) throw new Error('Core ML semantic digest impersonates artifact identity');
+  if (JSON.stringify(replay.semanticReplayDigests?.recorded) !== JSON.stringify(semantic) || replay.semanticReplayDigests.rounds.length !== 2 || replay.semanticReplayDigests.rounds.some((item) => JSON.stringify(item) !== JSON.stringify(semantic))) throw new Error('Core ML non-record semantic digest drift');
+  if (!replay.semanticReplayValidation?.allMatched || !replay.semanticReplayValidation.scope?.includes('never an artifact identity')) throw new Error('Core ML non-record semantic validation drift');
+  const verification = replay.recordedArtifactVerification;
+  if (!verification || verification.expectedTreeDigest !== recordedDigest || !verification.unchanged || verification.availableBefore !== verification.availableAfter) throw new Error('Core ML non-record artifact preservation failed');
+  if (verification.availableBefore) {
+    if (verification.status !== 'verified-preserved' || verification.beforeTreeDigest !== recordedDigest || verification.afterTreeDigest !== recordedDigest || !verification.exactIdentityVerifiedBefore || !verification.exactIdentityVerifiedAfter) throw new Error('Core ML non-record exact artifact identity failed');
+  } else if (verification.status !== 'recorded-artifact-unavailable' || verification.beforeTreeDigest !== null || verification.afterTreeDigest !== null || verification.exactIdentityVerifiedBefore || verification.exactIdentityVerifiedAfter) {
+    throw new Error('Core ML missing recorded artifact was overclaimed');
+  }
+  for (const key of ['manifest', 'report']) {
+    const item = replay.trackedEvidence?.[key];
+    if (!item?.unchanged || item.sha256 !== item.sha256After || !/^[0-9a-f]{64}$/.test(item.sha256)) throw new Error(`Core ML non-record tracked ${key} drift`);
+  }
+  if (replay.rounds.length !== 2 || replay.rounds.some((round) => round.exitCode !== undefined && round.exitCode !== 0)) throw new Error('Core ML non-record replay rounds invalid');
 }

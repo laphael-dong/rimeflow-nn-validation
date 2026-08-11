@@ -104,13 +104,13 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 35350,
-      "sha256": "3f6efe3c7d27e8472b41037b19269e1204843d284c451e9c74b627d3892185fb"
+      "bytes": 35351,
+      "sha256": "bfce849df328afd531ae6cf980b84c7868d7bd0832297ee2ee1f28e32f7dfbac"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
-      "bytes": 9342,
-      "sha256": "f1b279a2f7afb55303b532e68af751bc7bb0bd5c034c17310a21e9606107ba44"
+      "bytes": 10276,
+      "sha256": "8d5271e9c154c632f8b0a4f382128f2889bfadade59563a9ba5f58c4358c63f5"
     },
     {
       "path": "evidence/conversions/litert-artifact-manifest.json",
@@ -134,8 +134,8 @@
     },
     {
       "path": "evidence/reports/coreml-conversion-report.json",
-      "bytes": 23299,
-      "sha256": "34bc04c3fb306c14cea947b3f6899b3f457a9240d515e66ec77cae3538629fbe"
+      "bytes": 23862,
+      "sha256": "896120667709d6cdb6e033857c67b33e2ac508536b76561c84574c635c30bf02"
     },
     {
       "path": "evidence/reports/litert-conversion-report.json",

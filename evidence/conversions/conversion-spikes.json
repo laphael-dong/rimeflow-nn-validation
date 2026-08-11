@@ -41,8 +41,8 @@
         "iosRuntimeExecuted": false,
         "report": {
           "path": "evidence/reports/coreml-conversion-report.json",
-          "bytes": 23299,
-          "sha256": "34bc04c3fb306c14cea947b3f6899b3f457a9240d515e66ec77cae3538629fbe"
+          "bytes": 23862,
+          "sha256": "896120667709d6cdb6e033857c67b33e2ac508536b76561c84574c635c30bf02"
         },
         "legacyOnnxProbe": {
           "acceptedSources": [
@@ -62,13 +62,13 @@
         "format": "Core ML ML Program .mlpackage",
         "fileCount": 3,
         "totalFileBytes": 12825402,
-        "treeDigest": "11ec6908db348cd5c251e2423bb20cca4989a975584834c73a09a6020b32fc63",
+        "treeDigest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98",
         "trackedByGit": false
       },
       "artifactManifest": {
         "path": "evidence/conversions/coreml-artifact-manifest.json",
-        "bytes": 9342,
-        "sha256": "f1b279a2f7afb55303b532e68af751bc7bb0bd5c034c17310a21e9606107ba44"
+        "bytes": 10276,
+        "sha256": "8d5271e9c154c632f8b0a4f382128f2889bfadade59563a9ba5f58c4358c63f5"
       },
       "sourceCheckpoint": {
         "bytes": 6549796,

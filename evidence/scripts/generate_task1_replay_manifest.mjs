@@ -151,6 +151,12 @@ if (litertOnly) {
     command: coremlCommand,
     executed: true,
     blockedReason: null,
+    mode: coremlReplay.mode,
+    recordedArtifactTreeDigest: coremlReplay.recordedArtifactTreeDigest,
+    recordedArtifactVerification: coremlReplay.recordedArtifactVerification,
+    semanticReplayDigests: coremlReplay.semanticReplayDigests,
+    semanticReplayValidation: coremlReplay.semanticReplayValidation,
+    trackedEvidence: coremlReplay.trackedEvidence,
     rounds: coremlReplay.rounds.map((round) => ({
       run: round.round,
       actualCommand: coremlCommand,
@@ -166,7 +172,11 @@ if (litertOnly) {
         { path: '$HANDOFF_ASSETS/yolov8n.pt', exists: true, bytes: 6549796, sha256: 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36' },
         { path: 'evidence/tooling/coreml-requirements.lock', exists: true, bytes: coremlLockBytes.length, sha256: sha256(coremlLockBytes) },
       ],
-      outputs: [{ bytes: round.artifactTree.totalFileBytes, sha256: round.artifactTree.digest }],
+      outputs: [{
+        bytes: round.artifactTree.totalFileBytes,
+        kind: 'workspace-package-tree',
+        workspacePackageTreeDigest: round.artifactTree.digest,
+      }],
       log: {
         storage: 'embedded-in-replay-manifest',
         stdout: round.conversion.stdout,
