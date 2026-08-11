@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "repository": "rimeflow-yolov8n",
   "repositoryHeadAtReplay": {
-    "commit": "f118bf16b70f83c1da96526e976a9bc714e5fd4d",
+    "commit": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
     "kind": "evidence-input-head",
     "finalEvidenceCommitRecordedByGit": true
   },
@@ -45,7 +45,9 @@
       "value": "cargo 1.97.1 (c980f4866 2026-06-30)",
       "stderr": ""
     },
-    "onnxruntimeWeb": "1.27.0"
+    "onnxruntimeWeb": "1.27.0",
+    "litertRuntime": "2.1.6",
+    "litertTorch": "0.9.3"
   },
   "immutableLogEvidence": {
     "kind": "embedded-in-manifest",
@@ -265,11 +267,11 @@
         {
           "run": 1,
           "actualCommand": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
-          "startedAt": "2026-08-11T10:18:05.939Z",
-          "endedAt": "2026-08-11T10:18:06.070Z",
+          "startedAt": "2026-08-11T11:47:16.041Z",
+          "endedAt": "2026-08-11T11:47:16.149Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "f118bf16b70f83c1da96526e976a9bc714e5fd4d",
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "worktreeBefore": {
             "tracked": "",
@@ -296,20 +298,20 @@
           "outputs": [],
           "log": {
             "storage": "embedded-in-replay-manifest",
-            "stdout": "\nrunning 1 test\ntest tests::task1_raw_golden_uses_production_decode_and_nms ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
-            "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s\n     Running unittests src/lib.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-940e61cd9b9d0790)\n     Running unittests src/main.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-0df42c8736da7960)\n   Doc-tests rimeflow_raw_golden\n",
+            "stdout": "\nrunning 1 test\ntest tests::task1_raw_golden_uses_production_decode_and_nms ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n\nrunning 0 tests\n\ntest result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+            "stderr": "    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s\n     Running unittests src/lib.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-940e61cd9b9d0790)\n     Running unittests src/main.rs (evidence/tooling/raw-golden/target/debug/deps/rimeflow_raw_golden-0df42c8736da7960)\n   Doc-tests rimeflow_raw_golden\n",
             "bytes": 750,
-            "sha256": "c276f95c62bc612ce485a225eef6f7375e46f350d4ce3cac94705c07c3da3ac8"
+            "sha256": "95ce1f42baed2c7a0e0cee79a2ee6e55e9fe58dccbb7bd762a77b53a5659b2db"
           }
         },
         {
           "run": 2,
           "actualCommand": "cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml",
-          "startedAt": "2026-08-11T10:18:06.070Z",
-          "endedAt": "2026-08-11T10:18:06.166Z",
+          "startedAt": "2026-08-11T11:47:16.149Z",
+          "endedAt": "2026-08-11T11:47:16.242Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "f118bf16b70f83c1da96526e976a9bc714e5fd4d",
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "worktreeBefore": {
             "tracked": "",
@@ -351,18 +353,18 @@
     },
     {
       "id": "conversion-report-regeneration",
-      "command": "node evidence/scripts/run_conversion_spikes.mjs",
+      "command": "node evidence/scripts/run_conversion_spikes.mjs --litert-only",
       "executed": true,
       "blockedReason": null,
       "rounds": [
         {
           "run": 1,
-          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs",
-          "startedAt": "2026-08-11T10:18:06.166Z",
-          "endedAt": "2026-08-11T10:18:07.591Z",
+          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs --litert-only",
+          "startedAt": "2026-08-11T11:47:16.242Z",
+          "endedAt": "2026-08-11T11:47:16.305Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "f118bf16b70f83c1da96526e976a9bc714e5fd4d",
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "worktreeBefore": {
             "tracked": "",
@@ -374,48 +376,60 @@
           },
           "inputs": [
             {
-              "path": "models/yolov8n.onnx",
+              "path": "evidence/conversions/conversion-spikes.json",
               "exists": true,
-              "bytes": 12851098,
-              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+              "bytes": 37041,
+              "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
+            },
+            {
+              "path": "evidence/conversions/litert-artifact-manifest.json",
+              "exists": true,
+              "bytes": 7152,
+              "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
             },
             {
               "path": "evidence/reports/handoff-model-audit.json",
               "exists": true,
-              "bytes": 16302,
-              "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
+              "bytes": 16352,
+              "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
             },
             {
-              "path": "evidence/tooling/requirements.lock",
+              "path": "evidence/reports/litert-conversion-report.json",
               "exists": true,
-              "bytes": 1869,
-              "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+              "bytes": 35059,
+              "sha256": "8580e9d4d4c6ed13af041599d0b2195cab40d1c5fc8a292c85586261f59e7823"
+            },
+            {
+              "path": "evidence/reports/litert-golden-report.json",
+              "exists": true,
+              "bytes": 20179,
+              "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
             }
           ],
           "outputs": [
             {
               "path": "evidence/conversions/conversion-spikes.json",
               "exists": true,
-              "bytes": 40054,
-              "sha256": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59"
+              "bytes": 37041,
+              "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
             }
           ],
           "log": {
             "storage": "embedded-in-replay-manifest",
-            "stdout": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59\n",
-            "stderr": "\u001b[1;31m2026-08-11 18:18:07.533422465 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-11 18:18:07.535721285 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n",
-            "bytes": 1399,
-            "sha256": "908a501b73c98fb690108952f97decbe82a706c5c9d38990645ab5b855a36240"
+            "stdout": "{\"mode\":\"litert-only\",\"sha256\":\"28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be\"}\n",
+            "stderr": "",
+            "bytes": 99,
+            "sha256": "1a20dcc1f17317457c7a4d5e0f3b1c480024cb83fe06144211f1088fdb116750"
           }
         },
         {
           "run": 2,
-          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs",
-          "startedAt": "2026-08-11T10:18:07.591Z",
-          "endedAt": "2026-08-11T10:18:09.000Z",
+          "actualCommand": "node evidence/scripts/run_conversion_spikes.mjs --litert-only",
+          "startedAt": "2026-08-11T11:47:16.305Z",
+          "endedAt": "2026-08-11T11:47:16.367Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "f118bf16b70f83c1da96526e976a9bc714e5fd4d",
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "worktreeBefore": {
             "tracked": "",
@@ -427,38 +441,50 @@
           },
           "inputs": [
             {
-              "path": "models/yolov8n.onnx",
+              "path": "evidence/conversions/conversion-spikes.json",
               "exists": true,
-              "bytes": 12851098,
-              "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+              "bytes": 37041,
+              "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
+            },
+            {
+              "path": "evidence/conversions/litert-artifact-manifest.json",
+              "exists": true,
+              "bytes": 7152,
+              "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
             },
             {
               "path": "evidence/reports/handoff-model-audit.json",
               "exists": true,
-              "bytes": 16302,
-              "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
+              "bytes": 16352,
+              "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
             },
             {
-              "path": "evidence/tooling/requirements.lock",
+              "path": "evidence/reports/litert-conversion-report.json",
               "exists": true,
-              "bytes": 1869,
-              "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+              "bytes": 35059,
+              "sha256": "8580e9d4d4c6ed13af041599d0b2195cab40d1c5fc8a292c85586261f59e7823"
+            },
+            {
+              "path": "evidence/reports/litert-golden-report.json",
+              "exists": true,
+              "bytes": 20179,
+              "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
             }
           ],
           "outputs": [
             {
               "path": "evidence/conversions/conversion-spikes.json",
               "exists": true,
-              "bytes": 40054,
-              "sha256": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59"
+              "bytes": 37041,
+              "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
             }
           ],
           "log": {
             "storage": "embedded-in-replay-manifest",
-            "stdout": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59\n",
-            "stderr": "\u001b[1;31m2026-08-11 18:18:08.939544910 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2110 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n\u001b[1;31m2026-08-11 18:18:08.941877063 [E:onnxruntime:onnxruntime-node, provider_bridge_ort.cc:2199 Create] /onnxruntime_src/onnxruntime/core/session/provider_bridge_ort.cc:1952 onnxruntime::Provider& onnxruntime::ProviderLibrary::Get() [ONNXRuntimeError] : 1 : FAIL : Failed to load library /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so with error: /home/raffael/algo/github/rimeflow-yolov8n/evidence/tooling/web/node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime_providers_shared.so: cannot open shared object file: No such file or directory\n\u001b[m\n",
-            "bytes": 1399,
-            "sha256": "5aa88e5f6ee08f0f39008956fb417ead5d81a02e89261ad07dd40b5eddd4eddc"
+            "stdout": "{\"mode\":\"litert-only\",\"sha256\":\"28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be\"}\n",
+            "stderr": "",
+            "bytes": 99,
+            "sha256": "1a20dcc1f17317457c7a4d5e0f3b1c480024cb83fe06144211f1088fdb116750"
           }
         }
       ],
@@ -469,10 +495,163 @@
       }
     },
     {
+      "id": "android-litert-conversion-and-host-golden",
+      "command": "$LITERT_PYTHON evidence/scripts/run_litert_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/litert/replay",
+      "executed": true,
+      "blockedReason": null,
+      "rounds": [
+        {
+          "run": 1,
+          "actualCommand": "$LITERT_PYTHON evidence/scripts/run_litert_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/litert/replay",
+          "startedAt": "2026-08-11T11:44:12.766460Z",
+          "endedAt": "2026-08-11T11:44:25.206550Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "full": "",
+            "tracked": ""
+          },
+          "worktreeAfter": {
+            "full": "",
+            "tracked": ""
+          },
+          "inputs": [
+            {
+              "path": "$HANDOFF_ASSETS/yolov8n.pt",
+              "exists": true,
+              "bytes": 6549796,
+              "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+            },
+            {
+              "path": "evidence/tooling/litert-requirements.lock",
+              "exists": true,
+              "bytes": 8235,
+              "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
+            }
+          ],
+          "outputs": [
+            {
+              "bytes": 12841227,
+              "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+            },
+            {
+              "bytes": 7152,
+              "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+            },
+            {
+              "bytes": 20179,
+              "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+              "summary": {
+                "allFinite": true,
+                "allShapesMatched": true,
+                "classMismatchCount": 0,
+                "deterministic": true,
+                "fixtureCount": 5,
+                "maximumConfidenceAbsolute": 9.530395508328127e-7,
+                "maximumDecodedBboxAbsolute": 6.82200851476189e-7,
+                "maximumRawAbsolute": 0.003204345703125,
+                "maximumRawRelative": 4.391961097717285,
+                "minimumBboxIou": 0.9999981541566957,
+                "rawToleranceMismatchCount": 0
+              }
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session 仅配置 wasm provider 且初始化/推理成功\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n\nUltralytics 8.4.104 🚀 Python-3.12.3 torch-2.12.1+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mLiteRT:\u001b[0m starting export with litert_torch 0.9.3...\n(00:00) [START] LiteRT-Torch Convert\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default (+00:01)\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions (+00:01)\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes (+00:01)\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:01)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module (+00:01)\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default (+00:02)\n(00:05) [START] LiteRT-Torch Convert > Merge MLIR Modules\n(00:05) [ DONE] LiteRT-Torch Convert > Merge MLIR Modules (+00:00)\n(00:05) [START] LiteRT-Torch Convert > Run LiteRT Converter Passes\n(00:05) [ DONE] LiteRT-Torch Convert > Run LiteRT Converter Passes (+00:00)\n(00:05) [ DONE] LiteRT-Torch Convert (+00:05)\n(00:00) [START] Write Model to \n$REPO/.evidence/litert/replay/round-1/conve\nrsion/yolov8n.tflite\n(00:00) [ DONE] Write Model to \n$REPO/.evidence/litert/replay/round-1/conve\nrsion/yolov8n.tflite (+00:00)\n\u001b[34m\u001b[1mLiteRT:\u001b[0m export success ✅ 5.6s, saved as '$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.tflite' (12.2 MB)\n\nExport complete (5.8s)\nResults saved to \u001b[1m$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.tflite\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.tflite imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.tflite imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"bytes\": 12841227, \"path\": \"$REPO/.evidence/litert/replay/round-1/conversion/yolov8n.tflite\", \"sha256\": \"794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1\"}, \"commandParameters\": {\"batch\": 1, \"dynamic\": false, \"format\": \"litert\", \"imgsz\": 640, \"nms\": false, \"quantize\": 32}, \"converter\": {\"component\": \"litert-torch\", \"intermediate\": \"torch.export ExportedProgram and LiteRT compiler IR (in-memory)\", \"metadataNormalization\": {\"fixedDosTimestamp\": \"2026-08-11T00:00:00\", \"flatbufferPrefixBytes\": 12840252, \"flatbufferPrefixSha256\": \"e8da21672182000b0e641e8dd67116f00b18c04c606798adc26c064fbd98cbeb\", \"modifiedFields\": [\"metadata ZIP local-header DOS timestamp\", \"metadata ZIP central-directory DOS timestamp\"]}}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"runtimeModule\": \"__init__.py\", \"source\": {\"bytes\": 6549796, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\", \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"versions\": {\"ai-edge-litert\": \"2.1.6\", \"ai-edge-quantizer\": \"0.8.0\", \"litert-converter\": \"0.3.1\", \"litert-torch\": \"0.9.3\", \"torch\": \"2.12.1+cpu\", \"torchvision\": \"0.27.1+cpu\", \"ultralytics\": \"8.4.104\"}}\n\n{\"output\": \"$REPO/.evidence/litert/replay/round-1/golden-report.json\", \"passed\": true, \"summary\": {\"allFinite\": true, \"allShapesMatched\": true, \"classMismatchCount\": 0, \"deterministic\": true, \"fixtureCount\": 5, \"maximumConfidenceAbsolute\": 9.530395508328127e-07, \"maximumDecodedBboxAbsolute\": 6.82200851476189e-07, \"maximumRawAbsolute\": 0.003204345703125, \"maximumRawRelative\": 4.391961097717285, \"minimumBboxIou\": 0.9999981541566957, \"rawToleranceMismatchCount\": 0}}\n",
+            "stderr": "\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1786448655.496217 2403005 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so\nW0811 19:44:16.560000 2403005 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.\nWARNING:root:Your model is converted in training mode. Please set the module in evaluation mode with `module.eval()` for better on-device performance and compatibility.\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\nI0000 00:00:1786448662.913637 2403005 flatbuffer_export.cc:4342] Estimated count of arithmetic ops: 9.744 G  ops, equivalently 4.872 G  MACs\n\nINFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n",
+            "bytes": 13310,
+            "sha256": "ab8812f86cabc0d64ed37de924c934ca1961bbe5081b3dc13b745b5072b0c589"
+          }
+        },
+        {
+          "run": 2,
+          "actualCommand": "$LITERT_PYTHON evidence/scripts/run_litert_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/litert/replay",
+          "startedAt": "2026-08-11T11:44:25.227494Z",
+          "endedAt": "2026-08-11T11:44:37.608710Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "9c9bf5fbd1bd6cf47467aaa077baf327dfc58a8a",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "worktreeBefore": {
+            "full": "",
+            "tracked": ""
+          },
+          "worktreeAfter": {
+            "full": "",
+            "tracked": ""
+          },
+          "inputs": [
+            {
+              "path": "$HANDOFF_ASSETS/yolov8n.pt",
+              "exists": true,
+              "bytes": 6549796,
+              "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+            },
+            {
+              "path": "evidence/tooling/litert-requirements.lock",
+              "exists": true,
+              "bytes": 8235,
+              "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
+            }
+          ],
+          "outputs": [
+            {
+              "bytes": 12841227,
+              "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+            },
+            {
+              "bytes": 7152,
+              "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+            },
+            {
+              "bytes": 20179,
+              "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+              "summary": {
+                "allFinite": true,
+                "allShapesMatched": true,
+                "classMismatchCount": 0,
+                "deterministic": true,
+                "fixtureCount": 5,
+                "maximumConfidenceAbsolute": 9.530395508328127e-7,
+                "maximumDecodedBboxAbsolute": 6.82200851476189e-7,
+                "maximumRawAbsolute": 0.003204345703125,
+                "maximumRawRelative": 4.391961097717285,
+                "minimumBboxIou": 0.9999981541566957,
+                "rawToleranceMismatchCount": 0
+              }
+            }
+          ],
+          "log": {
+            "storage": "embedded-in-replay-manifest",
+            "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session 仅配置 wasm provider 且初始化/推理成功\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n\nUltralytics 8.4.104 🚀 Python-3.12.3 torch-2.12.1+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mLiteRT:\u001b[0m starting export with litert_torch 0.9.3...\n(00:00) [START] LiteRT-Torch Convert\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default (+00:01)\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions (+00:01)\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes (+00:01)\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:01)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module (+00:01)\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default (+00:02)\n(00:05) [START] LiteRT-Torch Convert > Merge MLIR Modules\n(00:05) [ DONE] LiteRT-Torch Convert > Merge MLIR Modules (+00:00)\n(00:05) [START] LiteRT-Torch Convert > Run LiteRT Converter Passes\n(00:05) [ DONE] LiteRT-Torch Convert > Run LiteRT Converter Passes (+00:00)\n(00:05) [ DONE] LiteRT-Torch Convert (+00:05)\n(00:00) [START] Write Model to \n$REPO/.evidence/litert/replay/round-2/conve\nrsion/yolov8n.tflite\n(00:00) [ DONE] Write Model to \n$REPO/.evidence/litert/replay/round-2/conve\nrsion/yolov8n.tflite (+00:00)\n\u001b[34m\u001b[1mLiteRT:\u001b[0m export success ✅ 5.5s, saved as '$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.tflite' (12.2 MB)\n\nExport complete (5.7s)\nResults saved to \u001b[1m$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.tflite\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.tflite imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.tflite imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"bytes\": 12841227, \"path\": \"$REPO/.evidence/litert/replay/round-2/conversion/yolov8n.tflite\", \"sha256\": \"794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1\"}, \"commandParameters\": {\"batch\": 1, \"dynamic\": false, \"format\": \"litert\", \"imgsz\": 640, \"nms\": false, \"quantize\": 32}, \"converter\": {\"component\": \"litert-torch\", \"intermediate\": \"torch.export ExportedProgram and LiteRT compiler IR (in-memory)\", \"metadataNormalization\": {\"fixedDosTimestamp\": \"2026-08-11T00:00:00\", \"flatbufferPrefixBytes\": 12840252, \"flatbufferPrefixSha256\": \"e8da21672182000b0e641e8dd67116f00b18c04c606798adc26c064fbd98cbeb\", \"modifiedFields\": [\"metadata ZIP local-header DOS timestamp\", \"metadata ZIP central-directory DOS timestamp\"]}}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"runtimeModule\": \"__init__.py\", \"source\": {\"bytes\": 6549796, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\", \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"versions\": {\"ai-edge-litert\": \"2.1.6\", \"ai-edge-quantizer\": \"0.8.0\", \"litert-converter\": \"0.3.1\", \"litert-torch\": \"0.9.3\", \"torch\": \"2.12.1+cpu\", \"torchvision\": \"0.27.1+cpu\", \"ultralytics\": \"8.4.104\"}}\n\n{\"output\": \"$REPO/.evidence/litert/replay/round-2/golden-report.json\", \"passed\": true, \"summary\": {\"allFinite\": true, \"allShapesMatched\": true, \"classMismatchCount\": 0, \"deterministic\": true, \"fixtureCount\": 5, \"maximumConfidenceAbsolute\": 9.530395508328127e-07, \"maximumDecodedBboxAbsolute\": 6.82200851476189e-07, \"maximumRawAbsolute\": 0.003204345703125, \"maximumRawRelative\": 4.391961097717285, \"minimumBboxIou\": 0.9999981541566957, \"rawToleranceMismatchCount\": 0}}\n",
+            "stderr": "\nWARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1786448668.025508 2403169 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so\nW0811 19:44:29.093000 2403169 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.\nWARNING:root:Your model is converted in training mode. Please set the module in evaluation mode with `module.eval()` for better on-device performance and compatibility.\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\nI0000 00:00:1786448675.360026 2403169 flatbuffer_export.cc:4342] Estimated count of arithmetic ops: 9.744 G  ops, equivalently 4.872 G  MACs\n\nINFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n",
+            "bytes": 13310,
+            "sha256": "a321d33203078f291d357b677b3b52a2d0e3d09f4b8483d72a3f3e75d315fd54"
+          }
+        }
+      ],
+      "repeatComparison": {
+        "runs": 2,
+        "allExitCodesZero": true,
+        "deterministicOutputDigestsEqual": true,
+        "details": {
+          "artifactSha256Equal": true,
+          "fixtureRawAndDecodedEqual": true,
+          "goldenReportDigestEqual": true,
+          "ioMetadataEqual": true,
+          "manifestDigestEqual": true,
+          "trackedWorktreeUnchanged": true
+        }
+      }
+    },
+    {
       "id": "delegated-platform-spikes",
-      "command": "Core ML/LiteRT/Windows ML/MindSpore/Linux accelerated provider platform commands",
+      "command": "Core ML/Windows ML/MindSpore/Linux accelerated provider platform commands",
       "executed": false,
-      "blockedReason": "源 .pt 与 ONNX 同源性已验证；模型用途限定为内部框架验证。外部负责人尚未回传 Core ML、LiteRT、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。",
+      "blockedReason": "LiteRT 已完成 host artifact/inference/golden 验证但缺 Android runner；外部负责人仍未回传 Core ML、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。",
       "rounds": [],
       "repeatComparison": null
     }
@@ -495,8 +674,8 @@
     },
     {
       "path": "evidence/golden/manifest.json",
-      "bytes": 5186,
-      "sha256": "b7986fc6c7c7a6a9ee4e349b8380255a70f79b82a7fc8af57095a27c5f5c2e65"
+      "bytes": 6080,
+      "sha256": "dc6738795cc6b486e862976989774fe447ed97bb0d640112d5b05f4a9afe4d24"
     },
     {
       "path": "evidence/golden/web-reference.json",
@@ -510,18 +689,38 @@
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
-      "bytes": 16302,
-      "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
+      "bytes": 16352,
+      "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
     },
     {
       "path": "evidence/reports/model-provenance.json",
-      "bytes": 5217,
-      "sha256": "736343ee49b1383eb925905dec7d2ed3a0774b99c88aaf1b72c1f0a5348a7ccb"
+      "bytes": 5231,
+      "sha256": "a2801f4beeec37e4f6e5bad123d6a29af90d4c65fad5a63b07e8c40ef93379fc"
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 40054,
-      "sha256": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59"
+      "bytes": 37041,
+      "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
+    },
+    {
+      "path": "evidence/conversions/litert-artifact-manifest.json",
+      "bytes": 7152,
+      "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+    },
+    {
+      "path": "evidence/reports/litert-conversion-report.json",
+      "bytes": 35059,
+      "sha256": "8580e9d4d4c6ed13af041599d0b2195cab40d1c5fc8a292c85586261f59e7823"
+    },
+    {
+      "path": "evidence/reports/litert-golden-report.json",
+      "bytes": 20179,
+      "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
+    },
+    {
+      "path": "evidence/tooling/litert-requirements.lock",
+      "bytes": 8235,
+      "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
     }
   ],
   "task1_7OwnershipReplayComplete": true,

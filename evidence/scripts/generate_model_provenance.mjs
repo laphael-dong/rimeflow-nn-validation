@@ -67,7 +67,7 @@ const report = {
     task14: 'blocked',
     task1: 'blocked',
     publication: 'test-evidence-only',
-    reason: '模型来源与同源性已验证，用途限定为内部 onnx-base 框架验证；1.4 仅等待外部平台 spike evidence，模型及临时转换物不进入 RimeCut 产品包。',
+    reason: '模型来源与同源性及 LiteRT host artifact/inference/golden 已验证；1.4 仍等待其余平台 spike 与 Android runner evidence，模型及临时转换物不进入 RimeCut 产品包。',
   },
   tooling: { python: toolProbe.python, onnx: toolProbe.onnxVersion, handoffAudit: handoffAudit.reExport.toolVersions },
 };

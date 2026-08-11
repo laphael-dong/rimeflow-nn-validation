@@ -104,23 +104,38 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 40054,
-      "sha256": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59"
+      "bytes": 37041,
+      "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
+    },
+    {
+      "path": "evidence/conversions/litert-artifact-manifest.json",
+      "bytes": 7152,
+      "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
-      "bytes": 16302,
-      "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
+      "bytes": 16352,
+      "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
     },
     {
       "path": "evidence/reports/model-provenance.json",
-      "bytes": 5217,
-      "sha256": "736343ee49b1383eb925905dec7d2ed3a0774b99c88aaf1b72c1f0a5348a7ccb"
+      "bytes": 5231,
+      "sha256": "a2801f4beeec37e4f6e5bad123d6a29af90d4c65fad5a63b07e8c40ef93379fc"
     },
     {
       "path": "evidence/reports/preprocess-conformance.json",
       "bytes": 3624,
       "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+    },
+    {
+      "path": "evidence/reports/litert-conversion-report.json",
+      "bytes": 35059,
+      "sha256": "8580e9d4d4c6ed13af041599d0b2195cab40d1c5fc8a292c85586261f59e7823"
+    },
+    {
+      "path": "evidence/reports/litert-golden-report.json",
+      "bytes": 20179,
+      "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
     },
     {
       "path": "evidence/reports/web-wasm-performance.json",
@@ -136,6 +151,16 @@
       "path": "evidence/tooling/model-audit-requirements.lock",
       "bytes": 214,
       "sha256": "fa5485531e80b11b6ada856f32a87f4b69efeb3c3532e0e98d6958d4fe947f3e"
+    },
+    {
+      "path": "evidence/tooling/litert-requirements.in",
+      "bytes": 361,
+      "sha256": "a312b3559442470a1091f7e13e61e45cc6a09486b2659e2cf9b39baf30abc8b7"
+    },
+    {
+      "path": "evidence/tooling/litert-requirements.lock",
+      "bytes": 8235,
+      "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
     },
     {
       "path": "evidence/tooling/raw-golden/src/lib.rs",

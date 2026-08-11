@@ -1,0 +1,198 @@
+{
+  "commands": {
+    "conversion": [
+      "$REPO/.evidence/litert/verify-venv/bin/python",
+      "evidence/scripts/export_litert_model.py",
+      "--pt",
+      "$HANDOFF_ASSETS/yolov8n.pt",
+      "--output-dir",
+      "$REPO/.evidence/litert/record/round-1/conversion"
+    ],
+    "goldenValidation": [
+      "$REPO/.evidence/litert/verify-venv/bin/python",
+      "evidence/scripts/validate_litert_golden.py",
+      "--model",
+      "$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite",
+      "--web-reference-dir",
+      "$REPO/.evidence/litert/record/round-1/web-reference",
+      "--output",
+      "$REPO/.evidence/litert/record/round-1/golden-report.json"
+    ],
+    "webReference": [
+      "node",
+      "evidence/scripts/export_web_reference_tensors.mjs",
+      "$REPO/.evidence/litert/record/round-1/web-reference"
+    ]
+  },
+  "comparison": {
+    "artifactSha256Equal": true,
+    "fixtureRawAndDecodedEqual": true,
+    "goldenReportDigestEqual": true,
+    "ioMetadataEqual": true,
+    "manifestDigestEqual": true,
+    "trackedWorktreeUnchanged": true
+  },
+  "rounds": [
+    {
+      "artifact": {
+        "bytes": 12841227,
+        "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+      },
+      "artifactManifest": {
+        "bytes": 7152,
+        "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+      },
+      "conversion": {
+        "command": [
+          "$REPO/.evidence/litert/verify-venv/bin/python",
+          "evidence/scripts/export_litert_model.py",
+          "--pt",
+          "$HANDOFF_ASSETS/yolov8n.pt",
+          "--output-dir",
+          "$REPO/.evidence/litert/record/round-1/conversion"
+        ],
+        "endedAt": "2026-08-11T11:42:52.333706Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:42:43.378077Z",
+        "stderr": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1786448564.188063 2402151 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so\nW0811 19:42:45.221000 2402151 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.\nWARNING:root:Your model is converted in training mode. Please set the module in evaluation mode with `module.eval()` for better on-device performance and compatibility.\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\nI0000 00:00:1786448571.308443 2402151 flatbuffer_export.cc:4342] Estimated count of arithmetic ops: 9.744 G  ops, equivalently 4.872 G  MACs\n",
+        "stdout": "Ultralytics 8.4.104 \ud83d\ude80 Python-3.12.3 torch-2.12.1+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/litert/record/round-1/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mLiteRT:\u001b[0m starting export with litert_torch 0.9.3...\n(00:00) [START] LiteRT-Torch Convert\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default (+00:01)\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions (+00:01)\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes (+00:01)\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:01)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module (+00:01)\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default (+00:02)\n(00:05) [START] LiteRT-Torch Convert > Merge MLIR Modules\n(00:05) [ DONE] LiteRT-Torch Convert > Merge MLIR Modules (+00:00)\n(00:05) [START] LiteRT-Torch Convert > Run LiteRT Converter Passes\n(00:05) [ DONE] LiteRT-Torch Convert > Run LiteRT Converter Passes (+00:00)\n(00:05) [ DONE] LiteRT-Torch Convert (+00:05)\n(00:00) [START] Write Model to \n$REPO/.evidence/litert/record/round-1/conve\nrsion/yolov8n.tflite\n(00:00) [ DONE] Write Model to \n$REPO/.evidence/litert/record/round-1/conve\nrsion/yolov8n.tflite (+00:00)\n\u001b[34m\u001b[1mLiteRT:\u001b[0m export success \u2705 5.4s, saved as '$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite' (12.2 MB)\n\nExport complete (5.5s)\nResults saved to \u001b[1m$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"bytes\": 12841227, \"path\": \"$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite\", \"sha256\": \"794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1\"}, \"commandParameters\": {\"batch\": 1, \"dynamic\": false, \"format\": \"litert\", \"imgsz\": 640, \"nms\": false, \"quantize\": 32}, \"converter\": {\"component\": \"litert-torch\", \"intermediate\": \"torch.export ExportedProgram and LiteRT compiler IR (in-memory)\", \"metadataNormalization\": {\"fixedDosTimestamp\": \"2026-08-11T00:00:00\", \"flatbufferPrefixBytes\": 12840252, \"flatbufferPrefixSha256\": \"e8da21672182000b0e641e8dd67116f00b18c04c606798adc26c064fbd98cbeb\", \"modifiedFields\": [\"metadata ZIP local-header DOS timestamp\", \"metadata ZIP central-directory DOS timestamp\"]}}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"runtimeModule\": \"__init__.py\", \"source\": {\"bytes\": 6549796, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\", \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"versions\": {\"ai-edge-litert\": \"2.1.6\", \"ai-edge-quantizer\": \"0.8.0\", \"litert-converter\": \"0.3.1\", \"litert-torch\": \"0.9.3\", \"torch\": \"2.12.1+cpu\", \"torchvision\": \"0.27.1+cpu\", \"ultralytics\": \"8.4.104\"}}\n"
+      },
+      "goldenReport": {
+        "bytes": 20179,
+        "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+        "summary": {
+          "allFinite": true,
+          "allShapesMatched": true,
+          "classMismatchCount": 0,
+          "deterministic": true,
+          "fixtureCount": 5,
+          "maximumConfidenceAbsolute": 9.530395508328127e-07,
+          "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+          "maximumRawAbsolute": 0.003204345703125,
+          "maximumRawRelative": 4.391961097717285,
+          "minimumBboxIou": 0.9999981541566957,
+          "rawToleranceMismatchCount": 0
+        }
+      },
+      "round": 1,
+      "validation": {
+        "command": [
+          "$REPO/.evidence/litert/verify-venv/bin/python",
+          "evidence/scripts/validate_litert_golden.py",
+          "--model",
+          "$REPO/.evidence/litert/record/round-1/conversion/yolov8n.tflite",
+          "--web-reference-dir",
+          "$REPO/.evidence/litert/record/round-1/web-reference",
+          "--output",
+          "$REPO/.evidence/litert/record/round-1/golden-report.json"
+        ],
+        "endedAt": "2026-08-11T11:42:53.484718Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:42:52.333838Z",
+        "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n",
+        "stdout": "{\"output\": \"$REPO/.evidence/litert/record/round-1/golden-report.json\", \"passed\": true, \"summary\": {\"allFinite\": true, \"allShapesMatched\": true, \"classMismatchCount\": 0, \"deterministic\": true, \"fixtureCount\": 5, \"maximumConfidenceAbsolute\": 9.530395508328127e-07, \"maximumDecodedBboxAbsolute\": 6.82200851476189e-07, \"maximumRawAbsolute\": 0.003204345703125, \"maximumRawRelative\": 4.391961097717285, \"minimumBboxIou\": 0.9999981541566957, \"rawToleranceMismatchCount\": 0}}\n"
+      },
+      "webReference": {
+        "command": [
+          "node",
+          "evidence/scripts/export_web_reference_tensors.mjs",
+          "$REPO/.evidence/litert/record/round-1/web-reference"
+        ],
+        "endedAt": "2026-08-11T11:42:43.378031Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:42:41.411173Z",
+        "stderr": "",
+        "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n"
+      },
+      "worktreeAfter": {
+        "full": "",
+        "tracked": ""
+      },
+      "worktreeBefore": {
+        "full": "",
+        "tracked": ""
+      }
+    },
+    {
+      "artifact": {
+        "bytes": 12841227,
+        "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+      },
+      "artifactManifest": {
+        "bytes": 7152,
+        "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+      },
+      "conversion": {
+        "command": [
+          "$REPO/.evidence/litert/verify-venv/bin/python",
+          "evidence/scripts/export_litert_model.py",
+          "--pt",
+          "$HANDOFF_ASSETS/yolov8n.pt",
+          "--output-dir",
+          "$REPO/.evidence/litert/record/round-2/conversion"
+        ],
+        "endedAt": "2026-08-11T11:43:04.433346Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:42:55.388485Z",
+        "stderr": "WARNING: All log messages before absl::InitializeLog() is called are written to STDERR\nI0000 00:00:1786448576.206154 2402351 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_cutlass_90a.abi3.so\nFailed to load $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: $REPO/.evidence/litert/verify-venv/lib/python3.12/site-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so\nW0811 19:42:57.245000 2402351 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.\nWARNING:root:Your model is converted in training mode. Please set the module in evaluation mode with `module.eval()` for better on-device performance and compatibility.\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\n/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.\n  return cls.__new__(cls, *args)\nI0000 00:00:1786448583.392310 2402351 flatbuffer_export.cc:4342] Estimated count of arithmetic ops: 9.744 G  ops, equivalently 4.872 G  MACs\n",
+        "stdout": "Ultralytics 8.4.104 \ud83d\ude80 Python-3.12.3 torch-2.12.1+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/litert/record/round-2/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mLiteRT:\u001b[0m starting export with litert_torch 0.9.3...\n(00:00) [START] LiteRT-Torch Convert\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default\n(00:00) [START] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:01) [ DONE] LiteRT-Torch Convert > Torch Export: serving_default (+00:01)\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes\n(00:01) [START] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes > ExportedProgram Run \nDecompositions (+00:01)\n(00:02) [ DONE] LiteRT-Torch Convert > Run FX Passes (+00:01)\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default\n(00:02) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:01)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions\n(00:03) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > \nExportedProgram Run Decompositions (+00:00)\n(00:03) [START] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default > Create \nMLIR Module (+00:01)\n(00:05) [ DONE] LiteRT-Torch Convert > Lower to MLIR: serving_default (+00:02)\n(00:05) [START] LiteRT-Torch Convert > Merge MLIR Modules\n(00:05) [ DONE] LiteRT-Torch Convert > Merge MLIR Modules (+00:00)\n(00:05) [START] LiteRT-Torch Convert > Run LiteRT Converter Passes\n(00:05) [ DONE] LiteRT-Torch Convert > Run LiteRT Converter Passes (+00:00)\n(00:05) [ DONE] LiteRT-Torch Convert (+00:05)\n(00:00) [START] Write Model to \n$REPO/.evidence/litert/record/round-2/conve\nrsion/yolov8n.tflite\n(00:00) [ DONE] Write Model to \n$REPO/.evidence/litert/record/round-2/conve\nrsion/yolov8n.tflite (+00:00)\n\u001b[34m\u001b[1mLiteRT:\u001b[0m export success \u2705 5.4s, saved as '$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite' (12.2 MB)\n\nExport complete (5.5s)\nResults saved to \u001b[1m$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"bytes\": 12841227, \"path\": \"$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite\", \"sha256\": \"794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1\"}, \"commandParameters\": {\"batch\": 1, \"dynamic\": false, \"format\": \"litert\", \"imgsz\": 640, \"nms\": false, \"quantize\": 32}, \"converter\": {\"component\": \"litert-torch\", \"intermediate\": \"torch.export ExportedProgram and LiteRT compiler IR (in-memory)\", \"metadataNormalization\": {\"fixedDosTimestamp\": \"2026-08-11T00:00:00\", \"flatbufferPrefixBytes\": 12840252, \"flatbufferPrefixSha256\": \"e8da21672182000b0e641e8dd67116f00b18c04c606798adc26c064fbd98cbeb\", \"modifiedFields\": [\"metadata ZIP local-header DOS timestamp\", \"metadata ZIP central-directory DOS timestamp\"]}}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"runtimeModule\": \"__init__.py\", \"source\": {\"bytes\": 6549796, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\", \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"versions\": {\"ai-edge-litert\": \"2.1.6\", \"ai-edge-quantizer\": \"0.8.0\", \"litert-converter\": \"0.3.1\", \"litert-torch\": \"0.9.3\", \"torch\": \"2.12.1+cpu\", \"torchvision\": \"0.27.1+cpu\", \"ultralytics\": \"8.4.104\"}}\n"
+      },
+      "goldenReport": {
+        "bytes": 20179,
+        "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+        "summary": {
+          "allFinite": true,
+          "allShapesMatched": true,
+          "classMismatchCount": 0,
+          "deterministic": true,
+          "fixtureCount": 5,
+          "maximumConfidenceAbsolute": 9.530395508328127e-07,
+          "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+          "maximumRawAbsolute": 0.003204345703125,
+          "maximumRawRelative": 4.391961097717285,
+          "minimumBboxIou": 0.9999981541566957,
+          "rawToleranceMismatchCount": 0
+        }
+      },
+      "round": 2,
+      "validation": {
+        "command": [
+          "$REPO/.evidence/litert/verify-venv/bin/python",
+          "evidence/scripts/validate_litert_golden.py",
+          "--model",
+          "$REPO/.evidence/litert/record/round-2/conversion/yolov8n.tflite",
+          "--web-reference-dir",
+          "$REPO/.evidence/litert/record/round-2/web-reference",
+          "--output",
+          "$REPO/.evidence/litert/record/round-2/golden-report.json"
+        ],
+        "endedAt": "2026-08-11T11:43:05.618724Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:43:04.433465Z",
+        "stderr": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU.\n",
+        "stdout": "{\"output\": \"$REPO/.evidence/litert/record/round-2/golden-report.json\", \"passed\": true, \"summary\": {\"allFinite\": true, \"allShapesMatched\": true, \"classMismatchCount\": 0, \"deterministic\": true, \"fixtureCount\": 5, \"maximumConfidenceAbsolute\": 9.530395508328127e-07, \"maximumDecodedBboxAbsolute\": 6.82200851476189e-07, \"maximumRawAbsolute\": 0.003204345703125, \"maximumRawRelative\": 4.391961097717285, \"minimumBboxIou\": 0.9999981541566957, \"rawToleranceMismatchCount\": 0}}\n"
+      },
+      "webReference": {
+        "command": [
+          "node",
+          "evidence/scripts/export_web_reference_tensors.mjs",
+          "$REPO/.evidence/litert/record/round-2/web-reference"
+        ],
+        "endedAt": "2026-08-11T11:42:55.388460Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T11:42:53.504299Z",
+        "stderr": "",
+        "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n"
+      },
+      "worktreeAfter": {
+        "full": "",
+        "tracked": ""
+      },
+      "worktreeBefore": {
+        "full": "",
+        "tracked": ""
+      }
+    }
+  ],
+  "schemaVersion": 1
+}

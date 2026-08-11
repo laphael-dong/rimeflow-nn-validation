@@ -1,0 +1,9 @@
+# Android LiteRT FP32 转换的顶层版本。完整传递依赖与 wheel SHA-256 见 litert-requirements.lock。
+# PyTorch CPU wheel 来源：https://download.pytorch.org/whl/cpu
+# 其余 Python 包来源：https://pypi.org/simple
+torch==2.12.1+cpu
+torchvision==0.27.1+cpu
+ultralytics==8.4.104
+litert-torch==0.9.3
+litert-converter==0.3.1
+ai-edge-litert==2.1.6

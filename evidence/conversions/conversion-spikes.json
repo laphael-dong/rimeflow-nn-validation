@@ -55,40 +55,72 @@
     },
     {
       "platform": "android",
-      "format": "tflite/litert-compiled-model",
-      "state": "blocked",
+      "format": "tflite-flatbuffer",
+      "state": "host-inference-verified",
+      "supported": false,
       "tool": {
-        "name": "ai-edge-litert runtime",
+        "name": "Ultralytics LiteRT exporter / litert-torch / ai-edge-litert runtime",
         "version": "2.1.6",
-        "officialSource": "https://ai.google.dev/edge/litert/models/convert"
+        "converterVersion": "0.9.3",
+        "compilerVersion": "0.3.1",
+        "officialSource": "https://docs.ultralytics.com/integrations/tflite/",
+        "converterSource": "https://github.com/google-ai-edge/litert-torch"
       },
       "attempt": {
         "command": [
-          ".evidence/python-tools/bin/python",
-          "evidence/scripts/probe_python_converters.py",
-          "models/yolov8n.onnx"
+          "$LITERT_PYTHON",
+          "evidence/scripts/export_litert_model.py",
+          "--pt",
+          "$HANDOFF_ASSETS/yolov8n.pt",
+          "--output-dir",
+          ".evidence/litert/replay/round-N/conversion"
         ],
-        "exitCode": 1,
-        "stdout": "{\"coremltools\": {\"acceptedSources\": [\"auto\", \"tensorflow\", \"pytorch\", \"milinternal\"], \"attempt\": {\"error\": \"Unable to determine the type of the model, i.e. the source framework. Please provide the value of argument \\\"source\\\", from one of [\\\"tensorflow\\\", \\\"pytorch\\\", \\\"milinternal\\\"]. Note that model conversion requires the source package that generates the model. Please make sure you have the appropriate version of source package installed. E.g., if you're converting model originally trained with TensorFlow 1.14, make sure you have `tensorflow==1.14` installed.\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"convertSignature\": \"(model, source='auto', inputs=None, outputs=None, classifier_config=None, minimum_deployment_target=None, convert_to=None, compute_precision=None, skip_model_load=False, compute_units=<ComputeUnit.ALL: 1>, package_dir=None, debug=False, pass_pipeline: Optional[coremltools.converters.mil.mil.passes.pass_pipeline.PassPipeline] = None, states=None)\", \"onnxDirectConversionSupported\": false, \"version\": \"9.0\"}, \"litert\": {\"acceptedModelFormat\": \"TFLite FlatBuffer\", \"attempt\": {\"error\": \"The model is not a valid Flatbuffer buffer\", \"errorType\": \"ValueError\", \"exitCode\": 1}, \"interpreterSignature\": \"(model_path=None, model_content=None, experimental_delegates=None, num_threads=None, experimental_op_resolver_type=<OpResolverType.AUTO: 0>, experimental_preserve_all_tensors=False, experimental_disable_delegate_clustering=False, experimental_default_delegate_latest_features=False, experimental_compress_quantization_zero_points=False, experimental_disable_delegate_node_fusion=False, experimental_force_delegate_node_profiling=False)\", \"modulePath\": \"ai_edge_litert/__init__.py\", \"onnxConverterModulePresent\": false, \"version\": \"2.1.6\"}, \"onnxMetadata\": {\"args\": \"{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': 17, 'nms': False}\", \"author\": \"Ultralytics\", \"batch\": \"1\", \"channels\": \"3\", \"date\": \"2026-07-07T14:57:25.224955\", \"description\": \"Ultralytics YOLOv8n model trained on coco.yaml\", \"docs\": \"https://docs.ultralytics.com\", \"end2end\": \"False\", \"head\": \"Detect\", \"imgsz\": \"[640, 640]\", \"license\": \"AGPL-3.0 License (https://ultralytics.com/license)\", \"names\": \"{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}\", \"stride\": \"32\", \"task\": \"detect\", \"version\": \"8.4.90\"}, \"onnxVersion\": \"1.22.0\", \"python\": \"3.12.3\"}",
-        "stderr": "Failed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLCPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLGPUComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLNeuralEngineComputeDeviceProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLComputePlanProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelProxy: No module named 'coremltools.libcoremlpython'\nFailed to load _MLModelAssetProxy: No module named 'coremltools.libcoremlpython'",
-        "apiSignature": "(model_path=None, model_content=None, experimental_delegates=None, num_threads=None, experimental_op_resolver_type=<OpResolverType.AUTO: 0>, experimental_preserve_all_tensors=False, experimental_disable_delegate_clustering=False, experimental_default_delegate_latest_features=False, experimental_compress_quantization_zero_points=False, experimental_disable_delegate_node_fusion=False, experimental_force_delegate_node_profiling=False)",
-        "acceptedModelFormat": "TFLite FlatBuffer",
-        "converterModulePresent": false,
-        "errorType": "ValueError",
-        "error": "The model is not a valid Flatbuffer buffer"
+        "conversionExecuted": true,
+        "exitCode": 0,
+        "hostLoadRunExecuted": true,
+        "goldenPassed": true,
+        "report": {
+          "path": "evidence/reports/litert-conversion-report.json",
+          "bytes": 35059,
+          "sha256": "8580e9d4d4c6ed13af041599d0b2195cab40d1c5fc8a292c85586261f59e7823"
+        },
+        "goldenReport": {
+          "path": "evidence/reports/litert-golden-report.json",
+          "bytes": 20179,
+          "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
+        },
+        "legacyOnnxAsRuntimeInputProbe": {
+          "acceptedModelFormat": "TFLite FlatBuffer",
+          "error": "The model is not a valid Flatbuffer buffer",
+          "exitCode": 1,
+          "purpose": "历史负向证据；不作为本轮转换结论"
+        }
       },
-      "artifact": null,
+      "artifact": {
+        "bytes": 12841227,
+        "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+        "logicalPath": ".evidence/litert/artifacts/yolov8n-fp32.tflite",
+        "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+        "trackedByGit": false
+      },
+      "artifactManifest": {
+        "path": "evidence/conversions/litert-artifact-manifest.json",
+        "bytes": 7152,
+        "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+      },
       "sourceCheckpoint": {
         "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
         "auditPath": "evidence/reports/handoff-model-audit.json"
       },
-      "ioChanges": "未生成 TFLite；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]",
-      "quantization": "未执行",
-      "nmsResponsibility": "operator",
-      "failedOperator": "delegated LiteRT conversion/runner evidence not returned",
-      "license": "ai-edge-litert Apache-2.0；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
-      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；同源 .pt 已验证，LiteRT 转换和 Android 真实设备证据已委托外部负责人，回传前保持 blocked。"
+      "ioChanges": "运行时实际 I/O Shape/layout 与规范 ONNX 相同；名称和索引改变；官方 exporter 将输出 attributes 0..3 除以 640，测试层确定性乘回 640",
+      "quantization": "FP32；输入/输出 scale=0、zero-point=0；未执行 FP16/INT8/UINT8 量化",
+      "nmsResponsibility": "operator；实际 LiteRT op 列表无 NMS",
+      "preprocessingResponsibility": "runtime adapter；模型输入为 NCHW FP32 [0,1]，未融合 letterbox/RGB/normalize",
+      "failedOperator": null,
+      "androidRunnerVerified": false,
+      "license": "litert-torch/ai-edge-litert Apache-2.0；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence；.tflite 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录",
+      "conclusion": "官方 PyTorch/Ultralytics LiteRT 路径已生成 FP32 TFLite，并由 host ai-edge-litert 2.1.6 完成真实 Load/Run 与冻结 Web golden；尚无 Android arm64 真机 runner，不能标记 supported。"
     },
     {
       "platform": "windows-x86_64-and-arm64",

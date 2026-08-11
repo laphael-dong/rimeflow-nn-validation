@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
-import { validateCoverageEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoverageEvidence, validateLitertEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -98,7 +98,13 @@ if (conversion.spikes.some((item) => item.state === 'supported')) fail('spike mu
 const apple = conversion.spikes.find((item) => item.platform === 'apple');
 if (apple.tool.version !== '9.0' || apple.attempt.exitCode !== 1 || apple.attempt.acceptedSources.includes('onnx') || apple.artifact !== null) fail('Core ML spike evidence');
 const android = conversion.spikes.find((item) => item.platform === 'android');
-if (android.tool.version !== '2.1.6' || android.attempt.exitCode !== 1 || android.attempt.acceptedModelFormat !== 'TFLite FlatBuffer' || android.attempt.converterModulePresent !== false) fail('LiteRT spike evidence');
+const litertManifest = await readJson('evidence/conversions/litert-artifact-manifest.json');
+const litertGolden = await readJson('evidence/reports/litert-golden-report.json');
+const litertConversion = await readJson('evidence/reports/litert-conversion-report.json');
+validateLitertEvidence(litertManifest, litertGolden, litertConversion, reference.tolerances);
+if (android.state !== 'host-inference-verified' || android.supported || android.androidRunnerVerified || android.tool.version !== '2.1.6' || android.tool.converterVersion !== '0.9.3' || android.attempt.exitCode !== 0 || !android.attempt.conversionExecuted || !android.attempt.hostLoadRunExecuted || !android.attempt.goldenPassed || android.artifact.sha256 !== litertManifest.artifact.sha256) fail('LiteRT spike evidence');
+const litertLock = await readFile(resolve(root, 'evidence/tooling/litert-requirements.lock'), 'utf8');
+for (const line of litertLock.split('\n').filter((line) => line && !line.startsWith('#') && !line.startsWith('--'))) if (!/^[A-Za-z0-9_.-]+==[^ ]+ --hash=sha256:[0-9a-f]{64}$/.test(line)) fail(`LiteRT unhashed dependency: ${line}`);
 const windows = conversion.spikes.find((item) => item.platform === 'windows-x86_64-and-arm64');
 if (windows.state !== 'blocked' || windows.conversion !== '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入' || windows.artifact.sha256 !== actualModelSha) fail('Windows ML spike evidence');
 const mindspore = conversion.spikes.find((item) => item.platform === 'harmonyos');
@@ -127,5 +133,10 @@ for (const id of ['contract-fixture-golden', 'production-raw-golden', 'conversio
     if (!round.startedAt || !round.endedAt || round.exitCode !== 0 || !round.repositoryHead || !round.runnerId || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || !/^[0-9a-f]{64}$/.test(round.log.sha256)) fail(`operator replay round metadata: ${id}`);
   }
 }
+const litertReplayStep = replay.steps.find((item) => item.id === 'android-litert-conversion-and-host-golden');
+if (!litertReplayStep?.executed || litertReplayStep.rounds.length !== 2 || !litertReplayStep.repeatComparison.allExitCodesZero || !litertReplayStep.repeatComparison.deterministicOutputDigestsEqual || Object.values(litertReplayStep.repeatComparison.details).some((value) => value !== true)) fail('LiteRT task replay semantics');
+for (const round of litertReplayStep.rounds) if (round.exitCode !== 0 || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || round.outputs[0].sha256 !== litertManifest.artifact.sha256) fail(`LiteRT task replay round: ${round.run}`);
+const conversionReplayStep = replay.steps.find((item) => item.id === 'conversion-report-regeneration');
+if (conversionReplayStep.command !== 'node evidence/scripts/run_conversion_spikes.mjs --litert-only') fail('LiteRT-only conversion replay scope');
 if (replay.steps.find((item) => item.id === 'delegated-platform-spikes').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));

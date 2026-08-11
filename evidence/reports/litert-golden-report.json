@@ -1,0 +1,751 @@
+{
+  "artifact": {
+    "bytes": 12841227,
+    "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+    "logicalPath": ".evidence/litert/artifacts/yolov8n-fp32.tflite",
+    "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+    "trackedByGit": false
+  },
+  "contract": {
+    "input": {
+      "dtype": "float32",
+      "index": 0,
+      "layout": "NCHW",
+      "name": "serving_default_args_0",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "shapeSignature": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    "output": {
+      "dtype": "float32",
+      "index": 414,
+      "layout": "N_ATTRIBUTES_ANCHORS",
+      "name": "serving_default_output_0_output",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "shapeSignature": [
+        1,
+        84,
+        8400
+      ]
+    },
+    "outputRole": "detections"
+  },
+  "failures": [],
+  "fixtures": [
+    {
+      "decoded": {
+        "beforeNmsCount": 0,
+        "nmsIouThreshold": 0.45,
+        "results": []
+      },
+      "decodedComparison": {
+        "anchorMismatchCount": 0,
+        "classMismatchCount": 0,
+        "countMismatch": false,
+        "maximumConfidenceAbsolute": 0.0,
+        "maximumDecodedBboxAbsolute": 0.0,
+        "minimumBboxIou": null
+      },
+      "determinism": {
+        "mappedRawExact": true,
+        "runDigests": [
+          "2465b2cf37284d92b2f215d06bcf198c032e993622c231f8735e882fd8097477",
+          "2465b2cf37284d92b2f215d06bcf198c032e993622c231f8735e882fd8097477"
+        ]
+      },
+      "id": "no-detection",
+      "mappedOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 636.2745361328125,
+        "mean": 10.108612654923002,
+        "min": 2.485702548199291e-14,
+        "sha256Float32Le": "2465b2cf37284d92b2f215d06bcf198c032e993622c231f8735e882fd8097477"
+      },
+      "rawComparison": {
+        "maxAbsolute": 0.003204345703125,
+        "maxAbsoluteLocation": [
+          0,
+          2,
+          8046
+        ],
+        "maxRelative": 4.391961097717285,
+        "maxRelativeLocation": [
+          0,
+          66,
+          6061
+        ],
+        "mismatchCount": 0,
+        "nearZeroPolicy": {
+          "absoluteToleranceOnly": true,
+          "count": 23422,
+          "threshold": 1e-12
+        }
+      },
+      "runtimeOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 0.9941789507865906,
+        "mean": 0.01579690092435875,
+        "min": 2.485702548199291e-14,
+        "sha256Float32Le": "68b38543659c8363285475268452c1e3a47a908dcf0488386529c3fbf7e09655"
+      },
+      "webReferenceDecoded": [],
+      "webReferenceRaw": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 636.2744750976562,
+        "mean": 10.108611967380575,
+        "min": 0.0,
+        "sha256Float32Le": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+      }
+    },
+    {
+      "decoded": {
+        "beforeNmsCount": 9,
+        "nmsIouThreshold": 0.45,
+        "results": [
+          {
+            "anchor": 8208,
+            "bbox": [
+              0.09723952242144797,
+              0.12138338107955411,
+              0.7592294395718064,
+              0.925650311962686
+            ],
+            "classId": 16,
+            "score": 0.7327909469604492
+          }
+        ]
+      },
+      "decodedComparison": {
+        "anchorMismatchCount": 0,
+        "classMismatchCount": 0,
+        "countMismatch": false,
+        "maximumConfidenceAbsolute": 9.530395508328127e-07,
+        "maximumDecodedBboxAbsolute": 9.196268602185143e-08,
+        "minimumBboxIou": 0.9999996774706684
+      },
+      "determinism": {
+        "mappedRawExact": true,
+        "runDigests": [
+          "66a39b29b559b39a78160b3bdc201a7bd27a8f2a4d74a8b40ec778b7cf00718d",
+          "66a39b29b559b39a78160b3bdc201a7bd27a8f2a4d74a8b40ec778b7cf00718d"
+        ]
+      },
+      "id": "single-target",
+      "mappedOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.0564575195312,
+        "mean": 9.8096240095493,
+        "min": 4.546165001051892e-19,
+        "sha256Float32Le": "66a39b29b559b39a78160b3bdc201a7bd27a8f2a4d74a8b40ec778b7cf00718d"
+      },
+      "rawComparison": {
+        "maxAbsolute": 0.00299072265625,
+        "maxAbsoluteLocation": [
+          0,
+          2,
+          8047
+        ],
+        "maxRelative": 4.278778553009033,
+        "maxRelativeLocation": [
+          0,
+          13,
+          4135
+        ],
+        "mismatchCount": 0,
+        "nearZeroPolicy": {
+          "absoluteToleranceOnly": true,
+          "count": 64020,
+          "threshold": 1e-12
+        }
+      },
+      "runtimeOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 0.9954007267951965,
+        "mean": 0.01534426926868256,
+        "min": 4.546165001051892e-19,
+        "sha256Float32Le": "b9725517d2045c107441b19ac449bf730ec6e94f220041765578a14334f63ba5"
+      },
+      "webReferenceDecoded": [
+        {
+          "anchor": 8208,
+          "bbox": [
+            0.09723949,
+            0.12138329,
+            0.75922947,
+            0.92565022
+          ],
+          "classId": 16,
+          "score": 0.7327919
+        }
+      ],
+      "webReferenceRaw": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.0564575195312,
+        "mean": 9.809623919394914,
+        "min": 0.0,
+        "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+      }
+    },
+    {
+      "decoded": {
+        "beforeNmsCount": 48,
+        "nmsIouThreshold": 0.45,
+        "results": [
+          {
+            "anchor": 8256,
+            "bbox": [
+              0.8285736438125911,
+              0.3609803215560956,
+              1.0,
+              0.8149450337777869
+            ],
+            "classId": 0,
+            "score": 0.9027920365333557
+          },
+          {
+            "anchor": 8227,
+            "bbox": [
+              0.27441789429241586,
+              0.37837429212169615,
+              0.42494530863708985,
+              0.7929381405235478
+            ],
+            "classId": 0,
+            "score": 0.8911559581756592
+          },
+          {
+            "anchor": 8245,
+            "bbox": [
+              0.0631695352774857,
+              0.3688759343073137,
+              0.30155996613510044,
+              0.8389172113881583
+            ],
+            "classId": 0,
+            "score": 0.874419093132019
+          },
+          {
+            "anchor": 8189,
+            "bbox": [
+              0.03674354569297958,
+              0.21414508913268557,
+              0.9874762260405862,
+              0.7206222565706912
+            ],
+            "classId": 5,
+            "score": 0.8555363416671753
+          },
+          {
+            "anchor": 7445,
+            "bbox": [
+              0.0005876620636265229,
+              0.5083454511948061,
+              0.07410900625226645,
+              0.8073220884357513
+            ],
+            "classId": 0,
+            "score": 0.4430794417858124
+          }
+        ]
+      },
+      "decodedComparison": {
+        "anchorMismatchCount": 0,
+        "classMismatchCount": 0,
+        "countMismatch": false,
+        "maximumConfidenceAbsolute": 4.7313201900767154e-07,
+        "maximumDecodedBboxAbsolute": 1.7138815833206422e-07,
+        "minimumBboxIou": 0.999999145608457
+      },
+      "determinism": {
+        "mappedRawExact": true,
+        "runDigests": [
+          "7b715a94ce5d732012820c050a77e9c0ab29160e8a526c60f5ff831a110fce34",
+          "7b715a94ce5d732012820c050a77e9c0ab29160e8a526c60f5ff831a110fce34"
+        ]
+      },
+      "id": "multi-class",
+      "mappedOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.30078125,
+        "mean": 9.266902006587106,
+        "min": 6.108124114488603e-23,
+        "sha256Float32Le": "7b715a94ce5d732012820c050a77e9c0ab29160e8a526c60f5ff831a110fce34"
+      },
+      "rawComparison": {
+        "maxAbsolute": 0.0018768310546875,
+        "maxAbsoluteLocation": [
+          0,
+          3,
+          8084
+        ],
+        "maxRelative": 4.2917022705078125,
+        "maxRelativeLocation": [
+          0,
+          50,
+          242
+        ],
+        "mismatchCount": 0,
+        "nearZeroPolicy": {
+          "absoluteToleranceOnly": true,
+          "count": 76470,
+          "threshold": 1e-12
+        }
+      },
+      "runtimeOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 0.9957824945449829,
+        "mean": 0.014536108354817848,
+        "min": 6.108124114488603e-23,
+        "sha256Float32Le": "c3b759344b811dcf95f59d6b6f202094d76e4d67cd3cb663cefeeb7565a64234"
+      },
+      "webReferenceDecoded": [
+        {
+          "anchor": 8256,
+          "bbox": [
+            0.82857374,
+            0.36098032,
+            1,
+            0.81494503
+          ],
+          "classId": 0,
+          "score": 0.90279216
+        },
+        {
+          "anchor": 8227,
+          "bbox": [
+            0.27441789,
+            0.37837429,
+            0.42494531,
+            0.79293814
+          ],
+          "classId": 0,
+          "score": 0.8911559
+        },
+        {
+          "anchor": 8245,
+          "bbox": [
+            0.06316954,
+            0.36887581,
+            0.30155996,
+            0.83891704
+          ],
+          "classId": 0,
+          "score": 0.87441862
+        },
+        {
+          "anchor": 8189,
+          "bbox": [
+            0.03674355,
+            0.21414506,
+            0.98747622,
+            0.72062228
+          ],
+          "classId": 5,
+          "score": 0.85553628
+        },
+        {
+          "anchor": 7445,
+          "bbox": [
+            0.00058765,
+            0.50834541,
+            0.07410898,
+            0.80732203
+          ],
+          "classId": 0,
+          "score": 0.44307899
+        }
+      ],
+      "webReferenceRaw": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.30078125,
+        "mean": 9.266902031754766,
+        "min": 0.0,
+        "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+      }
+    },
+    {
+      "decoded": {
+        "beforeNmsCount": 46,
+        "nmsIouThreshold": 0.45,
+        "results": [
+          {
+            "anchor": 8256,
+            "bbox": [
+              0.8299705791517232,
+              0.3590282455893033,
+              1.0,
+              0.8137331998186278
+            ],
+            "classId": 0,
+            "score": 0.8991988301277161
+          },
+          {
+            "anchor": 8227,
+            "bbox": [
+              0.27475377215224067,
+              0.3787327067732276,
+              0.4253645421513856,
+              0.792274073252271
+            ],
+            "classId": 0,
+            "score": 0.8934332728385925
+          },
+          {
+            "anchor": 8245,
+            "bbox": [
+              0.06357714417178256,
+              0.36876492661639837,
+              0.30140089088321664,
+              0.8389586008536715
+            ],
+            "classId": 0,
+            "score": 0.8722463846206665
+          },
+          {
+            "anchor": 8189,
+            "bbox": [
+              0.03830883339176028,
+              0.2141616353821476,
+              0.9903940567057855,
+              0.7201180012736853
+            ],
+            "classId": 5,
+            "score": 0.8532298803329468
+          },
+          {
+            "anchor": 7445,
+            "bbox": [
+              0.0016515753025482932,
+              0.5086345694860185,
+              0.07152951133137922,
+              0.8061723744376488
+            ],
+            "classId": 0,
+            "score": 0.40938401222229004
+          }
+        ]
+      },
+      "decodedComparison": {
+        "anchorMismatchCount": 0,
+        "classMismatchCount": 0,
+        "countMismatch": false,
+        "maximumConfidenceAbsolute": 2.677777099502343e-07,
+        "maximumDecodedBboxAbsolute": 1.5084827675870827e-07,
+        "minimumBboxIou": 0.9999989421111263
+      },
+      "determinism": {
+        "mappedRawExact": true,
+        "runDigests": [
+          "95722a5208d81728c2902a02381cb3690e311be82e09ddb729f5f4b7b9caebd4",
+          "95722a5208d81728c2902a02381cb3690e311be82e09ddb729f5f4b7b9caebd4"
+        ]
+      },
+      "id": "boundary-box",
+      "mappedOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.3131713867188,
+        "mean": 9.270817944483174,
+        "min": 1.3732195288564459e-22,
+        "sha256Float32Le": "95722a5208d81728c2902a02381cb3690e311be82e09ddb729f5f4b7b9caebd4"
+      },
+      "rawComparison": {
+        "maxAbsolute": 0.002166748046875,
+        "maxAbsoluteLocation": [
+          0,
+          2,
+          6933
+        ],
+        "maxRelative": 4.296286582946777,
+        "maxRelativeLocation": [
+          0,
+          70,
+          6004
+        ],
+        "mismatchCount": 0,
+        "nearZeroPolicy": {
+          "absoluteToleranceOnly": true,
+          "count": 75796,
+          "threshold": 1e-12
+        }
+      },
+      "runtimeOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 0.9958018660545349,
+        "mean": 0.014540570027399238,
+        "min": 1.3732195288564459e-22,
+        "sha256Float32Le": "d0bd5de26625411bc4b218b45283c4cbe10985867908f9446440ee92927e1685"
+      },
+      "webReferenceDecoded": [
+        {
+          "anchor": 8256,
+          "bbox": [
+            0.82997073,
+            0.35902824,
+            1,
+            0.8137332
+          ],
+          "classId": 0,
+          "score": 0.89919901
+        },
+        {
+          "anchor": 8227,
+          "bbox": [
+            0.27475377,
+            0.37873271,
+            0.42536454,
+            0.79227407
+          ],
+          "classId": 0,
+          "score": 0.89343339
+        },
+        {
+          "anchor": 8245,
+          "bbox": [
+            0.06357714,
+            0.36876488,
+            0.30140089,
+            0.83895855
+          ],
+          "classId": 0,
+          "score": 0.87224633
+        },
+        {
+          "anchor": 8189,
+          "bbox": [
+            0.03830887,
+            0.21416168,
+            0.99039402,
+            0.72011805
+          ],
+          "classId": 5,
+          "score": 0.85322976
+        },
+        {
+          "anchor": 7445,
+          "bbox": [
+            0.0016516,
+            0.50863459,
+            0.07152955,
+            0.80617235
+          ],
+          "classId": 0,
+          "score": 0.40938428
+        }
+      ],
+      "webReferenceRaw": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 637.3131713867188,
+        "mean": 9.270817917103747,
+        "min": 0.0,
+        "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+      }
+    },
+    {
+      "decoded": {
+        "beforeNmsCount": 8,
+        "nmsIouThreshold": 0.45,
+        "results": [
+          {
+            "anchor": 7220,
+            "bbox": [
+              0.4617831945419312,
+              0.1462549865245819,
+              0.5274152994155884,
+              0.9627032577991486
+            ],
+            "classId": 16,
+            "score": 0.6739934682846069
+          }
+        ]
+      },
+      "decodedComparison": {
+        "anchorMismatchCount": 0,
+        "classMismatchCount": 0,
+        "countMismatch": false,
+        "maximumConfidenceAbsolute": 1.7153930498281511e-09,
+        "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+        "minimumBboxIou": 0.9999981541566957
+      },
+      "determinism": {
+        "mappedRawExact": true,
+        "runDigests": [
+          "a04bae281dd7d6bfcd0dda8bc0f1e25346a4dbe9a64b74cd6e1ac9419b133e90",
+          "a04bae281dd7d6bfcd0dda8bc0f1e25346a4dbe9a64b74cd6e1ac9419b133e90"
+        ]
+      },
+      "id": "extreme-aspect",
+      "mappedOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 636.7653198242188,
+        "mean": 9.674304598695938,
+        "min": 1.0377219916701819e-10,
+        "sha256Float32Le": "a04bae281dd7d6bfcd0dda8bc0f1e25346a4dbe9a64b74cd6e1ac9419b133e90"
+      },
+      "rawComparison": {
+        "maxAbsolute": 0.00299072265625,
+        "maxAbsoluteLocation": [
+          0,
+          3,
+          7965
+        ],
+        "maxRelative": 4.217702388763428,
+        "maxRelativeLocation": [
+          0,
+          46,
+          6602
+        ],
+        "mismatchCount": 0,
+        "nearZeroPolicy": {
+          "absoluteToleranceOnly": true,
+          "count": 82441,
+          "threshold": 1e-12
+        }
+      },
+      "runtimeOutput": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 0.9949458241462708,
+        "mean": 0.015126632417968976,
+        "min": 1.0377219916701819e-10,
+        "sha256Float32Le": "481d04aadc456dd99084edd2dba20fdeb637eafec3aa54560682aeaa3c5d0433"
+      },
+      "webReferenceDecoded": [
+        {
+          "anchor": 7220,
+          "bbox": [
+            0.46178317,
+            0.14625525,
+            0.52741532,
+            0.96270394
+          ],
+          "classId": 16,
+          "score": 0.67399347
+        }
+      ],
+      "webReferenceRaw": {
+        "elementCount": 705600,
+        "finiteCount": 705600,
+        "max": 636.7653198242188,
+        "mean": 9.674305035251988,
+        "min": 0.0,
+        "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+      }
+    }
+  ],
+  "mapping": {
+    "input": "identity: runtime input already uses NCHW FP32 [1,3,640,640]",
+    "outputCoordinates": "multiply attributes 0..3 by 640 to reverse the official Ultralytics LiteRT _NormalizeCoords wrapper",
+    "outputLayout": "identity: runtime output already uses [batch,attribute,anchor] [1,84,8400]"
+  },
+  "ownership": {
+    "nms": "operator postprocess; no NMS op is present in the model graph",
+    "postprocess": "operator decode, confidence threshold and NMS",
+    "preprocess": "runtime adapter letterbox/RGB/FP32 [0,1]; not fused into the model"
+  },
+  "passed": true,
+  "runtime": {
+    "name": "ai-edge-litert Interpreter",
+    "nmsOperators": [],
+    "operatorCount": 259,
+    "operatorNames": [
+      "ADD",
+      "CONCATENATION",
+      "CONV_2D",
+      "DELEGATE",
+      "LOGISTIC",
+      "MAX_POOL_2D",
+      "MUL",
+      "PAD",
+      "RESHAPE",
+      "RESIZE_NEAREST_NEIGHBOR",
+      "SLICE",
+      "SOFTMAX",
+      "SUB",
+      "TRANSPOSE"
+    ],
+    "threads": 1,
+    "version": "2.1.6"
+  },
+  "schemaVersion": 1,
+  "summary": {
+    "allFinite": true,
+    "allShapesMatched": true,
+    "classMismatchCount": 0,
+    "deterministic": true,
+    "fixtureCount": 5,
+    "maximumConfidenceAbsolute": 9.530395508328127e-07,
+    "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+    "maximumRawAbsolute": 0.003204345703125,
+    "maximumRawRelative": 4.391961097717285,
+    "minimumBboxIou": 0.9999981541566957,
+    "rawToleranceMismatchCount": 0
+  },
+  "tolerances": {
+    "boxIouMinimum": 0.999,
+    "classIdExact": true,
+    "confidenceAbsolute": 0.0001,
+    "decodedBoxAbsolute": 0.0001,
+    "frozenBeforeNativeAdapterResults": true,
+    "missingValuePolicy": "fail",
+    "nonFinitePolicy": "fail",
+    "rawTensorAbsolute": 1e-05,
+    "rawTensorRelative": 0.0001
+  },
+  "webReference": {
+    "runtime": {
+      "actualExecutionProvider": "wasm",
+      "evidence": "session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f",
+      "name": "onnxruntime-web",
+      "requestedExecutionProviders": [
+        "wasm"
+      ],
+      "threads": 1,
+      "version": "1.27.0"
+    },
+    "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+  }
+}

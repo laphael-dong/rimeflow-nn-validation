@@ -1,0 +1,251 @@
+{
+  "artifact": {
+    "bytes": 12841227,
+    "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+    "logicalPath": ".evidence/litert/artifacts/yolov8n-fp32.tflite",
+    "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+    "trackedByGit": false
+  },
+  "conversion": {
+    "command": [
+      "$LITERT_PYTHON",
+      "evidence/scripts/export_litert_model.py",
+      "--pt",
+      "$HANDOFF_ASSETS/yolov8n.pt",
+      "--output-dir",
+      ".evidence/litert/replay/round-N/conversion"
+    ],
+    "intermediates": [
+      {
+        "format": "torch.export ExportedProgram",
+        "persistence": "in-memory",
+        "purpose": "capture the fused PyTorch graph with static batch=1/imgsz=640"
+      },
+      {
+        "format": "FX graph and MLIR/LiteRT compiler IR",
+        "persistence": "in-memory",
+        "purpose": "decompose/lower the ExportedProgram and emit the TFLite FlatBuffer"
+      }
+    ],
+    "metadataNormalization": {
+      "fixedDosTimestamp": "2026-08-11T00:00:00",
+      "flatbufferPrefixBytes": 12840252,
+      "flatbufferPrefixSha256": "e8da21672182000b0e641e8dd67116f00b18c04c606798adc26c064fbd98cbeb",
+      "modifiedFields": [
+        "metadata ZIP local-header DOS timestamp",
+        "metadata ZIP central-directory DOS timestamp"
+      ]
+    },
+    "parameters": {
+      "batch": 1,
+      "dynamic": false,
+      "format": "litert",
+      "imgsz": 640,
+      "nms": false,
+      "quantize": 32
+    },
+    "path": "official Ultralytics YOLO.export(format='litert') -> litert-torch -> litert-converter -> TFLite"
+  },
+  "dependencies": {
+    "lock": {
+      "bytes": 8235,
+      "path": "evidence/tooling/litert-requirements.lock",
+      "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
+    },
+    "requested": {
+      "bytes": 361,
+      "path": "evidence/tooling/litert-requirements.in",
+      "sha256": "a312b3559442470a1091f7e13e61e45cc6a09486b2659e2cf9b39baf30abc8b7"
+    },
+    "sources": [
+      {
+        "packages": [
+          "torch",
+          "torchvision"
+        ],
+        "url": "https://download.pytorch.org/whl/cpu"
+      },
+      {
+        "packages": "all other locked Python distributions",
+        "url": "https://pypi.org/simple"
+      },
+      {
+        "component": "Ultralytics LiteRT exporter documentation/source",
+        "url": "https://docs.ultralytics.com/integrations/tflite/"
+      },
+      {
+        "component": "LiteRT PyTorch converter",
+        "url": "https://github.com/google-ai-edge/litert-torch"
+      }
+    ]
+  },
+  "ioContract": {
+    "input": {
+      "dtype": "float32",
+      "index": 0,
+      "layout": "NCHW",
+      "name": "serving_default_args_0",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "shapeSignature": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    "output": {
+      "dtype": "float32",
+      "index": 414,
+      "layout": "N_ATTRIBUTES_ANCHORS",
+      "name": "serving_default_output_0_output",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "shapeSignature": [
+        1,
+        84,
+        8400
+      ]
+    },
+    "outputRole": "detections"
+  },
+  "mapping": {
+    "input": "identity: runtime input already uses NCHW FP32 [1,3,640,640]",
+    "outputCoordinates": "multiply attributes 0..3 by 640 to reverse the official Ultralytics LiteRT _NormalizeCoords wrapper",
+    "outputLayout": "identity: runtime output already uses [batch,attribute,anchor] [1,84,8400]"
+  },
+  "ownership": {
+    "nms": "operator postprocess; no NMS op is present in the model graph",
+    "postprocess": "operator decode, confidence threshold and NMS",
+    "preprocess": "runtime adapter letterbox/RGB/FP32 [0,1]; not fused into the model"
+  },
+  "runtime": {
+    "name": "ai-edge-litert Interpreter",
+    "nmsOperators": [],
+    "operatorCount": 259,
+    "operatorNames": [
+      "ADD",
+      "CONCATENATION",
+      "CONV_2D",
+      "DELEGATE",
+      "LOGISTIC",
+      "MAX_POOL_2D",
+      "MUL",
+      "PAD",
+      "RESHAPE",
+      "RESIZE_NEAREST_NEIGHBOR",
+      "SLICE",
+      "SOFTMAX",
+      "SUB",
+      "TRANSPOSE"
+    ],
+    "threads": 1,
+    "version": "2.1.6"
+  },
+  "schemaVersion": 1,
+  "source": {
+    "bytes": 6549796,
+    "logicalPath": "$HANDOFF_ASSETS/yolov8n.pt",
+    "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+  },
+  "status": {
+    "androidRunnerVerified": false,
+    "artifactVerified": true,
+    "hostInferenceVerified": true,
+    "supported": false,
+    "value": "host-inference-verified"
+  },
+  "toolchain": {
+    "ai-edge-litert": "2.1.6",
+    "ai-edge-quantizer": "0.8.0",
+    "litert-converter": "0.3.1",
+    "litert-torch": "0.9.3",
+    "numpy": "2.4.4",
+    "onnx2tf": {
+      "installed": false,
+      "reason": "the selected official format=litert path does not use onnx2tf"
+    },
+    "pip": "24.0",
+    "python": "3.12.3",
+    "tensorflow": {
+      "installed": false,
+      "reason": "the selected official format=litert path converts PyTorch directly"
+    },
+    "torch": "2.12.1+cpu",
+    "torchvision": "0.27.1+cpu",
+    "ultralytics": "8.4.104"
+  },
+  "usageScope": {
+    "artifactRedistributionAllowed": false,
+    "modelLicenseMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
+    "productPackaging": "excluded",
+    "purpose": "internal-onnx-base-framework-validation-only",
+    "trackedByGit": false
+  },
+  "validation": {
+    "fixtureCount": 5,
+    "goldenPassed": true,
+    "summary": {
+      "allFinite": true,
+      "allShapesMatched": true,
+      "classMismatchCount": 0,
+      "deterministic": true,
+      "fixtureCount": 5,
+      "maximumConfidenceAbsolute": 9.530395508328127e-07,
+      "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+      "maximumRawAbsolute": 0.003204345703125,
+      "maximumRawRelative": 4.391961097717285,
+      "minimumBboxIou": 0.9999981541566957,
+      "rawToleranceMismatchCount": 0
+    },
+    "tolerances": {
+      "boxIouMinimum": 0.999,
+      "classIdExact": true,
+      "confidenceAbsolute": 0.0001,
+      "decodedBoxAbsolute": 0.0001,
+      "frozenBeforeNativeAdapterResults": true,
+      "missingValuePolicy": "fail",
+      "nonFinitePolicy": "fail",
+      "rawTensorAbsolute": 1e-05,
+      "rawTensorRelative": 0.0001
+    },
+    "webReference": {
+      "runtime": {
+        "actualExecutionProvider": "wasm",
+        "evidence": "session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f",
+        "name": "onnxruntime-web",
+        "requestedExecutionProviders": [
+          "wasm"
+        ],
+        "threads": 1,
+        "version": "1.27.0"
+      },
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+    }
+  }
+}

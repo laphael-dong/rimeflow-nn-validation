@@ -33,6 +33,21 @@ git diff --check
 
 Python 转换工具固定为 CPython 3.12/Linux x86_64 wheel，并由 `requirements.lock` 逐包记录 PyPI 官方 SHA-256。`prepare_python_tooling.mjs` 使用 `--require-hashes --no-deps` 安装后执行 `pip check`。LiteRT 2.1.6 对 `backports.strenum` 的 metadata 仍是无条件依赖，但该包声明 Python `<3.11`；Python 3.12 的 LiteRT 实现实际使用标准库 `enum.StrEnum`，因此准备命令显式使用 `--ignore-requires-python` 安装该已锁纯 Python wheel，不能省略或隐藏该上游元数据例外。MindSpore Lite 2.7.0 tarball 使用官方发布页给出的 SHA-256 校验。
 
+Android LiteRT 转换使用独立的 `litert-requirements.lock`。该文件锁定 CPython 3.12/Linux x86_64 环境的全部传递依赖和单个 wheel SHA-256；`torch==2.12.1+cpu`、`torchvision==0.27.1+cpu` 来自 PyTorch 官方 CPU index，其余包来自 PyPI。实际官方路径为 `ultralytics==8.4.104` 的 `YOLO.export(format="litert")`，由 `litert-torch==0.9.3`、`litert-converter==0.3.1` 直接把 PyTorch graph 降级为 TFLite；该路径不安装、不调用 TensorFlow 或 onnx2tf。重新建立环境和执行两轮 replay：
+
+```sh
+node evidence/scripts/lock_litert_tooling.mjs
+RIMEFLOW_LITERT_VENV=.evidence/litert/verify-venv node evidence/scripts/prepare_litert_tooling.mjs
+HANDOFF_ASSETS=/home/raffael/下载/yolov8n_ios_benchmark_handoff/Assets
+.evidence/litert/verify-venv/bin/python evidence/scripts/run_litert_replay.py \
+  --pt "$HANDOFF_ASSETS/yolov8n.pt" \
+  --workspace .evidence/litert/replay
+```
+
+转换 worker 在解析 checkpoint 前验证 SHA-256，并在结束后再次验证源文件 bytes/hash/mtime 均未改变。它只把 exporter 的逻辑输出前缀重定向到 `.evidence/`，不复制 `.pt`。Ultralytics 在 FlatBuffer 后附加 `metadata.json` ZIP entry；worker 只把该 entry 的两个 DOS timestamp 字段固定为 `2026-08-11T00:00:00`，同时记录未改动的 FlatBuffer prefix bytes/SHA-256。模型图、权重、tensor 和 metadata 内容不做改写。
+
+候选产物固定为 `.evidence/litert/artifacts/yolov8n-fp32.tflite`，12,841,227 字节，SHA-256 `794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1`。该目录被 Git 忽略；重新生成方法、完整命令/时间/退出码/stdout/stderr、artifact manifest 和 golden 结果分别在 `evidence/scripts/run_litert_replay.py`、`evidence/reports/litert-conversion-report.json`、`evidence/conversions/litert-artifact-manifest.json` 与 `evidence/reports/litert-golden-report.json`。
+
 外部模型 handoff 的 `.pt`/ONNX 审计使用独立、隔离的 CPU 环境，顶层版本固定在 `evidence/tooling/model-audit-requirements.lock`。先从 PyTorch CPU index 安装 `torch==2.12.1+cpu` 与 `torchvision==0.27.1+cpu`，再安装锁文件中的其余版本；随后执行：
 
 ```sh
@@ -49,6 +64,6 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 ## 状态判定
 
-Core ML 9.0 与 LiteRT 2.1.6 已调用真实官方 API：前者不接受 ONNX 作为直接转换源，后者是 TFLite runtime 而不是 ONNX converter。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。转换报告保留完整命令、工具版本、stdout/stderr、退出码、失败阶段、I/O、量化、NMS 和模型许可证声明；所有转换 artifact 仅能进入隔离测试 evidence，不进入产品发布目录。
+Core ML 9.0 仍不接受 ONNX 作为直接转换源。Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
 
-`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。任务 1.4 与大任务 1 仍保持 blocked，唯一相关原因是 Core ML、LiteRT、Windows ML、MindSpore Lite 和其余真实平台证据尚待外部负责人回传。
+`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Android conversion 子项已达到 `artifact-verified` 和 `host-inference-verified`，但尚未完成 Android arm64 真机 runner、adapter、性能、包加载或 fallback 验证，因此 `supported` 保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。

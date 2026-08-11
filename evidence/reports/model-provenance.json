@@ -42,7 +42,7 @@
     "state": "source-identified-and-weight-equivalent",
     "evidence": {
       "path": "evidence/reports/handoff-model-audit.json",
-      "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
+      "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
     },
     "gitPtArtifactCommits": []
   },
@@ -78,7 +78,7 @@
     "task14": "blocked",
     "task1": "blocked",
     "publication": "test-evidence-only",
-    "reason": "模型来源与同源性已验证，用途限定为内部 onnx-base 框架验证；1.4 仅等待外部平台 spike evidence，模型及临时转换物不进入 RimeCut 产品包。"
+    "reason": "模型来源与同源性及 LiteRT host artifact/inference/golden 已验证；1.4 仍等待其余平台 spike 与 Android runner evidence，模型及临时转换物不进入 RimeCut 产品包。"
   },
   "tooling": {
     "python": "3.12.3",
