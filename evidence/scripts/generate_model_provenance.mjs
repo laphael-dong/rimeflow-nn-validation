@@ -18,6 +18,9 @@ if (probe.status !== 0) throw new Error(`Python metadata probe failed:\n${probe.
 const toolProbe = JSON.parse(probe.stdout.trim().split('\n').at(-1));
 const modelBytes = await readFile(modelPath);
 const licenseBytes = await readFile(resolve(root, 'LICENSE'));
+const handoffAuditPath = resolve(root, 'evidence/reports/handoff-model-audit.json');
+const handoffAuditBytes = await readFile(handoffAuditPath);
+const handoffAudit = JSON.parse(handoffAuditBytes);
 const [firstRepositoryCommit, firstRepositoryCommitDate] = git(['log', '--diff-filter=A', '--follow', '-1', '--format=%H|%aI', '--', 'models/yolov8n.onnx']).split('|');
 const originalReadme = git(['show', `${firstRepositoryCommit}:README.md`]);
 const exportBlock = originalReadme.match(/```bash\n([\s\S]*?)\n```/)?.[1].trim().split('\n').join(' && ');
@@ -33,34 +36,40 @@ const report = {
     embeddedMetadata: toolProbe.onnxMetadata,
   },
   declaredExportRecipe: {
-    source: 'README.md in firstRepositoryCommit',
-    command: exportBlock,
+    source: 'evidence/reports/handoff-model-audit.json',
+    command: handoffAudit.reExport.command,
     reproducible: false,
-    reason: '命令没有锁定 ultralytics 或 yolov8n.pt digest；仓库历史没有提交 .pt、训练配置或导出日志。',
+    semanticReproductionVerified: handoffAudit.reExport.result?.seed20260811OutputExact === true,
+    reason: handoffAudit.reExport.byteReproducibilityBlocker,
+    historicalUnpinnedCommand: exportBlock,
   },
   originalTrainingArtifact: {
     path: null,
-    version: null,
-    sha256: null,
-    sourceUrl: null,
-    state: 'unverifiable',
+    logicalPath: handoffAudit.sourceCheckpoint.logicalPath,
+    version: handoffAudit.sourceCheckpoint.checkpoint.version,
+    sha256: handoffAudit.sourceCheckpoint.sha256,
+    sourceUrl: handoffAudit.sourceCheckpoint.upstream.downloadUrl,
+    sourceReleaseAssetId: handoffAudit.sourceCheckpoint.upstream.assetId,
+    immutableSourceState: handoffAudit.sourceCheckpoint.upstream.releaseImmutable ? 'immutable' : 'mirror-required',
+    state: 'source-identified-and-weight-equivalent',
+    evidence: { path: 'evidence/reports/handoff-model-audit.json', sha256: sha256(handoffAuditBytes) },
     gitPtArtifactCommits: ptHistory ? ptHistory.split('\n') : [],
   },
   licensing: {
     repositoryCode: { declaredLicense: 'MIT', licensePath: 'LICENSE', licenseSha256: sha256(licenseBytes) },
     fixtureFiles: { state: 'per-file', manifestPath: 'evidence/fixtures/manifest.json', note: '外部 Ultralytics assets 与脚本生成 CC0 fixture 逐文件记录；不由仓库 MIT 统一覆盖。' },
-    originalWeights: { declaredByOnnxMetadata: toolProbe.onnxMetadata.license ?? null, enterpriseLicenseEvidence: null, authorizationState: 'unverified' },
-    onnxWeights: { licenseState: 'embedded metadata declares AGPL-3.0; exact original artifact and authorization are unresolved' },
+    originalWeights: { declaredByCheckpoint: handoffAudit.licensing.declaredByCheckpoint, declaredByOnnxMetadata: toolProbe.onnxMetadata.license ?? null, enterpriseLicenseEvidence: null, authorizationState: 'unverified-for-rimecut-commercial-redistribution' },
+    onnxWeights: { licenseState: 'source checkpoint and ONNX metadata declare AGPL-3.0; exact weights are traceable, but RimeCut authorization is unresolved' },
     conversionArtifacts: { licenseState: 'inherit unresolved model-weight obligations plus converter/runtime terms', redistributionAllowed: false },
-    rimecutPackageRedistribution: { allowed: false, reason: '没有可验证的原始权重来源、准确 .pt SHA 或 Ultralytics Enterprise 授权依据。' },
+    rimecutPackageRedistribution: { allowed: false, reason: '已验证原始 .pt 来源与准确 SHA，但没有 Ultralytics Enterprise 授权编号，也没有获批的 AGPL 分发合规结论。' },
   },
   decision: {
     task14: 'blocked',
     task1: 'blocked',
     publication: 'prohibited',
-    reason: '仓库 MIT 声明不能覆盖模型权重；在授权链闭环前禁止发布或分发 ONNX 及其转换产物。',
+    reason: '模型来源与同源性已验证；仓库 MIT 仍不能覆盖 AGPL 模型权重，在商业授权或获批的 AGPL 合规方案闭环前禁止发布或分发 ONNX 及其转换产物。',
   },
-  tooling: { python: toolProbe.python, onnx: toolProbe.onnxVersion },
+  tooling: { python: toolProbe.python, onnx: toolProbe.onnxVersion, handoffAudit: handoffAudit.reExport.toolVersions },
 };
 await writeFile(resolve(root, 'evidence/reports/model-provenance.json'), `${JSON.stringify(report, null, 2)}\n`);
 console.log(sha256(Buffer.from(`${JSON.stringify(report, null, 2)}\n`)));

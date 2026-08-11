@@ -107,7 +107,12 @@ const linuxCpu = conversion.spikes.find((item) => item.platform === 'linux-x86_6
 if (linuxCpu.state !== 'inference-verified' || linuxCpu.attempt.inferenceExecuted !== true || linuxCpu.attempt.output.finiteCount !== 84 * 8400) fail('Linux ORT CPU inference evidence');
 for (const provider of ['openvino', 'cuda', 'tensorrt']) if (conversion.spikes.find((item) => item.platform === `linux-x86_64-${provider}`).state !== 'blocked') fail(`${provider} must remain independently blocked`);
 const provenance = await readJson('evidence/reports/model-provenance.json');
-if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'unverifiable') fail('model provenance');
+const handoffAudit = await readJson('evidence/reports/handoff-model-audit.json');
+if (handoffAudit.sourceCheckpoint.sha256 !== 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36' || handoffAudit.candidateOnnx.sha256 !== '71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45') fail('handoff model digests');
+if (handoffAudit.decision.ptAndOnnxTechnicalVerification !== 'passed' || handoffAudit.decision.task14Complete !== false || handoffAudit.licensing.publication !== 'prohibited') fail('handoff audit blocked semantics');
+if (handoffAudit.comparisons.initializers.mismatches.length !== 0 || handoffAudit.comparisons.initializers.exactEqualCount !== 143) fail('handoff initializer equivalence');
+if (handoffAudit.comparisons.inference.some((item) => !item.torchRepeatExact || !item.candidateReferenceExact || !item.ptCandidateAllclose)) fail('handoff inference equivalence');
+if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'source-identified-and-weight-equivalent' || provenance.originalTrainingArtifact.sha256 !== handoffAudit.sourceCheckpoint.sha256) fail('model provenance');
 if (provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'prohibited') fail('unsafe model license decision');
 const replay = await readJson('evidence/replay/task1-replay.json');
 if (replay.schemaVersion !== 2 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true || replay.immutableLogEvidence.kind !== 'embedded-in-manifest') fail('operator replay metadata');

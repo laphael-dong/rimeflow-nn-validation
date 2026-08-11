@@ -15,6 +15,8 @@ const outputs = [
   'evidence/golden/manifest.json',
   'evidence/golden/web-reference.json',
   'evidence/reports/preprocess-conformance.json',
+  'evidence/reports/handoff-model-audit.json',
+  'evidence/reports/model-provenance.json',
   'evidence/conversions/conversion-spikes.json',
 ];
 const commonInputs = ['models/yolov8n.onnx', 'evidence/fixtures/manifest.json'];
@@ -26,7 +28,7 @@ steps.push(await runRepeatedStep({
   executable: 'bun',
   args: ['run', 'evidence/scripts/generate_all.mjs'],
   inputPaths: commonInputs,
-  outputPaths: outputs.slice(0, 6),
+  outputPaths: outputs,
 }));
 steps.push(await runRepeatedStep({
   root,
@@ -43,13 +45,13 @@ steps.push(await runRepeatedStep({
   command: 'node evidence/scripts/run_conversion_spikes.mjs',
   executable: 'node',
   args: ['evidence/scripts/run_conversion_spikes.mjs'],
-  inputPaths: ['models/yolov8n.onnx', 'evidence/tooling/requirements.lock'],
+  inputPaths: ['models/yolov8n.onnx', 'evidence/reports/handoff-model-audit.json', 'evidence/tooling/requirements.lock'],
   outputPaths: ['evidence/conversions/conversion-spikes.json'],
 }));
 steps.push(blockedStep(
   'authorized-platform-artifacts',
   'Core ML/LiteRT/Windows ML/MindSpore/Linux accelerated provider platform commands',
-  '缺少可追溯且获准的源模型、Windows x64/ARM64 与 Apple/Android/HarmonyOS 真实 runner，以及 CUDA/TensorRT/OpenVINO 环境。',
+  '源 .pt 与 ONNX 同源性已验证，但缺少覆盖 RimeCut 商业再分发/格式转换/派生产物的授权编号，且外部负责人尚未回传 Core ML、LiteRT、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。',
 ));
 const artifacts = [];
 for (const path of outputs) {

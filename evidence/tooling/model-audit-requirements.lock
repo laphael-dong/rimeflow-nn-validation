@@ -1,0 +1,8 @@
+# 任务 1.4 外部 .pt/ONNX 审计环境。PyTorch CPU wheel 使用官方 CPU index。
+numpy==2.4.4
+onnx==1.22.0
+onnxruntime==1.27.0
+onnxslim==0.1.94
+torch==2.12.1+cpu
+torchvision==0.27.1+cpu
+ultralytics==8.4.104

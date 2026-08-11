@@ -104,13 +104,18 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 39389,
-      "sha256": "00cc476d87c848e671d8f09e3e2a10b365fde2d37f0c974a8e3dd2aa454b0886"
+      "bytes": 39825,
+      "sha256": "db042add82dcb43591ec177ffe7f36f4ce4ae3e52091f69109e0fc36549c82aa"
+    },
+    {
+      "path": "evidence/reports/handoff-model-audit.json",
+      "bytes": 16431,
+      "sha256": "21e0911cd7c536f8e8bcd1cb2c70e466323e650c8a026c42a43deabc81e052cf"
     },
     {
       "path": "evidence/reports/model-provenance.json",
-      "bytes": 4088,
-      "sha256": "71465f80c5c34bb377b5281dff6ed27d87226234414066f475d02349d7ab9d9a"
+      "bytes": 5269,
+      "sha256": "1fa218eb63f67cfe2ac4073afa9efe6eec7d1f26beaa6f40be40f76521ebf7a4"
     },
     {
       "path": "evidence/reports/preprocess-conformance.json",
@@ -126,6 +131,11 @@
       "path": "evidence/tooling/requirements.lock",
       "bytes": 1869,
       "sha256": "9e3ef6cc02a646dc1ef184407b269dae322b77b970eddef366d46a6dfac306a8"
+    },
+    {
+      "path": "evidence/tooling/model-audit-requirements.lock",
+      "bytes": 214,
+      "sha256": "fa5485531e80b11b6ada856f32a87f4b69efeb3c3532e0e98d6958d4fe947f3e"
     },
     {
       "path": "evidence/tooling/raw-golden/src/lib.rs",

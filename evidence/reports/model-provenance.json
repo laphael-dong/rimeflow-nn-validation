@@ -24,17 +24,26 @@
     }
   },
   "declaredExportRecipe": {
-    "source": "README.md in firstRepositoryCommit",
-    "command": "pip install ultralytics && yolo export model=yolov8n.pt format=onnx simplify=True opset=17",
+    "source": "evidence/reports/handoff-model-audit.json",
+    "command": "$AUDIT_PYTHON -m ultralytics export model=$WORK/yolov8n.pt format=onnx imgsz=640 batch=1 simplify=True dynamic=False nms=False",
     "reproducible": false,
-    "reason": "命令没有锁定 ultralytics 或 yolov8n.pt digest；仓库历史没有提交 .pt、训练配置或导出日志。"
+    "semanticReproductionVerified": true,
+    "reason": "Ultralytics 写入导出时间，且 handoff 未提供原始完整依赖锁；当前重导出仅证明 I/O、权重和推理等价，不能复现候选 ONNX 的原始 SHA-256。",
+    "historicalUnpinnedCommand": "pip install ultralytics && yolo export model=yolov8n.pt format=onnx simplify=True opset=17"
   },
   "originalTrainingArtifact": {
     "path": null,
-    "version": null,
-    "sha256": null,
-    "sourceUrl": null,
-    "state": "unverifiable",
+    "logicalPath": "$HANDOFF_ASSETS/yolov8n.pt",
+    "version": "8.0.0.dev0",
+    "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+    "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
+    "sourceReleaseAssetId": 195719301,
+    "immutableSourceState": "mirror-required",
+    "state": "source-identified-and-weight-equivalent",
+    "evidence": {
+      "path": "evidence/reports/handoff-model-audit.json",
+      "sha256": "21e0911cd7c536f8e8bcd1cb2c70e466323e650c8a026c42a43deabc81e052cf"
+    },
     "gitPtArtifactCommits": []
   },
   "licensing": {
@@ -49,12 +58,13 @@
       "note": "外部 Ultralytics assets 与脚本生成 CC0 fixture 逐文件记录；不由仓库 MIT 统一覆盖。"
     },
     "originalWeights": {
+      "declaredByCheckpoint": "AGPL-3.0 License (https://ultralytics.com/license)",
       "declaredByOnnxMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
       "enterpriseLicenseEvidence": null,
-      "authorizationState": "unverified"
+      "authorizationState": "unverified-for-rimecut-commercial-redistribution"
     },
     "onnxWeights": {
-      "licenseState": "embedded metadata declares AGPL-3.0; exact original artifact and authorization are unresolved"
+      "licenseState": "source checkpoint and ONNX metadata declare AGPL-3.0; exact weights are traceable, but RimeCut authorization is unresolved"
     },
     "conversionArtifacts": {
       "licenseState": "inherit unresolved model-weight obligations plus converter/runtime terms",
@@ -62,17 +72,24 @@
     },
     "rimecutPackageRedistribution": {
       "allowed": false,
-      "reason": "没有可验证的原始权重来源、准确 .pt SHA 或 Ultralytics Enterprise 授权依据。"
+      "reason": "已验证原始 .pt 来源与准确 SHA，但没有 Ultralytics Enterprise 授权编号，也没有获批的 AGPL 分发合规结论。"
     }
   },
   "decision": {
     "task14": "blocked",
     "task1": "blocked",
     "publication": "prohibited",
-    "reason": "仓库 MIT 声明不能覆盖模型权重；在授权链闭环前禁止发布或分发 ONNX 及其转换产物。"
+    "reason": "模型来源与同源性已验证；仓库 MIT 仍不能覆盖 AGPL 模型权重，在商业授权或获批的 AGPL 合规方案闭环前禁止发布或分发 ONNX 及其转换产物。"
   },
   "tooling": {
     "python": "3.12.3",
-    "onnx": "1.22.0"
+    "onnx": "1.22.0",
+    "handoffAudit": {
+      "onnx": "1.22.0",
+      "onnxslim": "0.1.94",
+      "torch": "2.12.1+cpu",
+      "torchvision": "0.27.1+cpu",
+      "ultralytics": "8.4.104"
+    }
   }
 }

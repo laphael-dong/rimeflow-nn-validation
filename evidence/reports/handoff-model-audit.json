@@ -1,0 +1,415 @@
+{
+  "candidateOnnx": {
+    "bytes": 12769289,
+    "initializerCount": 143,
+    "inputs": [
+      {
+        "dtype": "FLOAT",
+        "name": "images",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "irVersion": 9,
+    "logicalPath": "$HANDOFF_ASSETS/yolov8n.onnx",
+    "metadata": {
+      "args": "{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': None, 'nms': False}",
+      "author": "Ultralytics",
+      "batch": "1",
+      "channels": "3",
+      "date": "2026-07-31T12:21:21.621252",
+      "description": "Ultralytics YOLOv8n model trained on coco.yaml",
+      "docs": "https://docs.ultralytics.com",
+      "end2end": "False",
+      "head": "Detect",
+      "imgsz": "[640, 640]",
+      "license": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "names": "{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}",
+      "stride": "32",
+      "task": "detect",
+      "version": "8.4.104"
+    },
+    "nmsInGraph": false,
+    "nodeCount": 233,
+    "operators": {
+      "Add": 8,
+      "Concat": 17,
+      "Conv": 64,
+      "Div": 1,
+      "MaxPool": 3,
+      "Mul": 58,
+      "Reshape": 8,
+      "Resize": 2,
+      "Sigmoid": 58,
+      "Slice": 2,
+      "Softmax": 1,
+      "Split": 8,
+      "Sub": 2,
+      "Transpose": 1
+    },
+    "opsets": [
+      {
+        "domain": "",
+        "version": 20
+      }
+    ],
+    "outputs": [
+      {
+        "dtype": "FLOAT",
+        "name": "output0",
+        "shape": [
+          1,
+          84,
+          8400
+        ]
+      }
+    ],
+    "sha256": "71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45",
+    "valueInfoCount": 240
+  },
+  "checkedOn": "2026-08-11",
+  "comparisons": {
+    "conclusion": "候选 ONNX、仓库参考 ONNX 和官方 checkpoint 使用同一组权重；ONNX 图的 opset/export metadata 不同，但固定输入结果等价。",
+    "inference": [
+      {
+        "candidateOnnxSha256Float32Le": "ce71e246b9909cfffe775286695511a054fc1e766621e9a526840a9c516d34f6",
+        "candidateReferenceExact": true,
+        "id": "zeros",
+        "inputSha256Float32Le": "f824c1a8a1128713f17dd8d1190d70e6012b509606d986e7a6c81e40b628df2b",
+        "ptCandidateAllclose": true,
+        "ptCandidateMaxAbsoluteDifference": 0.00115966796875,
+        "ptCandidateMeanAbsoluteDifference": 1.5683348021819053e-06,
+        "referenceOnnxSha256Float32Le": "ce71e246b9909cfffe775286695511a054fc1e766621e9a526840a9c516d34f6",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "torchRepeatExact": true,
+        "torchRuns": [
+          "2759567797d5ca65604515a586e9655392bad156fd7511925be6d757b18883c1",
+          "2759567797d5ca65604515a586e9655392bad156fd7511925be6d757b18883c1"
+        ]
+      },
+      {
+        "candidateOnnxSha256Float32Le": "b0730679a2e6114b4dfa952d07f2f556e4b50d966af4f203d0d29deca18ca08a",
+        "candidateReferenceExact": true,
+        "id": "gray114",
+        "inputSha256Float32Le": "d4e05bfc32af71b56bac53465531642c4a5824f39e042c89f34ffbc4884a7966",
+        "ptCandidateAllclose": true,
+        "ptCandidateMaxAbsoluteDifference": 0.002197265625,
+        "ptCandidateMeanAbsoluteDifference": 2.137446255185917e-06,
+        "referenceOnnxSha256Float32Le": "b0730679a2e6114b4dfa952d07f2f556e4b50d966af4f203d0d29deca18ca08a",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "torchRepeatExact": true,
+        "torchRuns": [
+          "d8cda9b3e90210e512548c26dfbf582ed4bd7fd29332079c7a4395ff0344d134",
+          "d8cda9b3e90210e512548c26dfbf582ed4bd7fd29332079c7a4395ff0344d134"
+        ]
+      },
+      {
+        "candidateOnnxSha256Float32Le": "6f98d088c4e648d0fcd3fdfc53800042e1aaa99781bb91290ed92511ef5c90d7",
+        "candidateReferenceExact": true,
+        "id": "seed20260811",
+        "inputSha256Float32Le": "56da2c02d8f2b85dc94b1ae5d87c569e4adc4e099ffffe67589d3a8e4ad230c8",
+        "ptCandidateAllclose": true,
+        "ptCandidateMaxAbsoluteDifference": 0.0008544921875,
+        "ptCandidateMeanAbsoluteDifference": 1.3388643778772117e-06,
+        "referenceOnnxSha256Float32Le": "6f98d088c4e648d0fcd3fdfc53800042e1aaa99781bb91290ed92511ef5c90d7",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "torchRepeatExact": true,
+        "torchRuns": [
+          "2e239fae1cc5e022e167536dcbe17e24417031d6e976e9c05c79b756e131aea4",
+          "2e239fae1cc5e022e167536dcbe17e24417031d6e976e9c05c79b756e131aea4"
+        ]
+      }
+    ],
+    "initializers": {
+      "commonCount": 143,
+      "exactEqualCount": 143,
+      "mismatches": [],
+      "onlyCandidate": [],
+      "onlyReference": [
+        "/model.22/Constant_13_output_0"
+      ]
+    },
+    "ptOnnxTolerance": {
+      "absolute": 1e-05,
+      "purpose": "仅用于 PyTorch 与 ONNX exporter 数值同源审计，不修改任务 1.3 已冻结的平台 golden 容差。",
+      "relative": 0.0001
+    }
+  },
+  "decision": {
+    "blockers": [
+      "RimeCut 商业/客户端再分发、格式转换和派生产物的 Enterprise 授权编号缺失",
+      "官方 release asset 不是不可变来源，尚未镜像到自有不可变制品库",
+      "委托给其他负责人的 Core ML、LiteRT v2、Windows ML、MindSpore Lite 和其余 Linux provider spike evidence 尚未回传"
+    ],
+    "ptAndOnnxTechnicalVerification": "passed",
+    "sourceTraceability": "verified-with-sha-but-needs-immutable-mirror",
+    "task14": "blocked",
+    "task14Complete": false
+  },
+  "licensing": {
+    "clientRedistribution": "not-approved-for-rimecut",
+    "commercialUse": "not-approved-for-rimecut",
+    "declaredByCandidateOnnx": "AGPL-3.0 License (https://ultralytics.com/license)",
+    "declaredByCheckpoint": "AGPL-3.0 License (https://ultralytics.com/license)",
+    "derivedArtifacts": "not-approved-for-rimecut",
+    "enterpriseOrCommercialAuthorizationReference": null,
+    "formatConversion": "not-approved-for-rimecut",
+    "publication": "prohibited",
+    "reason": "AGPL 可以用于商业活动但带有强 copyleft/网络交互义务；当前没有证据证明 RimeCut 的分发模式满足 AGPL，也没有 Enterprise 授权编号。",
+    "rightsHolder": "Ultralytics"
+  },
+  "reExport": {
+    "byteReproducibilityBlocker": "Ultralytics 写入导出时间，且 handoff 未提供原始完整依赖锁；当前重导出仅证明 I/O、权重和推理等价，不能复现候选 ONNX 的原始 SHA-256。",
+    "byteReproducible": false,
+    "command": "$AUDIT_PYTHON -m ultralytics export model=$WORK/yolov8n.pt format=onnx imgsz=640 batch=1 simplify=True dynamic=False nms=False",
+    "result": {
+      "ephemeralArtifact": {
+        "bytes": 12851101,
+        "initializerCount": 144,
+        "inputs": [
+          {
+            "dtype": "FLOAT",
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ]
+          }
+        ],
+        "irVersion": 9,
+        "metadata": {
+          "args": "{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': None, 'nms': False}",
+          "author": "Ultralytics",
+          "batch": "1",
+          "channels": "3",
+          "date": "2026-08-11T14:18:34.900252",
+          "description": "Ultralytics YOLOv8n model trained on coco.yaml",
+          "docs": "https://docs.ultralytics.com",
+          "end2end": "False",
+          "head": "Detect",
+          "imgsz": "[640, 640]",
+          "license": "AGPL-3.0 License (https://ultralytics.com/license)",
+          "names": "{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}",
+          "stride": "32",
+          "task": "detect",
+          "version": "8.4.104"
+        },
+        "nmsInGraph": false,
+        "nodeCount": 233,
+        "operators": {
+          "Add": 8,
+          "Concat": 17,
+          "Conv": 64,
+          "Div": 1,
+          "MaxPool": 3,
+          "Mul": 58,
+          "Reshape": 8,
+          "Resize": 2,
+          "Sigmoid": 58,
+          "Slice": 2,
+          "Softmax": 1,
+          "Split": 8,
+          "Sub": 2,
+          "Transpose": 1
+        },
+        "opsets": [
+          {
+            "domain": "",
+            "version": 20
+          }
+        ],
+        "outputs": [
+          {
+            "dtype": "FLOAT",
+            "name": "output0",
+            "shape": [
+              1,
+              84,
+              8400
+            ]
+          }
+        ],
+        "sha256": "d0db9618127f1da26131f29819552f9ed62669a2ffae0bb5c665300dc81c20d8",
+        "valueInfoCount": 481
+      },
+      "initializerComparison": {
+        "commonCount": 143,
+        "exactEqualCount": 143,
+        "mismatches": [],
+        "onlyCandidate": [
+          "/model.22/Constant_13_output_0"
+        ],
+        "onlyReference": []
+      },
+      "publication": "prohibited",
+      "seed20260811OutputExact": true
+    },
+    "toolVersions": {
+      "onnx": "1.22.0",
+      "onnxslim": "0.1.94",
+      "torch": "2.12.1+cpu",
+      "torchvision": "0.27.1+cpu",
+      "ultralytics": "8.4.104"
+    }
+  },
+  "referenceOnnx": {
+    "bytes": 12851098,
+    "initializerCount": 144,
+    "inputs": [
+      {
+        "dtype": "FLOAT",
+        "name": "images",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "irVersion": 8,
+    "logicalPath": "models/yolov8n.onnx",
+    "metadata": {
+      "args": "{'data': None, 'batch': 1, 'fraction': 1.0, 'quantize': None, 'dynamic': False, 'simplify': True, 'opset': 17, 'nms': False}",
+      "author": "Ultralytics",
+      "batch": "1",
+      "channels": "3",
+      "date": "2026-07-07T14:57:25.224955",
+      "description": "Ultralytics YOLOv8n model trained on coco.yaml",
+      "docs": "https://docs.ultralytics.com",
+      "end2end": "False",
+      "head": "Detect",
+      "imgsz": "[640, 640]",
+      "license": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "names": "{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}",
+      "stride": "32",
+      "task": "detect",
+      "version": "8.4.90"
+    },
+    "nmsInGraph": false,
+    "nodeCount": 233,
+    "operators": {
+      "Add": 8,
+      "Concat": 17,
+      "Conv": 64,
+      "Div": 1,
+      "MaxPool": 3,
+      "Mul": 58,
+      "Reshape": 8,
+      "Resize": 2,
+      "Sigmoid": 58,
+      "Slice": 2,
+      "Softmax": 1,
+      "Split": 8,
+      "Sub": 2,
+      "Transpose": 1
+    },
+    "opsets": [
+      {
+        "domain": "",
+        "version": 17
+      }
+    ],
+    "outputs": [
+      {
+        "dtype": "FLOAT",
+        "name": "output0",
+        "shape": [
+          1,
+          84,
+          8400
+        ]
+      }
+    ],
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "valueInfoCount": 481
+  },
+  "schemaVersion": 1,
+  "scope": {
+    "delegated": [
+      "Core ML",
+      "LiteRT v2",
+      "Windows ML",
+      "MindSpore Lite",
+      "其他真实平台 runner"
+    ],
+    "doesNotReplaceFrozenGolden": true,
+    "verified": [
+      "source .pt",
+      "candidate ONNX",
+      "Linux x86_64 ORT CPU"
+    ]
+  },
+  "sourceCheckpoint": {
+    "bytes": 6549796,
+    "checkpoint": {
+      "date": "2022-12-30T00:12:08.084698",
+      "docs": "https://docs.ultralytics.com",
+      "epoch": -1,
+      "license": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "training": {
+        "data": "coco.yaml",
+        "deterministic": true,
+        "epochs": 500,
+        "imgsz": 640,
+        "model": "yolov8n.yaml",
+        "seed": 0,
+        "source": "ultralytics/assets/"
+      },
+      "version": "8.0.0.dev0"
+    },
+    "logicalPath": "$HANDOFF_ASSETS/yolov8n.pt",
+    "model": {
+      "class": "ultralytics.nn.tasks.DetectionModel",
+      "classCount": 80,
+      "parameterCount": 3157200,
+      "stateDictSha256": "6b21b4b042752dd0b974bcc9e74800c4efd5a2145f09f7701d686fc7d7deb723",
+      "stride": [
+        8.0,
+        16.0,
+        32.0
+      ]
+    },
+    "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+    "upstream": {
+      "assetId": 195719301,
+      "downloadUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
+      "downloadedBytesSha256Matched": true,
+      "immutabilityConclusion": "官方 release asset 当前字节已匹配，但 release 可变且 API 未提供 digest；采用前必须镜像到自有不可变制品库并保留同一 SHA-256。",
+      "releaseApi": "https://api.github.com/repos/ultralytics/assets/releases/177482232",
+      "releaseId": 177482232,
+      "releaseImmutable": false,
+      "repository": "https://github.com/ultralytics/assets",
+      "tag": "v8.3.0"
+    }
+  },
+  "tooling": {
+    "numpy": "2.4.4",
+    "onnxruntime": "1.27.0",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "providers": [
+      "CPUExecutionProvider"
+    ],
+    "python": "3.12.3",
+    "requirementsLock": "evidence/tooling/model-audit-requirements.lock",
+    "requirementsLockSha256": "fa5485531e80b11b6ada856f32a87f4b69efeb3c3532e0e98d6958d4fe947f3e"
+  }
+}

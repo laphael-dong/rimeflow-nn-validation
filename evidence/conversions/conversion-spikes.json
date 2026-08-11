@@ -35,13 +35,17 @@
         "error": "Unable to determine the type of the model, i.e. the source framework. Please provide the value of argument \"source\", from one of [\"tensorflow\", \"pytorch\", \"milinternal\"]. Note that model conversion requires the source package that generates the model. Please make sure you have the appropriate version of source package installed. E.g., if you're converting model originally trained with TensorFlow 1.14, make sure you have `tensorflow==1.14` installed."
       },
       "artifact": null,
+      "sourceCheckpoint": {
+        "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "auditPath": "evidence/reports/handoff-model-audit.json"
+      },
       "ioChanges": "未生成 artifact；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]",
       "quantization": "未执行",
       "nmsResponsibility": "operator",
-      "failedOperator": "source framework discovery before MIL conversion",
-      "license": "coremltools BSD；模型 ONNX metadata 声明 AGPL-3.0，准确原始权重与授权未确认",
-      "redistribution": "缺少同源 .pt/ExportedProgram 和授权依据，禁止发布 artifact",
-      "conclusion": "coremltools 9.0 官方入口只接受 TensorFlow/PyTorch/MIL；真实 ct.convert(source=auto) 拒绝 ONNX。仓库没有可验证的同源 .pt，无法进入获准转换或 golden 等价验证。"
+      "failedOperator": "delegated Apple conversion/runner evidence not returned",
+      "license": "coremltools BSD；模型 checkpoint/ONNX 声明 AGPL-3.0，RimeCut Enterprise/商业授权未确认",
+      "redistribution": "同源 .pt 已验证，但授权依据缺失，禁止发布 artifact",
+      "conclusion": "coremltools 9.0 官方入口不直接接受 ONNX；同源 .pt 已由独立审计确认，但本机不是 macOS，Core ML 转换与真实 runner spike 已委托外部负责人，证据回传前保持 blocked。"
     },
     {
       "platform": "android",
@@ -68,13 +72,17 @@
         "error": "The model is not a valid Flatbuffer buffer"
       },
       "artifact": null,
+      "sourceCheckpoint": {
+        "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "auditPath": "evidence/reports/handoff-model-audit.json"
+      },
       "ioChanges": "未生成 TFLite；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]",
       "quantization": "未执行",
       "nmsResponsibility": "operator",
-      "failedOperator": "TFLite FlatBuffer identifier validation before graph load",
-      "license": "ai-edge-litert Apache-2.0；模型权重授权未确认",
-      "redistribution": "缺少获准且可追溯的 SavedModel/TFLite 导出链，禁止发布 artifact",
-      "conclusion": "ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；真实 Interpreter 加载原 ONNX 在格式标识校验阶段失败。仓库没有可验证同源源模型，且无 Android 设备。"
+      "failedOperator": "delegated LiteRT conversion/runner evidence not returned",
+      "license": "ai-edge-litert Apache-2.0；模型 checkpoint/ONNX 声明 AGPL-3.0，RimeCut 授权未确认",
+      "redistribution": "同源 .pt 已验证，但获准 TFLite 导出链和授权依据缺失，禁止发布 artifact",
+      "conclusion": "ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；同源 .pt 已验证，LiteRT 转换和 Android 真实设备证据已委托外部负责人，回传前保持 blocked。"
     },
     {
       "platform": "windows-x86_64-and-arm64",

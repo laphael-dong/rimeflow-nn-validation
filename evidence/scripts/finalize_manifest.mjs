@@ -17,10 +17,12 @@ const paths = [
   'evidence/golden/coverage-matrix.json',
   'evidence/golden/web-reference.json',
   'evidence/conversions/conversion-spikes.json',
+  'evidence/reports/handoff-model-audit.json',
   'evidence/reports/model-provenance.json',
   'evidence/reports/preprocess-conformance.json',
   'evidence/reports/web-wasm-performance.json',
   'evidence/tooling/requirements.lock',
+  'evidence/tooling/model-audit-requirements.lock',
   'evidence/tooling/raw-golden/src/lib.rs',
   'evidence/tooling/raw-golden/src/main.rs',
 ];
