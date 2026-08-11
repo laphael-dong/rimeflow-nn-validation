@@ -203,39 +203,74 @@
       "conclusion": "官方 PyTorch/Ultralytics LiteRT 路径已生成 FP32 TFLite，并由 host ai-edge-litert 2.1.6 完成真实 Load/Run 与冻结 Web golden；尚无 Android arm64 真机 runner，不能标记 supported。"
     },
     {
-      "platform": "windows-x86_64-and-arm64",
+      "platform": "windows",
       "format": "onnx",
       "state": "blocked",
-      "conversion": "无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入",
+      "supported": false,
+      "task14Complete": false,
+      "conversion": "无格式转换：不生成、复制或修改第二份 ONNX；Microsoft.WindowsAppSDK.ML 2.1.74 提供 Windows ML catalog 与 ONNX Runtime API，runner 直接加载规范 models/yolov8n.onnx",
       "tool": {
-        "name": "Windows ML / Windows App SDK",
-        "version": "1.8 target; unavailable on Linux host",
-        "officialSource": "https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models"
+        "name": "Windows ML / Microsoft.WindowsAppSDK.ML",
+        "version": "2.1.74",
+        "runtimePackage": "Microsoft.Windows.AI.MachineLearning 2.1.74",
+        "bundledOrtObservedInPackage": "1.24.6",
+        "dotnetSdk": "8.0.423",
+        "officialSource": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/api-reference",
+        "packageSource": "https://www.nuget.org/packages/Microsoft.WindowsAppSDK.ML/2.1.74"
       },
       "attempt": {
-        "command": [
+        "initialCommand": [
           "dotnet",
           "--info"
         ],
-        "exitCode": null,
-        "signal": null,
-        "stdout": "",
-        "stderr": "executable unavailable: dotnet",
-        "logNormalization": "仅将仓库绝对路径替换为 $REPO，并将 converter_lite 的时间戳/PID/thread 替换为占位符；其余 stdout/stderr 逐字保留",
-        "requiredRunnerCommand": "dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin",
-        "requiredApi": "Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)"
+        "initialExitCode": 127,
+        "initialStderr": "/bin/bash: line 1: dotnet: command not found",
+        "temporarySdkRestoreExecuted": true,
+        "lockedRestoreExitCode": 0,
+        "x64StaticCompileExitCode": 0,
+        "arm64StaticCompileExitCode": 0,
+        "windowsSelfContainedBuildExitCode": 1,
+        "windowsSelfContainedBuildBlocker": "Linux 无法执行 Windows SDK mt.exe/MakePri.exe；不能标记 build-verified",
+        "requiredApi": "Microsoft.Windows.AI.MachineLearning.ExecutionProviderCatalog.RegisterCertifiedAsync + Microsoft.ML.OnnxRuntime OrtEnv.GetEpDevices/SessionOptions.AppendExecutionProvider/InferenceSession/GetEpDeviceForInputs/profiling",
+        "manifest": "evidence/conversions/windows-ml-spike-manifest.json",
+        "report": "evidence/reports/windows-ml-spike-report.json"
       },
       "artifact": {
         "path": "models/yolov8n.onnx",
-        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+        "bytes": 12851098,
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+        "noConversion": true,
+        "copiesCreated": 0
       },
-      "ioChanges": "none",
+      "targets": {
+        "win-x64": {
+          "arch": "x86_64",
+          "runnerPrepared": true,
+          "buildVerified": false,
+          "runtimeExecuted": false,
+          "runtimeVerified": false,
+          "goldenExecuted": false,
+          "supported": false,
+          "blocker": "缺真实 Windows x64 runner 的 Load/Run、runtime introspection 与 golden。"
+        },
+        "win-arm64": {
+          "arch": "arm64",
+          "runnerPrepared": true,
+          "buildVerified": false,
+          "runtimeExecuted": false,
+          "runtimeVerified": false,
+          "goldenExecuted": false,
+          "supported": false,
+          "blocker": "缺独立真实 Windows ARM64 runner；x64、ARM64EC、模拟器和交叉 publish 均不能替代。"
+        }
+      },
+      "ioChanges": "none；runtime 必须 introspect images/FP32/[1,3,640,640] 与 output0/FP32/[1,84,8400]",
       "quantization": "none",
-      "nmsResponsibility": "operator",
-      "failedOperator": "Windows runner/toolchain discovery before Windows ML model load",
-      "license": "Windows ML follows Windows App SDK terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
-      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。"
+      "nmsResponsibility": "operator；raw little-endian FP32 交给 evidence/tooling/raw-golden 复用生产 src/postprocess.rs",
+      "failedOperator": "Windows x64 与 ARM64 真实 runner 均未执行",
+      "license": "Microsoft Windows App SDK and Windows ML Software License Terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "规范 ONNX 只原路径引用；模型、NuGet/SDK cache、bin/obj、publish 和临时输出均不进入 Git、RimeCut 产品包或发布目录",
+      "conclusion": "runner、精确依赖锁和证据契约已准备，Linux 仅完成 locked restore 与双 RID C# 静态编译；没有真实 Windows x64/ARM64 Load/Run，保持 blocked、supported=false、task14Complete=false。"
     },
     {
       "platform": "harmonyos",

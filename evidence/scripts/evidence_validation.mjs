@@ -1,11 +1,125 @@
 import { createHash } from 'node:crypto';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const FIXTURE_LICENSE_SHA256 = '0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0';
 const UPSTREAM_ASSETS_COMMIT = '42ef8a125df038dcca49f6216f446fe9112946c1';
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+
+const WINDOWS_MODEL_SHA256 = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad';
+const WINDOWS_PACKAGE_VERSION = '2.1.74';
+const WINDOWS_DOTNET_RUNTIME_VERSION = '8.0.29';
+const WINDOWS_LOCK_SHA256 = '4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255';
+
+function validateWindowsRuntimeClaim(targetId, target, runtimeEvidence) {
+  if (!target.runtimeVerified) return;
+  if (!target.runtimeExecuted || !target.runtimeIntrospectionComplete || !target.goldenExecuted) throw new Error(`${targetId}: runtime verified without execution/introspection/golden`);
+  if (!runtimeEvidence || runtimeEvidence.target !== targetId || runtimeEvidence.state !== 'runtime-verified') throw new Error(`${targetId}: runtime evidence missing or belongs to another architecture`);
+  const expectedArchitecture = targetId === 'win-x64' ? 'X64' : 'Arm64';
+  if (runtimeEvidence.host?.os !== 'windows' || runtimeEvidence.host?.processArchitecture !== expectedArchitecture || runtimeEvidence.host?.osArchitecture !== expectedArchitecture) throw new Error(`${targetId}: Linux ORT or wrong-architecture runtime evidence`);
+  if (runtimeEvidence.runtime?.dotnetRuntimeVersion !== WINDOWS_DOTNET_RUNTIME_VERSION) throw new Error(`${targetId}: .NET runtime version drift`);
+  if (!runtimeEvidence.windowsMlApiCalled || runtimeEvidence.runtime?.sourcePackage?.id !== 'Microsoft.WindowsAppSDK.ML' || runtimeEvidence.runtime.sourcePackage.version !== WINDOWS_PACKAGE_VERSION) throw new Error(`${targetId}: ordinary ORT claimed as Windows ML`);
+  if (runtimeEvidence.runtime?.sdk?.version !== '8.0.423' || !runtimeEvidence.runtime.sdk.source?.includes('dotnet --version executed at runtime')) throw new Error(`${targetId}: .NET SDK runtime introspection drift`);
+  const modules = runtimeEvidence.runtime.loadedModules;
+  if (!Array.isArray(modules) || !modules.some((item) => item.name?.toLowerCase() === 'onnxruntime.dll' && /^[0-9a-f]{64}$/.test(item.sha256)) || !modules.some((item) => item.name?.toLowerCase() === 'microsoft.windows.ai.machinelearning.dll' && /^[0-9a-f]{64}$/.test(item.sha256))) throw new Error(`${targetId}: loaded Windows ML modules not introspected`);
+  const input = runtimeEvidence.input;
+  const output = runtimeEvidence.output;
+  if (input?.count !== 1 || input.name !== 'images' || input.dtype !== 'float32' || JSON.stringify(input.shape) !== '[1,3,640,640]' || input.elementCount !== 1228800 || input.finiteCount !== input.elementCount) throw new Error(`${targetId}: runtime input introspection drift`);
+  if (output?.count !== 1 || output.name !== 'output0' || output.dtype !== 'float32' || JSON.stringify(output.shape) !== '[1,84,8400]' || output.elementCount !== 705600 || output.finiteCount !== output.elementCount) throw new Error(`${targetId}: runtime output introspection drift`);
+  if (!runtimeEvidence.model?.noConversion || runtimeEvidence.model.sha256 !== WINDOWS_MODEL_SHA256) throw new Error(`${targetId}: runtime model identity drift`);
+  const execution = runtimeEvidence.execution;
+  if (!Array.isArray(execution?.availableDevices) || execution.availableDevices.length === 0 || !execution.selectedDevice?.epName || !Array.isArray(execution.sessionInputDevices) || execution.sessionInputDevices.length !== 1 || !execution.sessionInputDevices[0]?.epName || !Array.isArray(execution.profileProviders) || execution.profileProviders.length === 0) throw new Error(`${targetId}: provider/device/profile introspection missing`);
+  if (execution.claimedProvider && !execution.profileProviders.includes(execution.claimedProvider)) throw new Error(`${targetId}: claimed provider differs from ORT profile`);
+  if (execution.profileProviders.every((provider) => provider === 'CPUExecutionProvider') && runtimeEvidence.runtime.sourcePackage.id !== 'Microsoft.WindowsAppSDK.ML') throw new Error(`${targetId}: ordinary CPU ORT claimed as Windows ML provider`);
+}
+
+export async function validateWindowsMlEvidence(root, conversion, manifest, report) {
+  if (manifest.schemaVersion !== 1 || report.schemaVersion !== 1) throw new Error('Windows ML schema version drift');
+  if (manifest.state !== report.state || manifest.supported !== report.supported || manifest.supported !== conversion.supported || manifest.task14Complete !== report.task14Complete || manifest.task14Complete !== conversion.task14Complete) throw new Error('Windows ML state/support/task evidence disagreement');
+  if (manifest.supported ? manifest.state !== 'supported' || !manifest.task14Complete : manifest.state !== 'blocked' || manifest.task14Complete) throw new Error('Windows ML blocked/support/task state overclaim');
+  if (!manifest.canonicalOnnx.noConversion || !report.noConversion || !report.canonicalOnnx || manifest.canonicalOnnx.convertedArtifacts.length !== 0 || manifest.canonicalOnnx.copyOrMutationAllowed || report.canonicalOnnx.copiesCreated !== 0 || report.canonicalOnnx.mutated) throw new Error('Windows ML must use canonical ONNX without conversion/copy/mutation');
+  const modelBytes = await readFile(resolve(root, 'models/yolov8n.onnx'));
+  for (const identity of [manifest.canonicalOnnx, report.canonicalOnnx, conversion.artifact]) {
+    if (identity.path !== 'models/yolov8n.onnx' || identity.bytes !== modelBytes.length || identity.sha256 !== WINDOWS_MODEL_SHA256 || identity.sha256 !== sha256(modelBytes)) throw new Error('Windows ML canonical ONNX identity drift');
+  }
+
+  const targetIds = ['win-x64', 'win-arm64'];
+  if (JSON.stringify(Object.keys(manifest.targets)) !== JSON.stringify(targetIds) || JSON.stringify(Object.keys(report.targets)) !== JSON.stringify(targetIds) || JSON.stringify(Object.keys(conversion.targets)) !== JSON.stringify(targetIds)) throw new Error('Windows ML x64/ARM64 targets must be separate and complete');
+  for (const targetId of targetIds) {
+    const target = report.targets[targetId];
+    const manifestTarget = manifest.targets[targetId];
+    const conversionTarget = conversion.targets[targetId];
+    if (!target.runnerPrepared || !manifestTarget.runner || !conversionTarget.runnerPrepared || !target.restoreExecuted || !target.staticCompileExecuted || !target.staticCompileVerified) throw new Error(`${targetId}: runner/restore/static compile preparation missing`);
+    for (const field of ['runtimeExecuted', 'runtimeVerified', 'goldenExecuted', 'supported']) {
+      if (target[field] !== manifestTarget[field] || target[field] !== conversionTarget[field]) throw new Error(`${targetId}: ${field} disagrees across report/manifest/conversion evidence`);
+    }
+    if (target.buildVerified !== manifestTarget.build.buildVerified || target.buildVerified !== conversionTarget.buildVerified) throw new Error(`${targetId}: build verification disagrees across report/manifest/conversion evidence`);
+    if (target.supported && (!target.runtimeVerified || !target.goldenExecuted)) throw new Error(`${targetId}: supported without runtime/golden verification`);
+    validateWindowsRuntimeClaim(targetId, target, report.runtimeEvidence?.[targetId]);
+  }
+  if (manifest.supported || report.supported || conversion.supported) {
+    for (const targetId of targetIds) {
+      const target = report.targets[targetId];
+      if (!target.runtimeVerified || !target.goldenExecuted || !target.supported) throw new Error('Windows ML supported requires real x64 and ARM64 runner evidence');
+    }
+  }
+
+  const input = manifest.ioContract.inputs[0];
+  const output = manifest.ioContract.outputs[0];
+  if (manifest.ioContract.inputs.length !== 1 || input.name !== 'images' || input.dtype !== 'float32' || input.layout !== 'NCHW' || JSON.stringify(input.shape) !== '[1,3,640,640]' || input.elementCount !== 1228800 || input.quantization !== null) throw new Error('Windows ML manifest input contract drift');
+  if (manifest.ioContract.outputs.length !== 1 || output.name !== 'output0' || output.dtype !== 'float32' || output.layout !== 'N_ATTRIBUTES_ANCHORS' || JSON.stringify(output.shape) !== '[1,84,8400]' || output.elementCount !== 705600 || output.quantization !== null) throw new Error('Windows ML manifest output contract drift');
+  if (manifest.ioContract.nms.fused || manifest.ioContract.nms.owner !== 'operator' || manifest.ioContract.nms.windowsSpecificImplementationAllowed || !manifest.ioContract.postprocessing.includes('src/postprocess.rs')) throw new Error('Windows ML NMS/postprocess ownership drift');
+  const officialApi = manifest.runner.officialApi;
+  if (manifest.runner.ordinaryOrtPackageReferenced || !manifest.runner.windowsMlApiRequired || officialApi.catalogNamespace !== 'Microsoft.Windows.AI.MachineLearning' || officialApi.catalogType !== 'ExecutionProviderCatalog' || officialApi.catalogMethod !== 'RegisterCertifiedAsync' || officialApi.sessionNamespace !== 'Microsoft.ML.OnnxRuntime' || officialApi.sessionType !== 'InferenceSession') throw new Error('Windows ML official catalog/session API drift');
+  for (const api of ['OrtEnv.GetEpDevices', 'SessionOptions.AppendExecutionProvider', 'InferenceSession.GetEpDeviceForInputs', 'InferenceSession.EndProfiling']) if (!officialApi.deviceApis.includes(api)) throw new Error(`Windows ML provider introspection API drift: ${api}`);
+
+  const project = await readFile(resolve(root, manifest.runner.project), 'utf8');
+  if (!project.includes('<TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>') || !project.includes('<RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>') || !project.includes('<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>') || !project.includes('<UseAppHost>false</UseAppHost>')) throw new Error('Windows ML project target/deployment drift');
+  if (!project.includes('<PackageReference Include="Microsoft.WindowsAppSDK.ML" Version="[2.1.74]" />') || !project.includes('<PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="[2.1.74]" />') || /<PackageReference[^>]+Version="[^"]*[*+]/.test(project) || /PackageReference Include="Microsoft\.ML\.OnnxRuntime"/.test(project)) throw new Error('Windows ML project package pin/source drift');
+  const globalJson = JSON.parse(await readFile(resolve(root, 'evidence/tooling/windows-ml-runner/global.json'), 'utf8'));
+  if (globalJson.sdk.version !== '8.0.423' || globalJson.sdk.rollForward !== 'disable' || globalJson.sdk.allowPrerelease) throw new Error('Windows ML exact SDK pin missing');
+  const lockPath = resolve(root, manifest.dependencies.lockFile.path);
+  const lockBytes = await readFile(lockPath);
+  if (sha256(lockBytes) !== WINDOWS_LOCK_SHA256 || manifest.dependencies.lockFile.sha256 !== WINDOWS_LOCK_SHA256 || report.dependencies.lockFile.sha256 !== WINDOWS_LOCK_SHA256) throw new Error('Windows ML lock file SHA drift');
+  const lock = JSON.parse(lockBytes);
+  for (const framework of ['net8.0-windows10.0.17763', 'net8.0-windows10.0.17763/win-x64', 'net8.0-windows10.0.17763/win-arm64']) if (!lock.dependencies[framework]) throw new Error(`Windows ML lock missing ${framework}`);
+  const locked = lock.dependencies['net8.0-windows10.0.17763'];
+  for (const [id, version] of [['Microsoft.WindowsAppSDK.ML', WINDOWS_PACKAGE_VERSION], ['Microsoft.Windows.AI.MachineLearning', WINDOWS_PACKAGE_VERSION]]) {
+    if (locked[id]?.type !== 'Direct' || locked[id].requested !== `[${version}, ${version}]` || locked[id].resolved !== version || !/^[A-Za-z0-9+/]{86}==$/.test(locked[id].contentHash)) throw new Error(`Windows ML lock package drift: ${id}`);
+  }
+  if (manifest.dependencies.windowsMlPackage.version !== WINDOWS_PACKAGE_VERSION || manifest.dependencies.windowsMlRuntimePackage.version !== WINDOWS_PACKAGE_VERSION || manifest.dependencies.dotnetSdk !== '8.0.423' || manifest.dependencies.dotnetRuntime !== WINDOWS_DOTNET_RUNTIME_VERSION || report.dependencies.dotnetRuntime !== WINDOWS_DOTNET_RUNTIME_VERSION || /[*+]/.test(JSON.stringify(manifest.dependencies))) throw new Error('Windows ML manifest contains missing/floating package, SDK, or runtime version');
+
+  const requiredReferenceUrls = [
+    'https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview',
+    'https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/api-reference',
+    'https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/distributing-your-app',
+    'https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/select-execution-providers',
+  ];
+  if (!Array.isArray(report.officialReferences) || requiredReferenceUrls.some((url) => !report.officialReferences.some((item) => item.url === url && item.pageTitle && item.accessedAt.startsWith('2026-08-11T') && item.selectionFact))) throw new Error('Windows ML official reference/title/access time/selection basis missing');
+  if (!report.selectionBasis || !report.previousDescriptionDifference?.old || !report.previousDescriptionDifference?.current) throw new Error('Windows ML selection basis or old/new API difference missing');
+  if (report.currentHost.os !== 'Linux' || report.currentHost.arch !== 'x86_64' || report.currentHost.windowsRuntimeAvailable) throw new Error('Windows ML preparation host state drift');
+  for (const target of Object.values(manifest.targets)) if (!target.runCommand.startsWith(`dotnet --fx-version ${WINDOWS_DOTNET_RUNTIME_VERSION} `)) throw new Error('Windows ML exact .NET runtime run command missing');
+  if (report.artifactHandling.secondOnnxGenerated || report.artifactHandling.canonicalOnnxCopied || report.artifactHandling.canonicalOnnxModified || report.artifactHandling.productOrReleaseDirectoryTouched || report.artifactHandling.rimecutTouched) throw new Error('Windows ML artifact publication boundary violated');
+  if (manifest.publicationExclusions.some((item) => /(^|\/)(release|dist)(\/|$)/i.test(item) && !item.includes('RimeCut'))) throw new Error('Windows ML artifact unexpectedly points into a publication directory');
+
+  const runnerSource = await readFile(resolve(root, 'evidence/tooling/windows-ml-runner/Program.cs'), 'utf8');
+  for (const symbol of ['ExecutionProviderCatalog.GetDefault', 'RegisterCertifiedAsync', 'OrtEnv.Instance', 'GetEpDevices', 'AppendExecutionProvider', 'new InferenceSession', 'InputMetadata', 'OutputMetadata', 'GetEpDeviceForInputs', 'EndProfiling', 'GetVersionString', 'Process.GetCurrentProcess().Modules', 'sourcePackage = new', 'os = OperatingSystem.IsWindows()', 'new ProcessStartInfo("dotnet", "--version")']) if (!runnerSource.includes(symbol)) throw new Error(`Windows ML runner introspection API missing: ${symbol}`);
+  if (!runnerSource.includes('OperatingSystem.IsWindows()') || runnerSource.includes('AppendExecutionProvider_CPU') || runnerSource.includes('Microsoft.ML.OnnxRuntime.Gpu')) throw new Error('Windows ML runner permits ordinary/non-Windows ORT path');
+
+  async function walk(directory, prefix = '') {
+    const found = [];
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) found.push(...await walk(resolve(directory, entry.name), relative)); else found.push(relative);
+    }
+    return found;
+  }
+  const runnerFiles = await walk(resolve(root, 'evidence/tooling/windows-ml-runner'));
+  if (runnerFiles.some((path) => /(^|\/)(bin|obj|publish)(\/|$)|\.(dll|exe|nupkg|onnx)$/i.test(path))) throw new Error('Windows ML runner contains build/package/model binary output');
+  const trackedOnnx = spawnSync('git', ['ls-files', '*.onnx'], { cwd: root, encoding: 'utf8' }).stdout.trim().split('\n').filter(Boolean);
+  if (JSON.stringify(trackedOnnx) !== '["models/yolov8n.onnx"]') throw new Error('Windows ML spike added a second tracked ONNX');
+}
 
 export async function isGitTracked(root, path) {
   const result = spawnSync('git', ['ls-files', '--error-unmatch', '--', path], {

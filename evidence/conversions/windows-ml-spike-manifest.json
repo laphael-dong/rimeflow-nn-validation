@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "yolov8n-windows-ml-compatibility-spike",
+  "state": "blocked",
+  "supported": false,
+  "task14Complete": false,
+  "canonicalOnnx": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "format": "ONNX",
+    "noConversion": true,
+    "convertedArtifacts": [],
+    "copyOrMutationAllowed": false
+  },
+  "runner": {
+    "project": "evidence/tooling/windows-ml-runner/WindowsMlSpike.csproj",
+    "language": "C# 12",
+    "targetFramework": "net8.0-windows10.0.17763.0",
+    "deployment": "self-contained Windows ML libraries; framework-dependent .NET 8 host",
+    "officialApi": {
+      "catalogNamespace": "Microsoft.Windows.AI.MachineLearning",
+      "catalogType": "ExecutionProviderCatalog",
+      "catalogMethod": "RegisterCertifiedAsync",
+      "sessionNamespace": "Microsoft.ML.OnnxRuntime",
+      "sessionType": "InferenceSession",
+      "deviceApis": [
+        "OrtEnv.GetEpDevices",
+        "SessionOptions.AppendExecutionProvider",
+        "InferenceSession.GetEpDeviceForInputs",
+        "InferenceSession.EndProfiling"
+      ]
+    },
+    "ordinaryOrtPackageReferenced": false,
+    "windowsMlApiRequired": true
+  },
+  "ioContract": {
+    "inputs": [
+      {
+        "name": "images",
+        "index": 0,
+        "count": 1,
+        "shape": [1, 3, 640, 640],
+        "layout": "NCHW",
+        "dtype": "float32",
+        "elementCount": 1228800,
+        "byteOrder": "little-endian",
+        "quantization": null,
+        "owner": "runtime-adapter"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output0",
+        "index": 0,
+        "count": 1,
+        "shape": [1, 84, 8400],
+        "layout": "N_ATTRIBUTES_ANCHORS",
+        "dtype": "float32",
+        "elementCount": 705600,
+        "byteOrder": "little-endian",
+        "quantization": null,
+        "owner": "operator"
+      }
+    ],
+    "preprocessing": "operator/runtime adapter: letterbox, RGB, divide by 255 and NCHW FP32 exactly once",
+    "postprocessing": "single production src/postprocess.rs through evidence/tooling/raw-golden",
+    "nms": {
+      "fused": false,
+      "owner": "operator",
+      "windowsSpecificImplementationAllowed": false
+    }
+  },
+  "dependencies": {
+    "dotnetSdk": "8.0.423",
+    "dotnetRuntime": "8.0.29",
+    "windowsMlPackage": {
+      "id": "Microsoft.WindowsAppSDK.ML",
+      "version": "2.1.74",
+      "projectVersionRange": "[2.1.74]",
+      "nupkgSha256": "4a5150b09300fb52b2db94927b4c791d887b82a329d53d81a7fca147b37b9d15",
+      "license": "Microsoft Software License Terms: Microsoft Windows App SDK and Windows Machine Learning",
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.windowsappsdk.ml/2.1.74/microsoft.windowsappsdk.ml.2.1.74.nupkg"
+    },
+    "windowsMlRuntimePackage": {
+      "id": "Microsoft.Windows.AI.MachineLearning",
+      "version": "2.1.74",
+      "projectVersionRange": "[2.1.74]",
+      "nupkgSha256": "691165fa3c07a04b752cbf4a07e93ed13a418e9dea1ee89eb163d2225e2ba3af",
+      "bundledOrtObservedInPackage": "1.24.6",
+      "license": "Microsoft Software License Terms: Microsoft Windows App SDK and Windows Machine Learning",
+      "source": "https://api.nuget.org/v3-flatcontainer/microsoft.windows.ai.machinelearning/2.1.74/microsoft.windows.ai.machinelearning.2.1.74.nupkg"
+    },
+    "lockFile": {
+      "path": "evidence/tooling/windows-ml-runner/packages.lock.json",
+      "sha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255",
+      "floatingVersionsAllowed": false
+    }
+  },
+  "targets": {
+    "win-x64": {
+      "os": "windows",
+      "arch": "x86_64",
+      "rid": "win-x64",
+      "minimumOs": "Windows 10 version 1809 build 17763 for Microsoft.WindowsAppSDK.ML; catalog-acquired optimized EPs require Windows 11 version 24H2 build 26100",
+      "runner": "required-real-windows-x64",
+      "build": {
+        "restoreExecuted": true,
+        "staticCompileExecuted": true,
+        "staticCompileVerified": true,
+        "windowsBuildExecuted": false,
+        "publishExecuted": false,
+        "buildVerified": false
+      },
+      "runtimeExecuted": false,
+      "runtimeVerified": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "supported": false,
+      "buildCommands": [
+        "Push-Location evidence/tooling/windows-ml-runner",
+        "dotnet restore WindowsMlSpike.csproj --locked-mode --runtime win-x64",
+        "dotnet publish WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore --self-contained false --output ../../../.evidence/windows-ml/build/win-x64",
+        "Pop-Location"
+      ],
+      "runCommand": "dotnet --fx-version 8.0.29 .evidence/windows-ml/build/win-x64/WindowsMlSpike.dll --model models/yolov8n.onnx --input .evidence/windows-ml/web-reference/single-target/input.f32le --output .evidence/windows-ml/outputs/win-x64-single-target.f32le --report .evidence/windows-ml/reports/win-x64-single-target.json --expected-model-sha256 9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+      "goldenCommand": "cargo run --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml -- .evidence/windows-ml/outputs/win-x64-single-target.f32le 768 900 .evidence/windows-ml/decoded/win-x64-single-target.json",
+      "blocker": "没有真实 Windows x64 runner 报告；Linux 只能 restore/静态编译，不能执行 Windows ML Load/Run、runtime introspection 或 golden。"
+    },
+    "win-arm64": {
+      "os": "windows",
+      "arch": "arm64",
+      "rid": "win-arm64",
+      "minimumOs": "Windows 10 version 1809 build 17763 for Microsoft.WindowsAppSDK.ML; catalog-acquired optimized EPs require Windows 11 version 24H2 build 26100",
+      "runner": "required-real-windows-arm64",
+      "build": {
+        "restoreExecuted": true,
+        "staticCompileExecuted": true,
+        "staticCompileVerified": true,
+        "windowsBuildExecuted": false,
+        "publishExecuted": false,
+        "buildVerified": false
+      },
+      "runtimeExecuted": false,
+      "runtimeVerified": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "supported": false,
+      "buildCommands": [
+        "Push-Location evidence/tooling/windows-ml-runner",
+        "dotnet restore WindowsMlSpike.csproj --locked-mode --runtime win-arm64",
+        "dotnet publish WindowsMlSpike.csproj --configuration Release --runtime win-arm64 --no-restore --self-contained false --output ../../../.evidence/windows-ml/build/win-arm64",
+        "Pop-Location"
+      ],
+      "runCommand": "dotnet --fx-version 8.0.29 .evidence/windows-ml/build/win-arm64/WindowsMlSpike.dll --model models/yolov8n.onnx --input .evidence/windows-ml/web-reference/single-target/input.f32le --output .evidence/windows-ml/outputs/win-arm64-single-target.f32le --report .evidence/windows-ml/reports/win-arm64-single-target.json --expected-model-sha256 9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+      "goldenCommand": "cargo run --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml -- .evidence/windows-ml/outputs/win-arm64-single-target.f32le 768 900 .evidence/windows-ml/decoded/win-arm64-single-target.json",
+      "blocker": "没有真实 Windows ARM64 runner 报告；x64、ARM64EC、模拟器和交叉 publish 均不能替代 ARM64 Windows ML Load/Run、runtime introspection 或 golden。"
+    }
+  },
+  "publicationExclusions": [
+    "models/yolov8n.onnx is referenced in place and is not copied by this spike",
+    ".evidence/windows-ml/**",
+    "evidence/tooling/windows-ml-runner/bin/**",
+    "evidence/tooling/windows-ml-runner/obj/**",
+    "RimeCut product and release directories"
+  ]
+}

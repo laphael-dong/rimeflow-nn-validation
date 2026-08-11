@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 39568,
-      "sha256": "edd4e100182e78121d18a355b0c1daf085312becef97aedad950cdebf3b06a7a"
+      "bytes": 41350,
+      "sha256": "c07e3aa2dad5cd785c42ac9ef5991657221742289eb9c10dc745962b5ff66e6d"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -121,6 +121,16 @@
       "path": "evidence/conversions/mindspore-artifact-manifest.json",
       "bytes": 20475,
       "sha256": "8c24d4038290accf9a3f319f209c1a9d969370b5cdd1e21b860bf5f4e1c62511"
+    },
+    {
+      "path": "evidence/conversions/windows-ml-spike-manifest.json",
+      "bytes": 7732,
+      "sha256": "6b4987932dfa72ca66735fe6bfef0ce75eab78db51cd7f9751e41f4fa3aed8d6"
+    },
+    {
+      "path": "evidence/reports/windows-ml-spike-report.json",
+      "bytes": 11134,
+      "sha256": "6e8e116e1ebe3029d8daccbd3716926e80ee11bbdebc3ddf94f56cfd8a8ac62b"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -211,6 +221,31 @@
       "path": "evidence/tooling/raw-golden/src/main.rs",
       "bytes": 1770,
       "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/Program.cs",
+      "bytes": 20370,
+      "sha256": "908242e7679eb5ff9f190e385b1d36e64bb13fbe0eb224e108b966aaf516326f"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/README.md",
+      "bytes": 3383,
+      "sha256": "9a97669f0e0325649d8172e9eb065b79ddaf31e8dd6b99f26dbdf89ee49934ee"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/WindowsMlSpike.csproj",
+      "bytes": 1289,
+      "sha256": "f7c50ab9492cd12517b72007c805733044df12dd01cb9f367ae1b48851f420c7"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/global.json",
+      "bytes": 104,
+      "sha256": "248c17bb46fd7ff31402c62dc1870e90005fc1d9bcbc9a31cefcc78691149d76"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/packages.lock.json",
+      "bytes": 4271,
+      "sha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255"
     },
     {
       "path": "evidence/tooling/mindspore-host-runner/main.cpp",

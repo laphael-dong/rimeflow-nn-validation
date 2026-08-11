@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T22:33:38+08:00",
+  "state": "blocked",
+  "supported": false,
+  "task14Complete": false,
+  "noConversion": true,
+  "canonicalOnnx": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "copiesCreated": 0,
+    "mutated": false
+  },
+  "officialReferences": [
+    {
+      "pageTitle": "What is Windows ML?",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Windows ML is the Windows-supported ONNX Runtime distribution; supports x64 and ARM64."
+    },
+    {
+      "pageTitle": "Get started with Windows ML",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/get-started",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": ".NET 8 or later and net8.0-windows10.0.17763.0 or later; x64 and ARM64."
+    },
+    {
+      "pageTitle": "Windows ML APIs",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/api-reference",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Microsoft.WindowsAppSDK.ML is the superset package; catalog APIs are in Microsoft.Windows.AI.MachineLearning and C# inference uses Microsoft.ML.OnnxRuntime."
+    },
+    {
+      "pageTitle": "Install and deploy Windows ML",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/distributing-your-app",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Microsoft.WindowsAppSDK.ML supports self-contained deployment down to build 17763 without Microsoft.WindowsAppSDK.Runtime."
+    },
+    {
+      "pageTitle": "Use ONNX APIs in Windows ML",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/use-onnx-apis",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "C# uses Microsoft.ML.OnnxRuntime and the ordinary InferenceSession API surface supplied by Windows ML."
+    },
+    {
+      "pageTitle": "Select execution providers using the ONNX Runtime included in Windows ML",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/select-execution-providers",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Enumerate OrtEnv.GetEpDevices and explicitly call SessionOptions.AppendExecutionProvider; do not infer the device from a build flag."
+    },
+    {
+      "pageTitle": "Windows ML execution providers",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/supported-execution-providers",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "CPU and DirectML are included; catalog-acquired optimized EPs require Windows 11 24H2 build 26100 and compatible hardware/drivers."
+    },
+    {
+      "pageTitle": "Windows App SDK and supported Windows releases",
+      "url": "https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/support",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Windows App SDK support is bounded by Windows servicing; build 17763 remains relevant for Windows Server 2019/LTSC scope."
+    },
+    {
+      "pageTitle": "Microsoft.WindowsAppSDK.ML 2.1.74",
+      "url": "https://www.nuget.org/packages/Microsoft.WindowsAppSDK.ML/2.1.74",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Latest stable non-preview/non-experimental Microsoft.WindowsAppSDK.ML version observed in the official NuGet V3 index."
+    },
+    {
+      "pageTitle": ".NET 8 releases",
+      "url": "https://builds.dotnet.microsoft.com/dotnet/release-metadata/8.0/releases.json",
+      "accessedAt": "2026-08-11T22:33:38+08:00",
+      "selectionFact": "Latest .NET 8 SDK is 8.0.423 and runtime is 8.0.29, released 2026-07-14."
+    }
+  ],
+  "selectionBasis": "选择 Microsoft.WindowsAppSDK.ML 2.1.74 self-contained 路径，以保留 build 17763 的 RegFree WinRT 支持并避免依赖机器预装 Windows App SDK runtime；同时直接固定 Microsoft.Windows.AI.MachineLearning 2.1.74，防止 wrapper 的 [2.1.74,3.0.0) 传递范围在未来 restore 时漂移。项目不引用普通 Microsoft.ML.OnnxRuntime NuGet 包。",
+  "previousDescriptionDifference": {
+    "old": "conversion-spikes.json 使用 Windows ML / Windows App SDK 1.8 target，并只写 InferenceSession(modelPath, sessionOptions)，没有正式 package 版本、ExecutionProviderCatalog、设备 API、双架构独立状态或 runtime introspection 契约。",
+    "current": "正式路径固定到 Microsoft.WindowsAppSDK.ML 2.1.74 + Microsoft.Windows.AI.MachineLearning.ExecutionProviderCatalog + Windows ML 自带 Microsoft.ML.OnnxRuntime 1.24.6 API；x64 与 ARM64 独立验证。旧 Windows.AI.MachineLearning LearningModelSession/LearningModelDevice API 不用于当前 runner。"
+  },
+  "dependencies": {
+    "dotnetSdk": "8.0.423",
+    "dotnetRuntime": "8.0.29",
+    "targetFramework": "net8.0-windows10.0.17763.0",
+    "packages": [
+      {
+        "id": "Microsoft.WindowsAppSDK.ML",
+        "version": "2.1.74",
+        "projectVersionRange": "[2.1.74]",
+        "sha256": "4a5150b09300fb52b2db94927b4c791d887b82a329d53d81a7fca147b37b9d15",
+        "license": "Microsoft Software License Terms: Microsoft Windows App SDK and Windows Machine Learning",
+        "source": "official NuGet V3 flat container"
+      },
+      {
+        "id": "Microsoft.Windows.AI.MachineLearning",
+        "version": "2.1.74",
+        "projectVersionRange": "[2.1.74]",
+        "sha256": "691165fa3c07a04b752cbf4a07e93ed13a418e9dea1ee89eb163d2225e2ba3af",
+        "license": "Microsoft Software License Terms: Microsoft Windows App SDK and Windows Machine Learning",
+        "source": "official NuGet V3 flat container",
+        "packageInspection": {
+          "bundledOrtVersion": "1.24.6",
+          "winX64BinariesPresent": true,
+          "winArm64BinariesPresent": true
+        }
+      }
+    ],
+    "lockFile": {
+      "path": "evidence/tooling/windows-ml-runner/packages.lock.json",
+      "sha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255",
+      "containsWinX64": true,
+      "containsWinArm64": true
+    }
+  },
+  "currentHost": {
+    "os": "Linux",
+    "kernel": "7.0.0-28-generic",
+    "arch": "x86_64",
+    "nativeDotnetInitiallyAvailable": false,
+    "temporarySdkPath": "/tmp/rimeflow-dotnet-8.0.423",
+    "windowsRuntimeAvailable": false
+  },
+  "executedCommands": [
+    {
+      "command": "dotnet --info",
+      "exitCode": 127,
+      "result": "/bin/bash: line 1: dotnet: command not found"
+    },
+    {
+      "command": "curl https://dot.net/v1/dotnet-install.sh | bash -s -- --version 8.0.423 --install-dir /tmp/rimeflow-dotnet-8.0.423 --no-path",
+      "exitCode": 0,
+      "result": "temporary SDK 8.0.423 installed outside repository"
+    },
+    {
+      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet restore WindowsMlSpike.csproj --use-lock-file -p:RestoreLockedMode=false",
+      "exitCode": 0,
+      "result": "exact [2.1.74] direct package ranges restored; packages.lock.json contains base, win-x64 and win-arm64 targets; NuGet cache is under /tmp"
+    },
+    {
+      "command": "/tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore",
+      "exitCode": 1,
+      "result": "Windows mt.exe returned Exec format error on Linux (tool exit 126); not build-verified"
+    },
+    {
+      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore -property:RestoreLockedMode=true -property:ManifestTool=/bin/true -property:AppxGeneratePriEnabled=false",
+      "exitCode": 0,
+      "result": "C# and Windows ML API static build verified only; Windows manifest/PRI tools were explicitly bypassed, so this is not a Windows build or publish result"
+    },
+    {
+      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-arm64 --no-restore -property:RestoreLockedMode=true -property:ManifestTool=/bin/true -property:AppxGeneratePriEnabled=false",
+      "exitCode": 0,
+      "result": "C# and Windows ML API static build verified only; Windows manifest/PRI tools were explicitly bypassed, so this is not a Windows build or publish result"
+    }
+  ],
+  "targets": {
+    "win-x64": {
+      "runnerPrepared": true,
+      "restoreExecuted": true,
+      "staticCompileExecuted": true,
+      "staticCompileVerified": true,
+      "buildVerified": false,
+      "runtimeExecuted": false,
+      "runtimeVerified": false,
+      "runtimeIntrospectionComplete": false,
+      "goldenExecuted": false,
+      "supported": false,
+      "blocker": "需要真实 Windows x64 runner 完成 locked restore/build、Windows ML Load/Run、EP/device/profile introspection、raw output 和 production raw-golden。"
+    },
+    "win-arm64": {
+      "runnerPrepared": true,
+      "restoreExecuted": true,
+      "staticCompileExecuted": true,
+      "staticCompileVerified": true,
+      "buildVerified": false,
+      "runtimeExecuted": false,
+      "runtimeVerified": false,
+      "runtimeIntrospectionComplete": false,
+      "goldenExecuted": false,
+      "supported": false,
+      "blocker": "需要独立真实 Windows ARM64 runner；x64、ARM64EC、模拟器或交叉 publish 结果均不接受。"
+    }
+  },
+  "runtimeIntrospectionContract": {
+    "required": true,
+    "modelShaVerifiedBeforeLoad": true,
+    "metadata": {
+      "input": {"count": 1, "name": "images", "dtype": "float32", "shape": [1, 3, 640, 640], "elementCount": 1228800},
+      "output": {"count": 1, "name": "output0", "dtype": "float32", "shape": [1, 84, 8400], "elementCount": 705600}
+    },
+    "finiteInputAndOutputRequired": true,
+    "actualEpDeviceFrom": ["OrtEnv.GetEpDevices", "InferenceSession.GetEpDeviceForInputs", "ORT profile node provider fields"],
+    "runtimeVersionFrom": "OrtEnv.GetVersionString plus loaded module FileVersionInfo",
+    "sdkVersionFrom": "dotnet --version executed at runtime from the publish directory containing the copied exact global.json",
+    "packageVersionFrom": "runtime .deps.json plus loaded assembly/module identity",
+    "hostIdentityFrom": "RuntimeInformation, Environment.OSVersion, machine name and ORT hardware vendor/device IDs",
+    "ordinaryLinuxOrtAccepted": false,
+    "ordinaryCpuOrtClaimedAsWindowsMlAccepted": false
+  },
+  "artifactHandling": {
+    "secondOnnxGenerated": false,
+    "canonicalOnnxCopied": false,
+    "canonicalOnnxModified": false,
+    "temporaryRoot": ".evidence/windows-ml",
+    "productOrReleaseDirectoryTouched": false,
+    "rimecutTouched": false
+  },
+  "blocker": "当前主机是 Linux x86_64，不能执行 Windows ML、Windows mt.exe/MakePri.exe 或真实 x64/ARM64 runner。两架构均缺 Load/Run、runtime introspection、golden 和性能证据。"
+}
