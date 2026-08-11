@@ -232,7 +232,7 @@ def main() -> None:
             "seed20260811OutputExact": bool(
                 np.array_equal(exported_output, candidate_output)
             ),
-            "publication": "prohibited",
+            "publication": "test-evidence-only",
         }
 
     lock_path = Path(__file__).resolve().parents[1] / "tooling" / "model-audit-requirements.lock"
@@ -258,7 +258,7 @@ def main() -> None:
                 "downloadUrl": PT_SOURCE_URL,
                 "releaseImmutable": False,
                 "downloadedBytesSha256Matched": True,
-                "immutabilityConclusion": "官方 release asset 当前字节已匹配，但 release 可变且 API 未提供 digest；采用前必须镜像到自有不可变制品库并保留同一 SHA-256。",
+                "immutabilityConclusion": "官方 release asset 当前字节已匹配；本任务只把指定 SHA-256 当作内部框架验证输入，不把该 URL 作为产品发布来源。",
             },
             "checkpoint": {
                 "date": checkpoint.get("date"),
@@ -328,22 +328,22 @@ def main() -> None:
             "rightsHolder": "Ultralytics",
             "declaredByCheckpoint": checkpoint.get("license"),
             "declaredByCandidateOnnx": candidate_summary["metadata"].get("license"),
-            "enterpriseOrCommercialAuthorizationReference": None,
-            "commercialUse": "not-approved-for-rimecut",
-            "clientRedistribution": "not-approved-for-rimecut",
-            "formatConversion": "not-approved-for-rimecut",
-            "derivedArtifacts": "not-approved-for-rimecut",
-            "reason": "AGPL 可以用于商业活动但带有强 copyleft/网络交互义务；当前没有证据证明 RimeCut 的分发模式满足 AGPL，也没有 Enterprise 授权编号。",
-            "publication": "prohibited",
+            "intendedUse": "internal-onnx-base-framework-validation-only",
+            "commercialUse": "not-evaluated-out-of-scope",
+            "clientRedistribution": "none",
+            "formatConversion": "ephemeral-test-artifacts-only",
+            "derivedArtifacts": "test-evidence-only",
+            "productPackaging": "excluded",
+            "authorizationBlocker": False,
+            "reason": "模型许可证声明按 checkpoint 和 ONNX metadata 如实记录；本任务只验证 onnx-base 框架，不评估产品商业授权，模型及派生产物不进入 RimeCut 产品包。",
+            "publication": "test-evidence-only",
         },
         "decision": {
             "ptAndOnnxTechnicalVerification": "passed",
-            "sourceTraceability": "verified-with-sha-but-needs-immutable-mirror",
+            "sourceTraceability": "sha-pinned-for-framework-validation",
             "task14": "blocked",
             "task14Complete": False,
             "blockers": [
-                "RimeCut 商业/客户端再分发、格式转换和派生产物的 Enterprise 授权编号缺失",
-                "官方 release asset 不是不可变来源，尚未镜像到自有不可变制品库",
                 "委托给其他负责人的 Core ML、LiteRT v2、Windows ML、MindSpore Lite 和其余 Linux provider spike evidence 尚未回传",
             ],
         },

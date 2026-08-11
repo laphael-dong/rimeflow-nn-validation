@@ -109,11 +109,11 @@ for (const provider of ['openvino', 'cuda', 'tensorrt']) if (conversion.spikes.f
 const provenance = await readJson('evidence/reports/model-provenance.json');
 const handoffAudit = await readJson('evidence/reports/handoff-model-audit.json');
 if (handoffAudit.sourceCheckpoint.sha256 !== 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36' || handoffAudit.candidateOnnx.sha256 !== '71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45') fail('handoff model digests');
-if (handoffAudit.decision.ptAndOnnxTechnicalVerification !== 'passed' || handoffAudit.decision.task14Complete !== false || handoffAudit.licensing.publication !== 'prohibited') fail('handoff audit blocked semantics');
+if (handoffAudit.decision.ptAndOnnxTechnicalVerification !== 'passed' || handoffAudit.decision.task14Complete !== false || handoffAudit.licensing.authorizationBlocker !== false || handoffAudit.licensing.publication !== 'test-evidence-only' || handoffAudit.licensing.productPackaging !== 'excluded') fail('handoff audit test-only semantics');
 if (handoffAudit.comparisons.initializers.mismatches.length !== 0 || handoffAudit.comparisons.initializers.exactEqualCount !== 143) fail('handoff initializer equivalence');
 if (handoffAudit.comparisons.inference.some((item) => !item.torchRepeatExact || !item.candidateReferenceExact || !item.ptCandidateAllclose)) fail('handoff inference equivalence');
 if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'source-identified-and-weight-equivalent' || provenance.originalTrainingArtifact.sha256 !== handoffAudit.sourceCheckpoint.sha256) fail('model provenance');
-if (provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'prohibited') fail('unsafe model license decision');
+if (provenance.licensing.originalWeights.authorizationState !== 'out-of-scope-test-only' || provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'test-evidence-only') fail('model test-only decision');
 const replay = await readJson('evidence/replay/task1-replay.json');
 if (replay.schemaVersion !== 2 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true || replay.immutableLogEvidence.kind !== 'embedded-in-manifest') fail('operator replay metadata');
 for (const output of replay.outputs) {
@@ -127,5 +127,5 @@ for (const id of ['contract-fixture-golden', 'production-raw-golden', 'conversio
     if (!round.startedAt || !round.endedAt || round.exitCode !== 0 || !round.repositoryHead || !round.runnerId || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || !/^[0-9a-f]{64}$/.test(round.log.sha256)) fail(`operator replay round metadata: ${id}`);
   }
 }
-if (replay.steps.find((item) => item.id === 'authorized-platform-artifacts').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
+if (replay.steps.find((item) => item.id === 'delegated-platform-spikes').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));

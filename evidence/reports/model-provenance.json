@@ -38,11 +38,11 @@
     "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
     "sourceUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
     "sourceReleaseAssetId": 195719301,
-    "immutableSourceState": "mirror-required",
+    "immutableSourceState": "sha-pinned-test-input",
     "state": "source-identified-and-weight-equivalent",
     "evidence": {
       "path": "evidence/reports/handoff-model-audit.json",
-      "sha256": "21e0911cd7c536f8e8bcd1cb2c70e466323e650c8a026c42a43deabc81e052cf"
+      "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
     },
     "gitPtArtifactCommits": []
   },
@@ -60,26 +60,25 @@
     "originalWeights": {
       "declaredByCheckpoint": "AGPL-3.0 License (https://ultralytics.com/license)",
       "declaredByOnnxMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
-      "enterpriseLicenseEvidence": null,
-      "authorizationState": "unverified-for-rimecut-commercial-redistribution"
+      "authorizationState": "out-of-scope-test-only"
     },
     "onnxWeights": {
-      "licenseState": "source checkpoint and ONNX metadata declare AGPL-3.0; exact weights are traceable, but RimeCut authorization is unresolved"
+      "licenseState": "source checkpoint and ONNX metadata declare AGPL-3.0; exact weights are traceable and used only for internal framework validation"
     },
     "conversionArtifacts": {
-      "licenseState": "inherit unresolved model-weight obligations plus converter/runtime terms",
+      "licenseState": "ephemeral framework-validation artifacts only; converter/runtime terms are recorded per spike",
       "redistributionAllowed": false
     },
     "rimecutPackageRedistribution": {
       "allowed": false,
-      "reason": "已验证原始 .pt 来源与准确 SHA，但没有 Ultralytics Enterprise 授权编号，也没有获批的 AGPL 分发合规结论。"
+      "reason": "用途限定为内部 onnx-base 框架验证；指定模型及其临时派生产物不进入 RimeCut 产品包。"
     }
   },
   "decision": {
     "task14": "blocked",
     "task1": "blocked",
-    "publication": "prohibited",
-    "reason": "模型来源与同源性已验证；仓库 MIT 仍不能覆盖 AGPL 模型权重，在商业授权或获批的 AGPL 合规方案闭环前禁止发布或分发 ONNX 及其转换产物。"
+    "publication": "test-evidence-only",
+    "reason": "模型来源与同源性已验证，用途限定为内部 onnx-base 框架验证；1.4 仅等待外部平台 spike evidence，模型及临时转换物不进入 RimeCut 产品包。"
   },
   "tooling": {
     "python": "3.12.3",

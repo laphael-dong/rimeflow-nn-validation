@@ -153,25 +153,25 @@
   },
   "decision": {
     "blockers": [
-      "RimeCut 商业/客户端再分发、格式转换和派生产物的 Enterprise 授权编号缺失",
-      "官方 release asset 不是不可变来源，尚未镜像到自有不可变制品库",
       "委托给其他负责人的 Core ML、LiteRT v2、Windows ML、MindSpore Lite 和其余 Linux provider spike evidence 尚未回传"
     ],
     "ptAndOnnxTechnicalVerification": "passed",
-    "sourceTraceability": "verified-with-sha-but-needs-immutable-mirror",
+    "sourceTraceability": "sha-pinned-for-framework-validation",
     "task14": "blocked",
     "task14Complete": false
   },
   "licensing": {
-    "clientRedistribution": "not-approved-for-rimecut",
-    "commercialUse": "not-approved-for-rimecut",
+    "authorizationBlocker": false,
+    "clientRedistribution": "none",
+    "commercialUse": "not-evaluated-out-of-scope",
     "declaredByCandidateOnnx": "AGPL-3.0 License (https://ultralytics.com/license)",
     "declaredByCheckpoint": "AGPL-3.0 License (https://ultralytics.com/license)",
-    "derivedArtifacts": "not-approved-for-rimecut",
-    "enterpriseOrCommercialAuthorizationReference": null,
-    "formatConversion": "not-approved-for-rimecut",
-    "publication": "prohibited",
-    "reason": "AGPL 可以用于商业活动但带有强 copyleft/网络交互义务；当前没有证据证明 RimeCut 的分发模式满足 AGPL，也没有 Enterprise 授权编号。",
+    "derivedArtifacts": "test-evidence-only",
+    "formatConversion": "ephemeral-test-artifacts-only",
+    "intendedUse": "internal-onnx-base-framework-validation-only",
+    "productPackaging": "excluded",
+    "publication": "test-evidence-only",
+    "reason": "模型许可证声明按 checkpoint 和 ONNX metadata 如实记录；本任务只验证 onnx-base 框架，不评估产品商业授权，模型及派生产物不进入 RimeCut 产品包。",
     "rightsHolder": "Ultralytics"
   },
   "reExport": {
@@ -259,7 +259,7 @@
         ],
         "onlyReference": []
       },
-      "publication": "prohibited",
+      "publication": "test-evidence-only",
       "seed20260811OutputExact": true
     },
     "toolVersions": {
@@ -393,7 +393,7 @@
       "assetId": 195719301,
       "downloadUrl": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt",
       "downloadedBytesSha256Matched": true,
-      "immutabilityConclusion": "官方 release asset 当前字节已匹配，但 release 可变且 API 未提供 digest；采用前必须镜像到自有不可变制品库并保留同一 SHA-256。",
+      "immutabilityConclusion": "官方 release asset 当前字节已匹配；本任务只把指定 SHA-256 当作内部框架验证输入，不把该 URL 作为产品发布来源。",
       "releaseApi": "https://api.github.com/repos/ultralytics/assets/releases/177482232",
       "releaseId": 177482232,
       "releaseImmutable": false,

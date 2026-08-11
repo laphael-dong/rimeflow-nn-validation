@@ -104,18 +104,18 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 39825,
-      "sha256": "db042add82dcb43591ec177ffe7f36f4ce4ae3e52091f69109e0fc36549c82aa"
+      "bytes": 40054,
+      "sha256": "b8785b4c8172a4c401fe05656f423a044c2f8477ef3ecdde57f8f13a567f3d59"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
-      "bytes": 16431,
-      "sha256": "21e0911cd7c536f8e8bcd1cb2c70e466323e650c8a026c42a43deabc81e052cf"
+      "bytes": 16302,
+      "sha256": "c776b011f4bbb4e45e4b6715fb6501b29ac6b20b25c48df2fadf264085c42743"
     },
     {
       "path": "evidence/reports/model-provenance.json",
-      "bytes": 5269,
-      "sha256": "1fa218eb63f67cfe2ac4073afa9efe6eec7d1f26beaa6f40be40f76521ebf7a4"
+      "bytes": 5217,
+      "sha256": "736343ee49b1383eb925905dec7d2ed3a0774b99c88aaf1b72c1f0a5348a7ccb"
     },
     {
       "path": "evidence/reports/preprocess-conformance.json",

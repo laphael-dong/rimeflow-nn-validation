@@ -49,9 +49,9 @@ steps.push(await runRepeatedStep({
   outputPaths: ['evidence/conversions/conversion-spikes.json'],
 }));
 steps.push(blockedStep(
-  'authorized-platform-artifacts',
+  'delegated-platform-spikes',
   'Core ML/LiteRT/Windows ML/MindSpore/Linux accelerated provider platform commands',
-  '源 .pt 与 ONNX 同源性已验证，但缺少覆盖 RimeCut 商业再分发/格式转换/派生产物的授权编号，且外部负责人尚未回传 Core ML、LiteRT、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。',
+  '源 .pt 与 ONNX 同源性已验证；模型用途限定为内部框架验证。外部负责人尚未回传 Core ML、LiteRT、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。',
 ));
 const artifacts = [];
 for (const path of outputs) {

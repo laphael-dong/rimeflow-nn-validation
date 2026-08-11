@@ -5,6 +5,12 @@
     "modelPath": "models/yolov8n.onnx",
     "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
   },
+  "usageScope": {
+    "intendedUse": "internal-onnx-base-framework-validation-only",
+    "authorizationEvaluation": "out-of-scope",
+    "artifactHandling": "isolated-test-evidence-only",
+    "productPackaging": "excluded"
+  },
   "spikes": [
     {
       "platform": "apple",
@@ -43,8 +49,8 @@
       "quantization": "未执行",
       "nmsResponsibility": "operator",
       "failedOperator": "delegated Apple conversion/runner evidence not returned",
-      "license": "coremltools BSD；模型 checkpoint/ONNX 声明 AGPL-3.0，RimeCut Enterprise/商业授权未确认",
-      "redistribution": "同源 .pt 已验证，但授权依据缺失，禁止发布 artifact",
+      "license": "coremltools BSD；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "coremltools 9.0 官方入口不直接接受 ONNX；同源 .pt 已由独立审计确认，但本机不是 macOS，Core ML 转换与真实 runner spike 已委托外部负责人，证据回传前保持 blocked。"
     },
     {
@@ -80,8 +86,8 @@
       "quantization": "未执行",
       "nmsResponsibility": "operator",
       "failedOperator": "delegated LiteRT conversion/runner evidence not returned",
-      "license": "ai-edge-litert Apache-2.0；模型 checkpoint/ONNX 声明 AGPL-3.0，RimeCut 授权未确认",
-      "redistribution": "同源 .pt 已验证，但获准 TFLite 导出链和授权依据缺失，禁止发布 artifact",
+      "license": "ai-edge-litert Apache-2.0；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "ai-edge-litert 2.1.6 是 TFLite runtime，不提供 ONNX converter；同源 .pt 已验证，LiteRT 转换和 Android 真实设备证据已委托外部负责人，回传前保持 blocked。"
     },
     {
@@ -115,8 +121,8 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": "Windows runner/toolchain discovery before Windows ML model load",
-      "license": "Windows ML follows Windows App SDK terms；模型权重授权未确认",
-      "redistribution": "原 ONNX 授权未闭环，禁止随 RimeCut 发布",
+      "license": "Windows ML follows Windows App SDK terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。"
     },
     {
@@ -148,8 +154,8 @@
       "quantization": "命令未请求量化，FP32",
       "nmsResponsibility": "operator",
       "failedOperator": "/model.22/dfl/conv/Conv (Conv2DFusion infer-shape/graph pass)",
-      "license": "MindSpore Apache-2.0；模型权重授权未确认",
-      "redistribution": "即使转换成功也只允许本地 spike，禁止发布 artifact",
+      "license": "MindSpore Apache-2.0；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "官方 converter_lite 2.7.0 已进入 ONNX parse/graph optimization，因 Conv2DFusion infer-shape 失败；缺 HarmonyOS runner。"
     },
     {
@@ -241,8 +247,8 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": null,
-      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
-      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "cpu provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。"
     },
     {
@@ -296,8 +302,8 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": "provider/session initialization before graph execution",
-      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
-      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "openvino provider 未能进入固定输入 inference，保持 blocked。"
     },
     {
@@ -351,8 +357,8 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": "provider/session initialization before graph execution",
-      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
-      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "cuda provider 未能进入固定输入 inference，保持 blocked。"
     },
     {
@@ -406,8 +412,8 @@
       "quantization": "none",
       "nmsResponsibility": "operator",
       "failedOperator": "provider/session initialization before graph execution",
-      "license": "ONNX Runtime MIT；ONNX 内嵌 metadata 声明 AGPL-3.0，但权重准确来源/授权仍未确认",
-      "redistribution": "模型授权未闭环，禁止随产品发布",
+      "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
       "conclusion": "tensorrt provider 未能进入固定输入 inference，保持 blocked。"
     }
   ]
