@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -151,6 +151,16 @@ validateCoremlReplayEvidence(coremlManifest, coremlReplayStep);
 for (const round of coremlReplayStep.rounds) if (round.exitCode !== 0 || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || round.outputs[0].kind !== 'workspace-package-tree' || !/^[0-9a-f]{64}$/.test(round.outputs[0].workspacePackageTreeDigest) || Object.hasOwn(round.outputs[0], 'sha256')) fail(`Core ML task replay round: ${round.run}`);
 const mindsporeReplayStep = replay.steps.find((item) => item.id === 'harmonyos-mindspore-conversion-and-host-golden');
 if (!mindsporeReplayStep?.executed || mindsporeReplayStep.rounds.length !== 2 || !mindsporeReplayStep.repeatComparison.allExitCodesZero || !mindsporeReplayStep.repeatComparison.deterministicOutputDigestsEqual || !mindsporeReplayStep.repeatComparison.failureSignaturesEqual) fail('MindSpore task replay semantics');
+validateMindsporeReplayEvidence(mindsporeManifest, mindsporeReplayStep);
+for (const [key, path] of Object.entries({
+  manifest: 'evidence/conversions/mindspore-artifact-manifest.json',
+  goldenReport: 'evidence/reports/mindspore-golden-report.json',
+  conversionReport: 'evidence/reports/mindspore-conversion-report.json',
+})) {
+  const bytes = await readFile(resolve(root, path));
+  const recorded = mindsporeReplayStep.trackedEvidence[key];
+  if (recorded.path !== path || recorded.bytes !== bytes.length || recorded.bytesAfter !== bytes.length || recorded.sha256 !== sha256(bytes) || recorded.sha256After !== sha256(bytes)) fail(`MindSpore replay tracked digest does not match current file: ${key}`);
+}
 if (!mindsporeReplayStep.command.includes('run_mindspore_replay.py') || mindsporeReplayStep.repeatComparison.details.allDeterministic !== true || mindsporeReplayStep.repeatComparison.details.derivedOnnxDigestEqual !== true || mindsporeReplayStep.repeatComparison.details.fixtureResultsEqual !== true || mindsporeReplayStep.repeatComparison.details.reexportOnnxDigestEqual !== true) fail('MindSpore task replay determinism');
 for (const round of mindsporeReplayStep.rounds) {
   if (round.exitCode !== 0 || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || round.hostFixtureCount !== 5 || round.outputs[0].sha256 !== mindsporeManifest.artifact.sha256 || round.outputs[1].sha256 !== '8718af53d53b6336f301ef7eacb529376f29f0c04bec415815fde7d734b9def2' || round.outputs[2].sha256 !== 'a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea' || round.expectedFailureSignatures.length !== 5) fail(`MindSpore task replay round: ${round.run}`);

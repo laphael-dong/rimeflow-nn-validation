@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 39512,
-      "sha256": "9de4420b1e5847223509e8fe431067e103ee0e89995e2453199dcff76e19608c"
+      "bytes": 39568,
+      "sha256": "edd4e100182e78121d18a355b0c1daf085312becef97aedad950cdebf3b06a7a"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -119,8 +119,8 @@
     },
     {
       "path": "evidence/conversions/mindspore-artifact-manifest.json",
-      "bytes": 19709,
-      "sha256": "3e1c255fc3d10f9094766485b34f2f52a9e7d8cf15def7940eb34b652a6fa6ee"
+      "bytes": 20475,
+      "sha256": "8c24d4038290accf9a3f319f209c1a9d969370b5cdd1e21b860bf5f4e1c62511"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -154,13 +154,13 @@
     },
     {
       "path": "evidence/reports/mindspore-conversion-report.json",
-      "bytes": 336498,
-      "sha256": "2a4e237ba85c0a83eff5785554ca8d56cd3353f11a9cb91535d941d5f326775c"
+      "bytes": 338419,
+      "sha256": "3bcaa8d1568124dd7ecd1c9521097f08c39051ec3635275cba2297d20585130a"
     },
     {
       "path": "evidence/reports/mindspore-golden-report.json",
-      "bytes": 13880,
-      "sha256": "eab99187e001661e669c74e73555e683dfe9f0f04f611574a81271f3d7e30934"
+      "bytes": 13976,
+      "sha256": "ec5e642369a04acf0dc5dc14f83af70a93c9fcfe042670e4d1bbd4c02f56c50c"
     },
     {
       "path": "evidence/reports/web-wasm-performance.json",

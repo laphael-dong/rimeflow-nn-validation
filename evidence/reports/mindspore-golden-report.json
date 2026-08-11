@@ -409,6 +409,7 @@
     "invocation": "evidence/tooling/raw-golden/src/main.rs",
     "platformSpecificImplementationAdded": false
   },
+  "recordedArtifactSha256": "7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5",
   "runtimeContract": {
     "build": "success",
     "inputs": [

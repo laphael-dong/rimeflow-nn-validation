@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -120,6 +121,249 @@ def artifact(path: Path, logical_path: str | None = None) -> dict[str, object]:
         "path": logical_path or str(path),
         "sha256": sha256(path),
     }
+
+
+TRACKED_EVIDENCE_PATHS = {
+    "manifest": "evidence/conversions/mindspore-artifact-manifest.json",
+    "goldenReport": "evidence/reports/mindspore-golden-report.json",
+    "conversionReport": "evidence/reports/mindspore-conversion-report.json",
+}
+
+
+def file_snapshot(path: Path) -> dict[str, object]:
+    if not path.exists():
+        return {"available": False, "bytes": None, "mtimeNs": None, "sha256": None}
+    if not path.is_file():
+        raise SystemExit(f"recorded MindSpore artifact is not a file: {path}")
+    stat = path.stat()
+    return {
+        "available": True,
+        "bytes": stat.st_size,
+        "mtimeNs": stat.st_mtime_ns,
+        "sha256": sha256(path),
+    }
+
+
+def paths_overlap(left: Path, right: Path) -> bool:
+    return left == right or left in right.parents or right in left.parents
+
+
+def validate_workspace(root: Path, workspace: Path, artifacts_dir: Path) -> None:
+    allowed_root = (root / ".evidence/mindspore").resolve()
+    if workspace != allowed_root and allowed_root not in workspace.parents:
+        raise SystemExit("MindSpore replay workspace must stay under .evidence/mindspore")
+    if paths_overlap(workspace, artifacts_dir):
+        raise SystemExit("MindSpore replay workspace must not overlap the recorded artifacts directory")
+
+
+def tracked_evidence_snapshot(root: Path) -> dict[str, dict[str, object]]:
+    result = {}
+    for key, relative in TRACKED_EVIDENCE_PATHS.items():
+        path = root / relative
+        if not path.is_file():
+            raise SystemExit(f"missing tracked MindSpore evidence: {relative}")
+        item = file_snapshot(path)
+        item["path"] = relative
+        result[key] = item
+    return result
+
+
+def load_recorded_evidence(
+    root: Path,
+) -> tuple[dict[str, object], dict[str, object], dict[str, object], dict[str, object]]:
+    snapshots = tracked_evidence_snapshot(root)
+    manifest = json.loads((root / TRACKED_EVIDENCE_PATHS["manifest"]).read_bytes())
+    golden = json.loads((root / TRACKED_EVIDENCE_PATHS["goldenReport"]).read_bytes())
+    report = json.loads((root / TRACKED_EVIDENCE_PATHS["conversionReport"]).read_bytes())
+    expected_sha = manifest.get("recordedArtifactSha256")
+    expected_bytes = manifest.get("artifact", {}).get("bytes")
+    if (
+        not isinstance(expected_sha, str)
+        or not re.fullmatch(r"[0-9a-f]{64}", expected_sha)
+        or manifest["artifact"].get("sha256") != expected_sha
+        or not isinstance(expected_bytes, int)
+        or expected_bytes <= 0
+    ):
+        raise SystemExit("tracked MindSpore manifest recorded artifact identity is invalid")
+    if golden.get("artifact", {}).get("sha256") != expected_sha or golden["artifact"].get("bytes") != expected_bytes:
+        raise SystemExit("tracked MindSpore golden report is not synchronized with the recorded artifact")
+    verification = report.get("recordedArtifactVerification", {})
+    if (
+        report.get("mode") != "record"
+        or report.get("recorded") is not True
+        or report.get("recordedArtifactSha256") != expected_sha
+        or report.get("replayArtifactSha256") != expected_sha
+        or report.get("artifact", {}).get("sha256") != expected_sha
+        or report.get("artifact", {}).get("bytes") != expected_bytes
+        or verification.get("status") != "recorded"
+        or verification.get("expectedSha256") != expected_sha
+        or verification.get("expectedBytes") != expected_bytes
+        or verification.get("afterSha256") != expected_sha
+        or verification.get("afterBytes") != expected_bytes
+        or verification.get("exactIdentityVerifiedAfter") is not True
+    ):
+        raise SystemExit("tracked MindSpore conversion report is not synchronized with the recorded artifact")
+    return manifest, golden, report, snapshots
+
+
+def recorded_artifact_verification(
+    before: dict[str, object],
+    after: dict[str, object],
+    expected_bytes: int,
+    expected_sha: str,
+    record_mode: bool,
+) -> dict[str, object]:
+    unchanged = before == after
+    exact_before = (
+        before["available"]
+        and before["bytes"] == expected_bytes
+        and before["sha256"] == expected_sha
+    )
+    exact_after = (
+        after["available"]
+        and after["bytes"] == expected_bytes
+        and after["sha256"] == expected_sha
+    )
+    if record_mode:
+        status = "recorded" if exact_after else "recording-failed"
+    elif not before["available"] and not after["available"]:
+        status = "recorded-artifact-unavailable"
+    elif unchanged and exact_before and exact_after:
+        status = "verified-preserved"
+    elif not before["available"] and after["available"]:
+        status = "recorded-artifact-created-during-replay"
+    else:
+        status = "recorded-artifact-changed"
+    return {
+        "afterBytes": after["bytes"],
+        "afterMtimeNs": after["mtimeNs"],
+        "afterSha256": after["sha256"],
+        "availableAfter": after["available"],
+        "availableBefore": before["available"],
+        "beforeBytes": before["bytes"],
+        "beforeMtimeNs": before["mtimeNs"],
+        "beforeSha256": before["sha256"],
+        "exactIdentityVerifiedAfter": exact_after,
+        "exactIdentityVerifiedBefore": exact_before,
+        "expectedBytes": expected_bytes,
+        "expectedSha256": expected_sha,
+        "status": status,
+        "unchanged": unchanged,
+    }
+
+
+def verify_non_record_preflight(
+    recorded_before: dict[str, object], recorded_manifest: dict[str, object]
+) -> None:
+    if recorded_before["available"] and (
+        recorded_before["bytes"] != recorded_manifest["artifact"]["bytes"]
+        or recorded_before["sha256"] != recorded_manifest["recordedArtifactSha256"]
+    ):
+        raise SystemExit("recorded MindSpore artifact drifted before non-record replay")
+
+
+def verify_non_record_artifact(
+    before: dict[str, object],
+    after: dict[str, object],
+    expected_bytes: int,
+    expected_sha: str,
+) -> dict[str, object]:
+    verification = recorded_artifact_verification(
+        before, after, expected_bytes, expected_sha, False
+    )
+    if verification["status"] not in {
+        "verified-preserved",
+        "recorded-artifact-unavailable",
+    }:
+        raise SystemExit(
+            f"non-record MindSpore replay changed or created the recorded artifact: {verification['status']}"
+        )
+    return verification
+
+
+def verify_tracked_evidence_preserved(
+    before: dict[str, dict[str, object]],
+    after: dict[str, dict[str, object]],
+) -> dict[str, dict[str, object]]:
+    result = {}
+    for key in TRACKED_EVIDENCE_PATHS:
+        left = before[key]
+        right = after[key]
+        unchanged = (
+            left["bytes"] == right["bytes"]
+            and left["sha256"] == right["sha256"]
+        )
+        result[key] = {
+            "bytes": left["bytes"],
+            "bytesAfter": right["bytes"],
+            "path": left["path"],
+            "sha256": left["sha256"],
+            "sha256After": right["sha256"],
+            "unchanged": unchanged,
+        }
+        if not unchanged:
+            raise SystemExit(f"non-record MindSpore replay changed tracked {key}")
+    return result
+
+
+def _write_staged_bytes(target: Path, payload: bytes) -> Path:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(
+        dir=target.parent, prefix=f".{target.name}.recording-"
+    )
+    staged = Path(temporary)
+    with os.fdopen(descriptor, "wb") as stream:
+        stream.write(payload)
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.chmod(staged, target.stat().st_mode & 0o777 if target.exists() else 0o644)
+    return staged
+
+
+def publish_recording(
+    source_artifact: Path,
+    final_artifact: Path,
+    tracked_payloads: dict[Path, bytes],
+    expected_bytes: int,
+    expected_sha: str,
+) -> None:
+    staged: dict[Path, Path] = {}
+    backups: dict[Path, Path | None] = {}
+    replaced: list[Path] = []
+    targets = [final_artifact, *tracked_payloads.keys()]
+    try:
+        staged[final_artifact] = _write_staged_bytes(
+            final_artifact, source_artifact.read_bytes()
+        )
+        if (
+            staged[final_artifact].stat().st_size != expected_bytes
+            or sha256(staged[final_artifact]) != expected_sha
+        ):
+            raise SystemExit("staged MindSpore artifact differs from the recorded identity")
+        for target, payload in tracked_payloads.items():
+            staged[target] = _write_staged_bytes(target, payload)
+        for target in targets:
+            if target.exists():
+                backups[target] = _write_staged_bytes(target, target.read_bytes())
+            else:
+                backups[target] = None
+        for target in targets:
+            os.replace(staged[target], target)
+            replaced.append(target)
+        actual = file_snapshot(final_artifact)
+        if actual["bytes"] != expected_bytes or actual["sha256"] != expected_sha:
+            raise RuntimeError("published MindSpore artifact identity verification failed")
+    except BaseException:
+        for target in reversed(replaced):
+            backup = backups.get(target)
+            if backup is None:
+                target.unlink(missing_ok=True)
+            elif backup.exists():
+                os.replace(backup, target)
+        raise
+    finally:
+        for path in [*staged.values(), *(item for item in backups.values() if item)]:
+            path.unlink(missing_ok=True)
 
 
 def failure_signature(stderr: str) -> dict[str, object] | None:
@@ -610,6 +854,74 @@ def stable_golden(round_data: dict[str, object], frozen_reference: dict[str, obj
     }
 
 
+def validate_workspace_against_recorded(
+    recorded_manifest: dict[str, object],
+    recorded_golden: dict[str, object],
+    workspace_manifest: dict[str, object],
+    workspace_golden: dict[str, object],
+    workspace_artifact: dict[str, object],
+) -> None:
+    if (
+        workspace_artifact["bytes"] != recorded_manifest["artifact"]["bytes"]
+        or workspace_artifact["sha256"] != recorded_manifest["recordedArtifactSha256"]
+    ):
+        raise SystemExit("MindSpore replay artifact differs from the recorded artifact identity")
+    recorded_conversion = recorded_manifest["conversion"]
+    workspace_conversion = workspace_manifest["conversion"]
+    recorded_command = [
+        item
+        for item in recorded_conversion["command"]
+        if not item.startswith("--modelFile=") and not item.startswith("--outputFile=")
+    ]
+    workspace_command = [
+        item
+        for item in workspace_conversion["command"]
+        if not item.startswith("--modelFile=") and not item.startswith("--outputFile=")
+    ]
+    if (
+        recorded_conversion["candidateId"] != workspace_conversion["candidateId"]
+        or recorded_conversion["parameters"] != workspace_conversion["parameters"]
+        or recorded_command != workspace_command
+        or recorded_conversion["sourceGraph"]["bytes"]
+        != workspace_conversion["sourceGraph"]["bytes"]
+        or recorded_conversion["sourceGraph"]["sha256"]
+        != workspace_conversion["sourceGraph"]["sha256"]
+    ):
+        raise SystemExit("MindSpore replay manifest contract drift: conversion")
+    for key in [
+        "derivedOnnx",
+        "differencesFromReferenceOnnx",
+        "ioContract",
+        "ownership",
+        "quantization",
+        "sourceInputs",
+        "status",
+        "usageScope",
+    ]:
+        if workspace_manifest[key] != recorded_manifest[key]:
+            raise SystemExit(f"MindSpore replay manifest contract drift: {key}")
+    for key in [
+        "archive",
+        "benchmark",
+        "commitId",
+        "converter",
+        "converterVersion",
+        "officialDownloadPage",
+        "pythonEnvironment",
+        "pythonRequirements",
+        "runtimeLibrary",
+    ]:
+        if workspace_manifest["toolchain"][key] != recorded_manifest["toolchain"][key]:
+            raise SystemExit(f"MindSpore replay toolchain drift: {key}")
+    comparable_golden = json.loads(json.dumps(workspace_golden))
+    comparable_golden["artifact"] = recorded_golden["artifact"]
+    comparable_golden["recordedArtifactSha256"] = recorded_manifest[
+        "recordedArtifactSha256"
+    ]
+    if comparable_golden != recorded_golden:
+        raise SystemExit("MindSpore replay golden report differs from recorded evidence")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pt", required=True, type=Path)
@@ -619,8 +931,27 @@ def main() -> int:
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
-    handoff_dir = args.pt.resolve(strict=True).parent
     workspace = (root / args.workspace).resolve()
+    artifacts_dir = (root / ".evidence/mindspore/artifacts").resolve()
+    final_artifact = artifacts_dir / "yolov8n-fp32.ms"
+    validate_workspace(root, workspace, artifacts_dir)
+
+    recorded_manifest = None
+    recorded_golden = None
+    recorded_report = None
+    tracked_evidence_before = None
+    if not args.record:
+        (
+            recorded_manifest,
+            recorded_golden,
+            recorded_report,
+            tracked_evidence_before,
+        ) = load_recorded_evidence(root)
+    recorded_before = file_snapshot(final_artifact)
+    if not args.record:
+        verify_non_record_preflight(recorded_before, recorded_manifest)
+
+    handoff_dir = args.pt.resolve(strict=True).parent
     workspace.mkdir(parents=True, exist_ok=True)
     mindspore_root = root / ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64"
     archive = root / ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64.tar.gz"
@@ -669,6 +1000,8 @@ def main() -> int:
     rounds = []
     for round_number in (1, 2):
         round_root = workspace / f"round-{round_number}"
+        if round_root.exists():
+            shutil.rmtree(round_root)
         round_root.mkdir(parents=True, exist_ok=True)
         before = git_status(root)
         source_before_raw = validate_inputs(paths)
@@ -796,44 +1129,102 @@ def main() -> int:
         raise RuntimeError(f"MindSpore two-round determinism failed: {comparison}")
 
     final_artifact_source = workspace / "round-2/conversions/pt-reexport-opset17-dfl-reduced-static-general.ms"
-    final_artifact = root / ".evidence/mindspore/artifacts/yolov8n-fp32.ms"
-    final_artifact.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(final_artifact_source, final_artifact)
+    replay_artifact = artifact(
+        final_artifact_source,
+        ".evidence/mindspore/replay/round-N/conversions/pt-reexport-opset17-dfl-reduced-static-general.ms",
+    )
     tools["pythonEnvironment"] = rounds[1]["exportReport"]["environment"]
     manifest = stable_manifest(inputs, rounds, tools)
-    manifest["artifact"].update(artifact(final_artifact, ".evidence/mindspore/artifacts/yolov8n-fp32.ms"))
     golden = stable_golden(rounds[1], frozen_reference)
-    golden["artifact"] = artifact(final_artifact, ".evidence/mindspore/artifacts/yolov8n-fp32.ms")
+
+    if args.record:
+        expected_bytes = replay_artifact["bytes"]
+        recorded_sha = replay_artifact["sha256"]
+        fixed_artifact = {
+            **replay_artifact,
+            "path": ".evidence/mindspore/artifacts/yolov8n-fp32.ms",
+        }
+    else:
+        expected_bytes = recorded_manifest["artifact"]["bytes"]
+        recorded_sha = recorded_manifest["recordedArtifactSha256"]
+        fixed_artifact = recorded_manifest["artifact"]
+        validate_workspace_against_recorded(
+            recorded_manifest, recorded_golden, manifest, golden, replay_artifact
+        )
+
+    manifest["artifact"].update(fixed_artifact)
+    manifest["recordedArtifactSha256"] = recorded_sha
+    golden["artifact"] = fixed_artifact
+    golden["recordedArtifactSha256"] = recorded_sha
+
+    if args.record:
+        predicted_after = {
+            "available": True,
+            "bytes": expected_bytes,
+            "mtimeNs": None,
+            "sha256": recorded_sha,
+        }
+        recorded_verification = recorded_artifact_verification(
+            recorded_before, predicted_after, expected_bytes, recorded_sha, True
+        )
+        tracked_evidence = None
+    else:
+        recorded_after = file_snapshot(final_artifact)
+        recorded_verification = verify_non_record_artifact(
+            recorded_before, recorded_after, expected_bytes, recorded_sha
+        )
+        tracked_evidence_after = tracked_evidence_snapshot(root)
+        tracked_evidence = verify_tracked_evidence_preserved(
+            tracked_evidence_before, tracked_evidence_after
+        )
+
     replay = {
-        "artifact": artifact(final_artifact, ".evidence/mindspore/artifacts/yolov8n-fp32.ms"),
+        "artifact": fixed_artifact if args.record else replay_artifact,
         "comparison": comparison,
         "inputs": inputs,
+        "mode": "record" if args.record else "replay",
         "recorded": args.record,
+        "recordedArtifactSha256": recorded_sha,
+        "recordedArtifactVerification": recorded_verification,
+        "replayArtifactSha256": replay_artifact["sha256"],
         "rounds": rounds,
         "schemaVersion": 1,
         "tools": tools,
+        "trackedEvidence": tracked_evidence,
     }
     replay_path = workspace / "mindspore-replay.json"
     replay_path.write_bytes(stable_bytes(replay))
     if args.record:
-        (root / "evidence/conversions/mindspore-artifact-manifest.json").write_bytes(stable_bytes(manifest))
-        (root / "evidence/reports/mindspore-golden-report.json").write_bytes(stable_bytes(golden))
-        (root / "evidence/reports/mindspore-conversion-report.json").write_bytes(stable_bytes(replay))
-    else:
-        expected_outputs = [
-            (root / "evidence/conversions/mindspore-artifact-manifest.json", stable_bytes(manifest)),
-            (root / "evidence/reports/mindspore-golden-report.json", stable_bytes(golden)),
-        ]
-        for path, expected_bytes in expected_outputs:
-            if not path.is_file() or path.read_bytes() != expected_bytes:
-                raise RuntimeError(f"tracked MindSpore evidence drift: {path.relative_to(root)}")
+        manifest["recordedArtifactVerification"] = recorded_verification
+        publish_recording(
+            final_artifact_source,
+            final_artifact,
+            {
+                root / TRACKED_EVIDENCE_PATHS["manifest"]: stable_bytes(manifest),
+                root / TRACKED_EVIDENCE_PATHS["goldenReport"]: stable_bytes(golden),
+                root / TRACKED_EVIDENCE_PATHS["conversionReport"]: stable_bytes(replay),
+            },
+            expected_bytes,
+            recorded_sha,
+        )
+        recorded_after = file_snapshot(final_artifact)
+        if (
+            recorded_after["bytes"] != expected_bytes
+            or recorded_after["sha256"] != recorded_sha
+        ):
+            raise RuntimeError("recorded MindSpore artifact identity verification failed")
     print(
         json.dumps(
             {
-                "artifact": artifact(final_artifact, ".evidence/mindspore/artifacts/yolov8n-fp32.ms"),
+                "artifact": fixed_artifact if args.record else replay_artifact,
                 "comparison": comparison,
+                "mode": replay["mode"],
                 "recorded": args.record,
+                "recordedArtifactSha256": recorded_sha,
+                "recordedArtifactVerification": recorded_verification,
+                "replayArtifactSha256": replay_artifact["sha256"],
                 "replay": str(replay_path.relative_to(root)),
+                "trackedEvidence": tracked_evidence,
             },
             sort_keys=True,
         )

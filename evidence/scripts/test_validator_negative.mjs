@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -28,6 +29,9 @@ const litertManifest = await readJson('evidence/conversions/litert-artifact-mani
 const litertGolden = await readJson('evidence/reports/litert-golden-report.json');
 const litertReplay = await readJson('evidence/reports/litert-conversion-report.json');
 const frozen = (await readJson('evidence/golden/web-reference.json')).tolerances;
+const mindsporePython = process.env.RIMEFLOW_MINDSPORE_PYTHON ?? '.evidence/mindspore/python-venv/bin/python';
+const guardTests = spawnSync(mindsporePython, ['evidence/scripts/test_mindspore_replay_guards.py'], { cwd: root, encoding: 'utf8' });
+if (guardTests.status !== 0) throw new Error(`MindSpore replay guard tests failed:\n${guardTests.stdout}\n${guardTests.stderr}`);
 validateLitertEvidence(litertManifest, litertGolden, litertReplay, frozen);
 const supported = structuredClone(litertManifest);
 supported.status.supported = true;
@@ -87,6 +91,8 @@ const mindsporeManifest = await readJson('evidence/conversions/mindspore-artifac
 const mindsporeGolden = await readJson('evidence/reports/mindspore-golden-report.json');
 const mindsporeReplay = await readJson('evidence/reports/mindspore-conversion-report.json');
 validateMindsporeEvidence(mindsporeManifest, mindsporeGolden, mindsporeReplay, frozen);
+const mindsporeNonRecord = taskReplay.steps.find((item) => item.id === 'harmonyos-mindspore-conversion-and-host-golden');
+validateMindsporeReplayEvidence(mindsporeManifest, mindsporeNonRecord);
 const mindsporeSupported = structuredClone(mindsporeManifest);
 mindsporeSupported.status.supported = true;
 await expectFailure('MindSpore supported without HarmonyOS device', async () => validateMindsporeEvidence(mindsporeSupported, mindsporeGolden, mindsporeReplay, frozen));
@@ -106,4 +112,44 @@ const mindsporePostprocess = structuredClone(mindsporeGolden);
 mindsporePostprocess.productionPostprocess.platformSpecificImplementationAdded = true;
 await expectFailure('MindSpore platform postprocess duplication', async () => validateMindsporeEvidence(mindsporeManifest, mindsporePostprocess, mindsporeReplay, frozen));
 
-console.log(JSON.stringify({ ok: true, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite conversion/host golden evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication'] }));
+const mindsporeChangedRecorded = structuredClone(mindsporeNonRecord);
+mindsporeChangedRecorded.recordedArtifactVerification.afterSha256 = '1'.repeat(64);
+mindsporeChangedRecorded.recordedArtifactVerification.unchanged = false;
+await expectFailure('MindSpore non-record replay changed fixed artifact', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeChangedRecorded));
+const mindsporeMissingOverclaim = structuredClone(mindsporeNonRecord);
+Object.assign(mindsporeMissingOverclaim.recordedArtifactVerification, {
+  availableBefore: false,
+  availableAfter: false,
+  beforeBytes: null,
+  afterBytes: null,
+  beforeMtimeNs: null,
+  afterMtimeNs: null,
+  beforeSha256: null,
+  afterSha256: null,
+  exactIdentityVerifiedBefore: true,
+  exactIdentityVerifiedAfter: true,
+  status: 'verified-preserved',
+});
+await expectFailure('MindSpore missing artifact exact identity overclaim', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeMissingOverclaim));
+const mindsporeAutoCreated = structuredClone(mindsporeNonRecord);
+Object.assign(mindsporeAutoCreated.recordedArtifactVerification, {
+  availableBefore: false,
+  availableAfter: true,
+  beforeBytes: null,
+  beforeMtimeNs: null,
+  beforeSha256: null,
+  status: 'recorded-artifact-created-during-replay',
+  unchanged: false,
+});
+await expectFailure('MindSpore non-record replay created fixed artifact', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeAutoCreated));
+const mindsporeReplayAsRecorded = structuredClone(mindsporeNonRecord);
+mindsporeReplayAsRecorded.replayArtifactSha256 = '2'.repeat(64);
+mindsporeReplayAsRecorded.workspaceArtifact.sha256 = mindsporeReplayAsRecorded.replayArtifactSha256;
+for (const round of mindsporeReplayAsRecorded.rounds) round.outputs[0].sha256 = mindsporeReplayAsRecorded.replayArtifactSha256;
+await expectFailure('MindSpore replay digest impersonates recorded artifact identity', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeReplayAsRecorded));
+const mindsporeTrackedDrift = structuredClone(mindsporeNonRecord);
+mindsporeTrackedDrift.trackedEvidence.goldenReport.sha256After = '3'.repeat(64);
+mindsporeTrackedDrift.trackedEvidence.goldenReport.unchanged = true;
+await expectFailure('MindSpore non-record tracked report drift', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeTrackedDrift));
+
+console.log(JSON.stringify({ ok: true, filesystemGuardTests: 7, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite record evidence', 'MindSpore Lite non-record artifact preservation evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication', 'MindSpore non-record replay changed fixed artifact', 'MindSpore missing artifact exact identity overclaim', 'MindSpore non-record replay created fixed artifact', 'MindSpore replay digest impersonates recorded artifact identity', 'MindSpore non-record tracked report drift'] }));

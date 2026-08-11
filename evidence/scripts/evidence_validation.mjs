@@ -89,7 +89,7 @@ export function validateMindsporeEvidence(manifest, golden, replay, frozenTolera
     reexportOnnx: '8718af53d53b6336f301ef7eacb529376f29f0c04bec415815fde7d734b9def2',
   };
   if (manifest.sourceInputs.archive.sha256 !== expected.archive || manifest.sourceInputs.handoffOnnx.sha256 !== expected.handoffOnnx || manifest.sourceInputs.pt.sha256 !== expected.pt || manifest.sourceInputs.referenceOnnx.sha256 !== expected.referenceOnnx || Object.values(manifest.sourceInputs).some((item) => !item.verified || item.sha256 !== item.expectedSha256)) throw new Error('MindSpore locked input drift');
-  if (manifest.artifact.sha256 !== expected.artifact || manifest.artifact.bytes !== 12832800 || manifest.artifact.trackedByGit || manifest.artifact.format !== 'MindIR Lite / MINDIR_LITE FlatBuffer (.ms)' || !manifest.artifact.location.startsWith('.evidence/')) throw new Error('MindSpore artifact metadata drift');
+  if (manifest.artifact.sha256 !== expected.artifact || manifest.recordedArtifactSha256 !== expected.artifact || manifest.artifact.bytes !== 12832800 || manifest.artifact.trackedByGit || manifest.artifact.format !== 'MindIR Lite / MINDIR_LITE FlatBuffer (.ms)' || manifest.artifact.location !== '.evidence/mindspore/artifacts/yolov8n-fp32.ms' || manifest.artifact.path !== manifest.artifact.location) throw new Error('MindSpore artifact metadata drift');
   if (manifest.status.value !== 'host-inference-verified' || !manifest.status.artifactVerified || !manifest.status.hostInferenceVerified || manifest.status.harmonyOsDeviceVerified || manifest.status.supported || manifest.status.task14Complete) throw new Error('MindSpore support status overclaim');
   if (manifest.toolchain.converterVersion !== '2.7.0' || manifest.toolchain.archive.sha256 !== expected.archive || manifest.toolchain.commitId !== 'd2b243f75f33a7a896483b09e567d845155cad06' || manifest.toolchain.converterVersionProbe.exitCode === 0 || manifest.toolchain.converterHelpProbe.exitCode !== 0 || manifest.toolchain.pythonRequirements.path !== 'evidence/tooling/mindspore-python-addons.lock' || !/^[0-9a-f]{64}$/.test(manifest.toolchain.pythonRequirements.sha256)) throw new Error('MindSpore toolchain provenance drift');
   if (JSON.stringify(manifest.toolchain.pythonEnvironment) !== JSON.stringify({ numpy: '2.3.5', onnx: '1.22.0', onnxruntime: '1.27.0', python: '3.12.3', torch: '2.7.0+cpu', torchvision: '0.22.0+cpu', ultralytics: '8.4.104' })) throw new Error('MindSpore Python toolchain drift');
@@ -99,13 +99,17 @@ export function validateMindsporeEvidence(manifest, golden, replay, frozenTolera
   if (manifest.ioContract.inputs.length !== 1 || input.name !== 'images' || input.index !== 0 || input.dtype !== 'float32' || JSON.stringify(input.shape) !== '[1,640,640,3]' || input.bytes !== 4915200 || input.quantization.length !== 0) throw new Error('MindSpore input contract drift');
   if (manifest.ioContract.outputs.length !== 1 || output.name !== 'output0' || output.index !== 0 || output.dtype !== 'float32' || JSON.stringify(output.shape) !== '[1,84,8400]' || output.bytes !== 2822400 || output.quantization.length !== 0) throw new Error('MindSpore output contract drift');
   if (!manifest.ownership.preprocessing.includes('NCHW-to-NHWC') || !manifest.ownership.coordinates.includes('xywh') || !manifest.ownership.nms.startsWith('operator;') || manifest.quantization.mode !== 'FP32; converter input/output type defaults, fp16 off, no quantization requested') throw new Error('MindSpore preprocessing/coordinate/NMS contract drift');
-  if (!golden.passed || golden.summary.fixtureCount !== 5 || golden.summary.passedCount !== 5 || golden.productionPostprocess.implementation !== 'src/postprocess.rs' || golden.productionPostprocess.platformSpecificImplementationAdded) throw new Error('MindSpore golden/production postprocess drift');
+  if (!golden.passed || golden.recordedArtifactSha256 !== expected.artifact || golden.artifact.sha256 !== expected.artifact || golden.artifact.bytes !== manifest.artifact.bytes || golden.summary.fixtureCount !== 5 || golden.summary.passedCount !== 5 || golden.productionPostprocess.implementation !== 'src/postprocess.rs' || golden.productionPostprocess.platformSpecificImplementationAdded) throw new Error('MindSpore golden/production postprocess drift');
   const frozenKeys = Object.keys(frozenTolerances);
   if (Object.keys(golden.tolerances).length !== frozenKeys.length || frozenKeys.some((key) => !Object.hasOwn(golden.tolerances, key) || !Object.is(golden.tolerances[key], frozenTolerances[key]))) throw new Error('MindSpore frozen tolerance drift');
   for (const fixture of golden.fixtures) {
     if (!fixture.passed || !fixture.rawComparison.passed || fixture.rawComparison.elementCount !== 84 * 8400 || fixture.rawComparison.finiteCount !== fixture.rawComparison.elementCount || !fixture.decodedComparison.passed || JSON.stringify(fixture.runtimeInput.shape) !== '[1,640,640,3]' || !fixture.runtimeInput.mapping.includes('NCHW')) throw new Error(`MindSpore fixture evidence drift: ${fixture.id}`);
   }
-  if (!replay.recorded || replay.rounds.length !== 2 || !replay.comparison.allDeterministic || !replay.comparison.derivedOnnxDigestEqual || !replay.comparison.fixtureResultsEqual || !replay.comparison.reexportOnnxDigestEqual || !replay.comparison.trackedWorktreeStateStable) throw new Error('MindSpore replay determinism drift');
+  const recordedVerification = replay.recordedArtifactVerification;
+  if (replay.mode !== 'record' || !replay.recorded || replay.recordedArtifactSha256 !== expected.artifact || replay.replayArtifactSha256 !== expected.artifact || replay.artifact.sha256 !== expected.artifact || replay.artifact.bytes !== manifest.artifact.bytes || replay.artifact.path !== manifest.artifact.path || replay.trackedEvidence !== null) throw new Error('MindSpore record/replay identity drift');
+  if (!recordedVerification || recordedVerification.status !== 'recorded' || recordedVerification.expectedSha256 !== expected.artifact || recordedVerification.expectedBytes !== manifest.artifact.bytes || !recordedVerification.availableAfter || recordedVerification.afterSha256 !== expected.artifact || recordedVerification.afterBytes !== manifest.artifact.bytes || !recordedVerification.exactIdentityVerifiedAfter) throw new Error('MindSpore recorded artifact verification drift');
+  if (JSON.stringify(manifest.recordedArtifactVerification) !== JSON.stringify(recordedVerification)) throw new Error('MindSpore manifest/report artifact verification mismatch');
+  if (replay.rounds.length !== 2 || !replay.comparison.allDeterministic || !replay.comparison.derivedOnnxDigestEqual || !replay.comparison.fixtureResultsEqual || !replay.comparison.reexportOnnxDigestEqual || !replay.comparison.trackedWorktreeStateStable) throw new Error('MindSpore replay determinism drift');
   const expectedIds = ['reference-baseline-general', 'reference-static-general', 'handoff-static-general', 'pt-reexport-opset17-unsimplified-static-general', 'reference-static-none', 'pt-reexport-opset17-dfl-reduced-static-general'];
   for (const round of replay.rounds) {
     if (round.exportReport.output.sha256 !== expected.reexportOnnx || round.derivationReport.derived.sha256 !== expected.derivedOnnx || !round.hostValidation.passed || round.hostValidation.fixtures.length !== 5 || round.worktreeBefore.tracked !== round.worktreeAfter.tracked || JSON.stringify(round.sourceBefore) !== JSON.stringify(round.sourceAfter)) throw new Error(`MindSpore replay round drift: ${round.round}`);
@@ -123,6 +127,40 @@ export function validateMindsporeEvidence(manifest, golden, replay, frozenTolera
   }
   if (Object.values(replay.comparison.paths).some((item) => Object.values(item).some((value) => value !== true))) throw new Error('MindSpore per-path replay comparison drift');
   if (JSON.stringify(replay).includes('/home/')) throw new Error('MindSpore report leaked a host absolute path');
+}
+
+export function validateMindsporeReplayEvidence(manifest, replay) {
+  const recordedSha = manifest.recordedArtifactSha256;
+  const recordedBytes = manifest.artifact.bytes;
+  if (manifest.status.supported || manifest.status.harmonyOsDeviceVerified || manifest.status.task14Complete) throw new Error('MindSpore replay support status overclaim');
+  if (replay.mode !== 'replay' || replay.recorded !== false || replay.recordedArtifactSha256 !== recordedSha) throw new Error('MindSpore non-record replay identity drift');
+  if (replay.replayArtifactSha256 !== recordedSha) throw new Error('MindSpore replay artifact digest differs from recorded identity');
+  const workspaceArtifact = replay.workspaceArtifact ?? replay.artifact;
+  if (!workspaceArtifact || workspaceArtifact.sha256 !== replay.replayArtifactSha256 || workspaceArtifact.bytes !== recordedBytes || workspaceArtifact.path === manifest.artifact.path || !workspaceArtifact.path.startsWith('.evidence/mindspore/replay/')) throw new Error('MindSpore workspace artifact identity drift');
+  const verification = replay.recordedArtifactVerification;
+  if (!verification || verification.expectedSha256 !== recordedSha || verification.expectedBytes !== recordedBytes || !verification.unchanged || verification.availableBefore !== verification.availableAfter) throw new Error('MindSpore non-record artifact preservation failed');
+  if (verification.availableBefore) {
+    if (verification.status !== 'verified-preserved' || verification.beforeSha256 !== recordedSha || verification.afterSha256 !== recordedSha || verification.beforeBytes !== recordedBytes || verification.afterBytes !== recordedBytes || verification.beforeMtimeNs !== verification.afterMtimeNs || !verification.exactIdentityVerifiedBefore || !verification.exactIdentityVerifiedAfter) throw new Error('MindSpore non-record exact artifact identity failed');
+  } else if (verification.status !== 'recorded-artifact-unavailable' || verification.beforeSha256 !== null || verification.afterSha256 !== null || verification.beforeBytes !== null || verification.afterBytes !== null || verification.beforeMtimeNs !== null || verification.afterMtimeNs !== null || verification.exactIdentityVerifiedBefore || verification.exactIdentityVerifiedAfter) {
+    throw new Error('MindSpore missing recorded artifact was overclaimed');
+  }
+  const expectedTrackedPaths = {
+    manifest: 'evidence/conversions/mindspore-artifact-manifest.json',
+    goldenReport: 'evidence/reports/mindspore-golden-report.json',
+    conversionReport: 'evidence/reports/mindspore-conversion-report.json',
+  };
+  for (const [key, path] of Object.entries(expectedTrackedPaths)) {
+    const item = replay.trackedEvidence?.[key];
+    if (!item || item.path !== path || item.bytes <= 0 || item.bytes !== item.bytesAfter || !/^[0-9a-f]{64}$/.test(item.sha256) || item.sha256 !== item.sha256After || item.unchanged !== true) throw new Error(`MindSpore non-record tracked ${key} drift`);
+  }
+  const comparison = replay.repeatComparison?.details ?? replay.comparison;
+  if (!comparison?.allDeterministic || !comparison.derivedOnnxDigestEqual || !comparison.fixtureResultsEqual || !comparison.reexportOnnxDigestEqual || !comparison.trackedWorktreeStateStable || Object.values(comparison.paths).some((item) => Object.values(item).some((value) => value !== true))) throw new Error('MindSpore non-record replay determinism drift');
+  if (!Array.isArray(replay.rounds) || replay.rounds.length !== 2) throw new Error('MindSpore non-record replay rounds missing');
+  for (const round of replay.rounds) {
+    const roundArtifact = round.outputs?.[0] ?? round.matrix?.find((item) => item.result === 'success')?.artifact;
+    const roundPassed = round.exitCode === undefined ? round.hostValidation?.passed : round.exitCode === 0;
+    if (!roundArtifact || roundArtifact.sha256 !== replay.replayArtifactSha256 || roundArtifact.bytes !== recordedBytes || !roundPassed || round.worktreeBefore.tracked !== round.worktreeAfter.tracked) throw new Error(`MindSpore non-record replay round drift: ${round.run ?? round.round}`);
+  }
 }
 
 export function validateCoremlEvidence(manifest, replay) {

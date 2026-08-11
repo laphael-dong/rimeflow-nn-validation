@@ -77,10 +77,16 @@ MINDSPORE_PYTHON=.evidence/mindspore/python-venv/bin/python
 $MINDSPORE_PYTHON evidence/scripts/run_mindspore_replay.py \
   --pt "$HANDOFF_ASSETS/yolov8n.pt" \
   --handoff-onnx "$HANDOFF_ASSETS/yolov8n.onnx" \
-  --workspace .evidence/mindspore/replay \
+  --workspace .evidence/mindspore/record-replay \
   --record
 node evidence/scripts/run_conversion_spikes.mjs --mindspore-only
+$MINDSPORE_PYTHON evidence/scripts/run_mindspore_replay.py \
+  --pt "$HANDOFF_ASSETS/yolov8n.pt" \
+  --handoff-onnx "$HANDOFF_ASSETS/yolov8n.onnx" \
+  --workspace .evidence/mindspore/replay
 ```
+
+只有 `--record` 可以在两轮转换、host Load/Run、生产 Rust golden 与确定性检查全部通过后，通过同目录 staging 和原子替换创建或更新 `.evidence/mindspore/artifacts/yolov8n-fp32.ms`，并同步刷新 tracked manifest、golden report 和 conversion report。普通 replay 必须使用与 `.evidence/mindspore/artifacts/` 不重叠的独立 workspace；它只生成临时 ONNX、`.ms` 和 workspace report，不创建、删除、覆盖或触碰固定候选时间戳。普通 replay 在转换前校验 tracked record 与已存在候选的 bytes/SHA，在结束后校验候选 bytes/SHA/mtime 和三个 tracked JSON 的 SHA 均未变化；候选缺失时明确记录 `recorded-artifact-unavailable`，不得声称验证了本机固定候选身份。报告分别使用 `recordedArtifactSha256` 和 `replayArtifactSha256`，即使 digest 相同也不混淆固定候选存在性与 workspace 确定性。
 
 脚本在每轮开始和结束验证 `.pt`、handoff ONNX、规范 ONNX 与 archive 的字节数和锁定 SHA，源文件只读且不得覆盖。矩阵只包含六条有依据的路径：规范 ONNX 原命令重放、规范 ONNX 加静态 `inputShape`、handoff ONNX 加静态 `inputShape`、从锁定 `.pt` 以 `imgsz=640,batch=1,opset=17,dynamic=false,simplify=false,nms=false,optimize=false` 重导出后转换、规范 ONNX 加 `optimize=none`，以及对重导出图进行 DFL 等价改写后转换。前五条均稳定失败于 `legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass` 的 `/model.22/dfl/conv/Conv`；输入、权重和输出 Shape 分别为 `[1,16,4,8400]`、`[1,16,1,1]`、`[1,1,4,8400]`，并保留 `/model.10/Resize` 与 `/model.13/Resize` 的可选空输入警告。
 

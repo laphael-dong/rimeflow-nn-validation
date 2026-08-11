@@ -225,6 +225,13 @@ if (litertOnly || coremlOnly) {
     command: mindsporeCommand,
     executed: true,
     blockedReason: null,
+    mode: mindsporeReplay.mode,
+    recorded: mindsporeReplay.recorded,
+    recordedArtifactSha256: mindsporeReplay.recordedArtifactSha256,
+    recordedArtifactVerification: mindsporeReplay.recordedArtifactVerification,
+    replayArtifactSha256: mindsporeReplay.replayArtifactSha256,
+    trackedEvidence: mindsporeReplay.trackedEvidence,
+    workspaceArtifact: mindsporeReplay.artifact,
     rounds: mindsporeReplay.rounds.map((round) => {
       const success = round.matrix.find((item) => item.result === 'success');
       const stdout = [round.webReference.stdout, round.export.stdout, round.derivation.stdout, ...round.matrix.map((item) => item.stdout), ...round.hostValidation.fixtures.flatMap((item) => [item.benchmark.stdout, item.runtime.stdout, item.productionRust.stdout])].join('\n');
