@@ -1,0 +1,9 @@
+# Apple Core ML 转换环境顶层依赖；完整传递闭包见 coreml-requirements.lock。
+# 适用平台：CPython 3.12、Linux x86_64。
+--index-url https://pypi.org/simple
+--extra-index-url https://download.pytorch.org/whl/cpu
+numpy==2.3.5
+torch==2.7.0+cpu
+torchvision==0.22.0+cpu
+ultralytics==8.4.104
+coremltools==9.0

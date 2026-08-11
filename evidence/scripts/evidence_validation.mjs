@@ -77,3 +77,28 @@ export function validateLitertEvidence(manifest, golden, replay, frozenTolerance
     if (round.conversion.exitCode !== 0 || round.validation.exitCode !== 0 || round.webReference.exitCode !== 0 || !round.conversion.startedAt || !round.conversion.endedAt || !round.conversion.stdout || round.artifact.sha256 !== manifest.artifact.sha256 || round.worktreeBefore.tracked !== round.worktreeAfter.tracked) throw new Error(`LiteRT replay round invalid: ${round.round}`);
   }
 }
+
+export function validateCoremlEvidence(manifest, replay) {
+  const expectedPtSha = 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36';
+  if (manifest.source.logicalPath !== '$HANDOFF_ASSETS/yolov8n.pt' || manifest.source.before.sha256 !== expectedPtSha || manifest.source.before.bytes !== 6549796 || JSON.stringify(manifest.source.before) !== JSON.stringify(manifest.source.after)) throw new Error('Core ML source checkpoint drift');
+  if (manifest.status.value !== 'artifact-spec-verified' || !manifest.status.artifactVerified || manifest.status.hostInferenceVerified || manifest.status.macosRuntimeVerified || manifest.status.iosRuntimeVerified || manifest.status.supported) throw new Error('Core ML support status overclaim');
+  if (manifest.toolchain.python !== '3.12.3' || manifest.toolchain.ultralytics !== '8.4.104' || manifest.toolchain.torch !== '2.7.0+cpu' || manifest.toolchain.torchvision !== '0.22.0+cpu' || manifest.toolchain.coremltools !== '9.0' || manifest.toolchain.numpy !== '2.3.5') throw new Error('Core ML toolchain drift');
+  if (manifest.artifact.trackedByGit || manifest.artifact.tree.fileCount !== 3 || manifest.artifact.tree.totalFileBytes <= 0 || !/^[0-9a-f]{64}$/.test(manifest.artifact.tree.digest)) throw new Error('Core ML artifact tree metadata invalid');
+  if (sha256(Buffer.from(JSON.stringify(manifest.artifact.tree.files))) !== manifest.artifact.tree.digest) throw new Error('Core ML canonical tree digest mismatch');
+  const paths = manifest.artifact.tree.files.map((item) => item.path);
+  if (JSON.stringify(paths) !== JSON.stringify(['Data/com.apple.CoreML/model.mlmodel', 'Data/com.apple.CoreML/weights/weight.bin', 'Manifest.json']) || manifest.artifact.tree.files.some((item) => item.bytes <= 0 || !/^[0-9a-f]{64}$/.test(item.sha256))) throw new Error('Core ML package tree drift');
+  const spec = manifest.spec;
+  if (spec.modelType !== 'mlProgram' || spec.specificationVersion !== 6 || spec.opset !== 'CoreML5' || spec.minimumDeploymentTarget.iOS !== '15.0' || spec.minimumDeploymentTarget.macOS !== '12.0') throw new Error('Core ML model/deployment spec drift');
+  if (spec.input.name !== 'image' || spec.input.index !== 0 || spec.input.featureType !== 'IMAGE' || spec.input.colorSpace !== 'RGB' || spec.input.functionTensorDtype !== 'FLOAT32' || JSON.stringify(spec.input.shape) !== '[1,3,640,640]' || spec.input.width !== 640 || spec.input.height !== 640 || Math.abs(spec.input.scale - 1 / 255) > 1e-9 || JSON.stringify(spec.input.bias) !== '[0,0,0]') throw new Error('Core ML input contract drift');
+  if (spec.output.name !== 'var_911' || spec.output.index !== 0 || spec.output.count !== 1 || spec.output.featureType !== 'MULTI_ARRAY' || spec.output.dtype !== 'FLOAT32' || spec.output.layout !== 'N_ATTRIBUTES_ANCHORS' || JSON.stringify(spec.output.shape) !== '[1,84,8400]') throw new Error('Core ML output contract drift');
+  if (spec.computePrecision.actual !== 'FLOAT32' || spec.computePrecision.float16Present || spec.computePrecision.requestedHalf || spec.computePrecision.requestedQuantization !== null || spec.computePrecision.blobConstantDtypes.FLOAT32 <= 0 || Object.keys(spec.computePrecision.blobConstantDtypes).some((dtype) => dtype !== 'FLOAT32')) throw new Error('Core ML precision drift');
+  if (spec.nms.fused || spec.nms.operators.length !== 0 || spec.nms.responsibility !== 'operator postprocess') throw new Error('Core ML NMS responsibility drift');
+  if (!spec.preprocessing.fused.includes('multiply by 1/255') || !spec.preprocessing.notFused.includes('letterbox resize') || spec.coordinates.bboxEncoding !== 'xywh in 640x640 model-input pixel units' || JSON.stringify(spec.coordinates.strideTensor.uniqueValues) !== '[8,16,32]') throw new Error('Core ML preprocessing/coordinate contract drift');
+  const comparison = replay.comparison;
+  if (replay.rounds.length !== 2 || comparison.packageTreeDigestEqual || !comparison.weightBlobDigestEqual || !comparison.normalizedSpecDigestEqual || !comparison.normalizedPackageManifestDigestEqual || !comparison.precisionContractEqual || !comparison.sourceStateEqualAndUnchanged || Object.values(comparison.ioMetadataEqual).some((value) => value !== true)) throw new Error('Core ML replay determinism characterization drift');
+  const changedPaths = comparison.changedFiles.map((item) => item.path).sort();
+  if (JSON.stringify(changedPaths) !== JSON.stringify(['Data/com.apple.CoreML/model.mlmodel', 'Manifest.json'])) throw new Error('Core ML unexpected nondeterministic files');
+  for (const round of replay.rounds) {
+    if (round.conversion.exitCode !== 0 || !round.conversion.startedAt || !round.conversion.endedAt || !round.conversion.stdout || round.worktreeBefore.tracked !== round.worktreeAfter.tracked || round.source.before.sha256 !== expectedPtSha || JSON.stringify(round.source.before) !== JSON.stringify(round.source.after)) throw new Error(`Core ML replay round invalid: ${round.round}`);
+  }
+}

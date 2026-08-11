@@ -9,7 +9,10 @@ const outputPath = resolve(root, 'evidence/replay/task1-replay.json');
 const git = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const repositoryHeadAtReplay = git(['rev-parse', 'HEAD']);
 const litertOnly = process.argv.includes('--litert-only');
-const previousReplay = litertOnly
+const coremlOnly = process.argv.includes('--coreml-only');
+if (litertOnly && coremlOnly) throw new Error('一次只能选择一个 scoped replay 模式');
+const scopedOnly = litertOnly || coremlOnly;
+const previousReplay = scopedOnly
   ? JSON.parse(await readFile(outputPath, 'utf8'))
   : null;
 const outputs = [
@@ -22,14 +25,17 @@ const outputs = [
   'evidence/reports/handoff-model-audit.json',
   'evidence/reports/model-provenance.json',
   'evidence/conversions/conversion-spikes.json',
+  'evidence/conversions/coreml-artifact-manifest.json',
   'evidence/conversions/litert-artifact-manifest.json',
+  'evidence/reports/coreml-conversion-report.json',
   'evidence/reports/litert-conversion-report.json',
   'evidence/reports/litert-golden-report.json',
+  'evidence/tooling/coreml-requirements.lock',
   'evidence/tooling/litert-requirements.lock',
 ];
 const commonInputs = ['models/yolov8n.onnx', 'evidence/fixtures/manifest.json'];
 const steps = [];
-if (litertOnly) {
+if (scopedOnly) {
   const previousContractReplay = previousReplay.steps.find((step) => step.id === 'contract-fixture-golden');
   if (!previousContractReplay) throw new Error('历史 task1 replay 缺少 contract-fixture-golden');
   steps.push(previousContractReplay);
@@ -53,28 +59,42 @@ steps.push(await runRepeatedStep({
   inputPaths: ['evidence/fixtures/raw/overlap-nms.json', 'src/postprocess.rs'],
   outputPaths: [],
 }));
+const conversionMode = coremlOnly ? '--coreml-only' : '--litert-only';
+const conversionInputs = coremlOnly
+  ? [
+      'evidence/conversions/conversion-spikes.json',
+      'evidence/conversions/coreml-artifact-manifest.json',
+      'evidence/reports/handoff-model-audit.json',
+      'evidence/reports/coreml-conversion-report.json',
+    ]
+  : [
+      'evidence/conversions/conversion-spikes.json',
+      'evidence/conversions/litert-artifact-manifest.json',
+      'evidence/reports/handoff-model-audit.json',
+      'evidence/reports/litert-conversion-report.json',
+      'evidence/reports/litert-golden-report.json',
+    ];
 steps.push(await runRepeatedStep({
   root,
   id: 'conversion-report-regeneration',
-  command: 'node evidence/scripts/run_conversion_spikes.mjs --litert-only',
+  command: `node evidence/scripts/run_conversion_spikes.mjs ${conversionMode}`,
   executable: 'node',
-  args: ['evidence/scripts/run_conversion_spikes.mjs', '--litert-only'],
-  inputPaths: [
-    'evidence/conversions/conversion-spikes.json',
-    'evidence/conversions/litert-artifact-manifest.json',
-    'evidence/reports/handoff-model-audit.json',
-    'evidence/reports/litert-conversion-report.json',
-    'evidence/reports/litert-golden-report.json',
-  ],
+  args: ['evidence/scripts/run_conversion_spikes.mjs', conversionMode],
+  inputPaths: conversionInputs,
   outputPaths: ['evidence/conversions/conversion-spikes.json'],
 }));
-const litertReplayPath = resolve(root, '.evidence/litert/replay/litert-replay.json');
-const litertReplay = JSON.parse(await readFile(litertReplayPath, 'utf8').catch(() => {
-  throw new Error('缺少两轮 LiteRT replay；先执行 evidence/scripts/run_litert_replay.py');
-}));
-const litertLockBytes = await readFile(resolve(root, 'evidence/tooling/litert-requirements.lock'));
-const litertCommand = '$LITERT_PYTHON evidence/scripts/run_litert_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/litert/replay';
-steps.push({
+if (coremlOnly) {
+  const previousLitert = previousReplay.steps.find((step) => step.id === 'android-litert-conversion-and-host-golden');
+  if (!previousLitert) throw new Error('历史 task1 replay 缺少 LiteRT replay');
+  steps.push(previousLitert);
+} else {
+  const litertReplayPath = resolve(root, '.evidence/litert/replay/litert-replay.json');
+  const litertReplay = JSON.parse(await readFile(litertReplayPath, 'utf8').catch(() => {
+    throw new Error('缺少两轮 LiteRT replay；先执行 evidence/scripts/run_litert_replay.py');
+  }));
+  const litertLockBytes = await readFile(resolve(root, 'evidence/tooling/litert-requirements.lock'));
+  const litertCommand = '$LITERT_PYTHON evidence/scripts/run_litert_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/litert/replay';
+  steps.push({
   id: 'android-litert-conversion-and-host-golden',
   command: litertCommand,
   executed: true,
@@ -113,11 +133,63 @@ steps.push({
     deterministicOutputDigestsEqual: Object.values(litertReplay.comparison).every(Boolean),
     details: litertReplay.comparison,
   },
-});
+  });
+}
+
+if (litertOnly) {
+  const previousCoreml = previousReplay.steps.find((step) => step.id === 'apple-coreml-conversion-and-spec-inspection');
+  if (previousCoreml) steps.push(previousCoreml);
+} else {
+  const coremlReplayPath = resolve(root, '.evidence/coreml/replay/coreml-replay.json');
+  const coremlReplay = JSON.parse(await readFile(coremlReplayPath, 'utf8').catch(() => {
+    throw new Error('缺少两轮 Core ML replay；先执行 evidence/scripts/run_coreml_replay.py');
+  }));
+  const coremlLockBytes = await readFile(resolve(root, 'evidence/tooling/coreml-requirements.lock'));
+  const coremlCommand = '$COREML_PYTHON evidence/scripts/run_coreml_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --workspace .evidence/coreml/replay';
+  steps.push({
+    id: 'apple-coreml-conversion-and-spec-inspection',
+    command: coremlCommand,
+    executed: true,
+    blockedReason: null,
+    rounds: coremlReplay.rounds.map((round) => ({
+      run: round.round,
+      actualCommand: coremlCommand,
+      startedAt: round.conversion.startedAt,
+      endedAt: round.conversion.endedAt,
+      exitCode: round.conversion.exitCode,
+      signal: null,
+      repositoryHead: repositoryHeadAtReplay,
+      runnerId: runnerIdentity().id,
+      worktreeBefore: round.worktreeBefore,
+      worktreeAfter: round.worktreeAfter,
+      inputs: [
+        { path: '$HANDOFF_ASSETS/yolov8n.pt', exists: true, bytes: 6549796, sha256: 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36' },
+        { path: 'evidence/tooling/coreml-requirements.lock', exists: true, bytes: coremlLockBytes.length, sha256: sha256(coremlLockBytes) },
+      ],
+      outputs: [{ bytes: round.artifactTree.totalFileBytes, sha256: round.artifactTree.digest }],
+      log: {
+        storage: 'embedded-in-replay-manifest',
+        stdout: round.conversion.stdout,
+        stderr: round.conversion.stderr,
+        bytes: Buffer.byteLength(round.conversion.stdout) + Buffer.byteLength(round.conversion.stderr),
+        sha256: sha256(Buffer.from(`${round.conversion.stdout}\0${round.conversion.stderr}`)),
+      },
+    })),
+    repeatComparison: {
+      runs: 2,
+      allExitCodesZero: coremlReplay.rounds.every((round) => round.conversion.exitCode === 0),
+      deterministicOutputDigestsEqual: coremlReplay.comparison.packageTreeDigestEqual,
+      semanticDeterminismVerified: coremlReplay.comparison.normalizedSpecDigestEqual
+        && coremlReplay.comparison.normalizedPackageManifestDigestEqual
+        && coremlReplay.comparison.weightBlobDigestEqual,
+      details: coremlReplay.comparison,
+    },
+  });
+}
 steps.push(blockedStep(
   'delegated-platform-spikes',
-  'Core ML/Windows ML/MindSpore/Linux accelerated provider platform commands',
-  'LiteRT 已完成 host artifact/inference/golden 验证但缺 Android runner；外部负责人仍未回传 Core ML、Windows ML、MindSpore Lite 与加速 Linux provider 的完整 spike evidence。',
+  'Windows ML/MindSpore/Linux accelerated provider platform commands and real Apple runtime commands',
+  'Core ML 已完成 Linux host artifact/spec 验证但缺 macOS/iOS Load/Run；LiteRT 缺 Android runner；Windows ML、MindSpore Lite 与加速 Linux provider 仍缺完整平台证据。',
 ));
 const artifacts = [];
 for (const path of outputs) {
@@ -134,11 +206,11 @@ const manifest = {
     fixtureSourceCommit: '42ef8a125df038dcca49f6216f446fe9112946c1',
   },
   runner: runnerIdentity(),
-  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', litertRuntime: '2.1.6', litertTorch: '0.9.3' },
+  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', coremltools: '9.0', litertRuntime: '2.1.6', litertTorch: '0.9.3' },
   immutableLogEvidence: { kind: 'embedded-in-manifest', path: 'evidence/replay/task1-replay.json', ciJobUrl: process.env.CI_JOB_URL ?? null },
   steps,
   outputs: artifacts,
-  task1_7OwnershipReplayComplete: litertOnly
+  task1_7OwnershipReplayComplete: scopedOnly
     ? previousReplay.task1_7OwnershipReplayComplete
     : steps.filter((step) => step.executed).every((step) => step.repeatComparison.allExitCodesZero),
   task1_4Complete: false,

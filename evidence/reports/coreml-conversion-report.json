@@ -1,0 +1,197 @@
+{
+  "commands": {
+    "conversion": [
+      "$REPO/.evidence/coreml/verify-venv/bin/python",
+      "evidence/scripts/export_coreml_model.py",
+      "--pt",
+      "$HANDOFF_ASSETS/yolov8n.pt",
+      "--output-dir",
+      "$REPO/.evidence/coreml/replay/round-1/conversion"
+    ]
+  },
+  "comparison": {
+    "changedFiles": [
+      {
+        "path": "Data/com.apple.CoreML/model.mlmodel",
+        "round1": {
+          "bytes": 108049,
+          "path": "Data/com.apple.CoreML/model.mlmodel",
+          "sha256": "5c6957127620b70bc760aa29a1c9dcd3f93e6da2ba4ab39178251bf03656941b"
+        },
+        "round2": {
+          "bytes": 108049,
+          "path": "Data/com.apple.CoreML/model.mlmodel",
+          "sha256": "5d10aa33d749e4843af6e6316c99c7d9c1970e4c048f3baea6e6d22bb3e833bb"
+        }
+      },
+      {
+        "path": "Manifest.json",
+        "round1": {
+          "bytes": 617,
+          "path": "Manifest.json",
+          "sha256": "0dcfbfd4ba11979959fa03f7b2f7890154eb4f6deb200c83ea457a7ff521d212"
+        },
+        "round2": {
+          "bytes": 617,
+          "path": "Manifest.json",
+          "sha256": "0e987bab01abc156ee0c2ffeaba22243a9deba3fd82fc50837fb1b80b35d2c01"
+        }
+      }
+    ],
+    "expectedVolatileFields": [
+      "Manifest.json itemInfoEntries UUID keys/rootModelIdentifier",
+      "Data/com.apple.CoreML/model.mlmodel description.metadata.userDefined.date"
+    ],
+    "ioMetadataEqual": {
+      "input": true,
+      "modelType": true,
+      "output": true,
+      "specificationVersion": true
+    },
+    "normalizedPackageManifestDigestEqual": true,
+    "normalizedSpecDigestEqual": true,
+    "packageTreeDigestEqual": false,
+    "precisionContractEqual": true,
+    "sourceStateEqualAndUnchanged": true,
+    "volatileMetadata": {
+      "round1": {
+        "date": "2026-08-11T20:25:59.118472"
+      },
+      "round2": {
+        "date": "2026-08-11T20:26:03.406989"
+      }
+    },
+    "weightBlobDigestEqual": true
+  },
+  "rounds": [
+    {
+      "artifactTree": {
+        "canonicalization": "sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded",
+        "digest": "67fb3ee0bf005a3a03260e7d69716193f48e9b538522ed5d7c698b0148f7db98",
+        "fileCount": 3,
+        "files": [
+          {
+            "bytes": 108049,
+            "path": "Data/com.apple.CoreML/model.mlmodel",
+            "sha256": "5c6957127620b70bc760aa29a1c9dcd3f93e6da2ba4ab39178251bf03656941b"
+          },
+          {
+            "bytes": 12716736,
+            "path": "Data/com.apple.CoreML/weights/weight.bin",
+            "sha256": "d5ad84a03983780fe37c243e55ccd82d8fe76040b96140de929bb011e61ecf2c"
+          },
+          {
+            "bytes": 617,
+            "path": "Manifest.json",
+            "sha256": "0dcfbfd4ba11979959fa03f7b2f7890154eb4f6deb200c83ea457a7ff521d212"
+          }
+        ],
+        "totalFileBytes": 12825402
+      },
+      "conversion": {
+        "command": [
+          "$REPO/.evidence/coreml/verify-venv/bin/python",
+          "evidence/scripts/export_coreml_model.py",
+          "--pt",
+          "$HANDOFF_ASSETS/yolov8n.pt",
+          "--output-dir",
+          "$REPO/.evidence/coreml/replay/round-1/conversion"
+        ],
+        "endedAt": "2026-08-11T12:26:01.448511Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T12:25:57.137433Z",
+        "stderr": "\nConverting PyTorch Frontend ==> MIL Ops:   0%|          | 0/593 [00:00<?, ? ops/s]\nConverting PyTorch Frontend ==> MIL Ops: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 592/593 [00:00<00:00, 8398.08 ops/s]\n\nRunning MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]\nRunning MIL frontend_pytorch pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 5/5 [00:00<00:00, 227.62 passes/s]\n\nRunning MIL default pipeline:   0%|          | 0/92 [00:00<?, ? passes/s]$REPO/.evidence/coreml/verify-venv/lib/python3.12/site-packages/coremltools/converters/mil/mil/passes/defs/preprocess.py:273: UserWarning: Output, '911', of the source model, has been renamed to 'var_911' in the Core ML model.\n  warnings.warn(msg.format(var.name, new_name))\n\nRunning MIL default pipeline:  26%|\u2588\u2588\u258c       | 24/92 [00:00<00:00, 236.37 passes/s]\nRunning MIL default pipeline:  52%|\u2588\u2588\u2588\u2588\u2588\u258f    | 48/92 [00:00<00:00, 207.58 passes/s]\nRunning MIL default pipeline:  75%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 69/92 [00:00<00:00, 204.06 passes/s]\nRunning MIL default pipeline:  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 90/92 [00:00<00:00, 199.94 passes/s]\nRunning MIL default pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 92/92 [00:00<00:00, 204.20 passes/s]\n\nRunning MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]\nRunning MIL backend_mlprogram pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 12/12 [00:00<00:00, 243.69 passes/s]\n",
+        "stdout": "Ultralytics 8.4.104 \ud83d\ude80 Python-3.12.3 torch-2.7.0+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mCoreML:\u001b[0m starting export with coremltools 9.0...\n\u001b[34m\u001b[1mCoreML:\u001b[0m export success \u2705 1.7s, saved as '$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.mlpackage' (12.2 MB)\n\nExport complete (1.8s)\nResults saved to \u001b[1m$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.mlpackage\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.mlpackage imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.mlpackage imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"format\": \"Core ML ML Program .mlpackage\", \"path\": \"$REPO/.evidence/coreml/replay/round-1/conversion/yolov8n.mlpackage\", \"trackedByGit\": false, \"tree\": {\"canonicalization\": \"sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded\", \"digest\": \"67fb3ee0bf005a3a03260e7d69716193f48e9b538522ed5d7c698b0148f7db98\", \"fileCount\": 3, \"files\": [{\"bytes\": 108049, \"path\": \"Data/com.apple.CoreML/model.mlmodel\", \"sha256\": \"5c6957127620b70bc760aa29a1c9dcd3f93e6da2ba4ab39178251bf03656941b\"}, {\"bytes\": 12716736, \"path\": \"Data/com.apple.CoreML/weights/weight.bin\", \"sha256\": \"d5ad84a03983780fe37c243e55ccd82d8fe76040b96140de929bb011e61ecf2c\"}, {\"bytes\": 617, \"path\": \"Manifest.json\", \"sha256\": \"0dcfbfd4ba11979959fa03f7b2f7890154eb4f6deb200c83ea457a7ff521d212\"}], \"totalFileBytes\": 12825402}}, \"commandParameters\": {\"batch\": 1, \"device\": \"cpu\", \"dynamic\": false, \"format\": \"coreml\", \"half\": false, \"imgsz\": 640, \"nms\": false, \"quantize\": null}, \"conversion\": {\"computePrecisionRequestedByExporter\": \"coremltools.precision.FLOAT32\", \"intermediates\": [\"torch.jit.trace(model.eval(), example_input, strict=False) in memory\", \"coremltools MIL Program in memory\"], \"minimumDeploymentTargetArgument\": null, \"path\": \"Ultralytics YOLO.export(format='coreml') -> torch.jit.trace -> coremltools.convert(convert_to='mlprogram')\"}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"packageManifest\": {\"normalized\": {\"fileFormatVersion\": \"1.0.0\", \"itemsByPath\": [{\"author\": \"com.apple.CoreML\", \"description\": \"CoreML Model Specification\", \"name\": \"model.mlmodel\", \"path\": \"com.apple.CoreML/model.mlmodel\"}, {\"author\": \"com.apple.CoreML\", \"description\": \"CoreML Model Weights\", \"name\": \"weights\", \"path\": \"com.apple.CoreML/weights\"}], \"rootModelPath\": \"com.apple.CoreML/model.mlmodel\"}, \"normalizedSha256\": \"dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2\"}, \"source\": {\"after\": {\"bytes\": 6549796, \"mtimeNs\": 1785471652000000000, \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"before\": {\"bytes\": 6549796, \"mtimeNs\": 1785471652000000000, \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\"}, \"spec\": {\"computePrecision\": {\"actual\": \"FLOAT32\", \"blobConstantDtypes\": {\"FLOAT32\": 129}, \"float16Present\": false, \"operationOutputDtypes\": {\"BOOL\": 20, \"FLOAT32\": 320, \"INT32\": 307, \"STRING\": 67}, \"requestedHalf\": false, \"requestedQuantization\": null}, \"coordinates\": {\"bboxEncoding\": \"xywh in 640x640 model-input pixel units\", \"evidence\": \"dbox is multiplied by the real stride tensor and concatenated directly with 80 sigmoid class scores; no later coordinate normalization op exists\", \"outputConcatInputs\": [\"dbox\", \"var_909\"], \"strideTensor\": {\"counts\": {\"16\": 1600, \"32\": 400, \"8\": 6400}, \"dtype\": \"FLOAT32\", \"name\": \"var_671\", \"shape\": [1, 8400], \"uniqueValues\": [8.0, 16.0, 32.0]}}, \"input\": {\"bias\": [0.0, 0.0, 0.0], \"colorSpace\": \"RGB\", \"featureType\": \"IMAGE\", \"functionTensorDtype\": \"FLOAT32\", \"height\": 640, \"index\": 0, \"layout\": \"RGB image feature; ML Program function tensor NCHW\", \"name\": \"image\", \"scale\": 0.003921568859368563, \"shape\": [1, 3, 640, 640], \"width\": 640}, \"minimumDeploymentTarget\": {\"derivation\": \"real specificationVersion 6 / CoreML5 ML Program\", \"iOS\": \"15.0\", \"macOS\": \"12.0\", \"tvOS\": \"15.0\", \"watchOS\": \"8.0\"}, \"modelType\": \"mlProgram\", \"nms\": {\"fused\": false, \"operators\": [], \"responsibility\": \"operator postprocess\"}, \"normalizedSpecSha256\": \"47861286655df41486c8ad6372ae03238f90d4830d59f30d730acf03d13d426b\", \"operations\": {\"count\": 705, \"types\": {\"add\": 8, \"concat\": 17, \"const\": 529, \"conv\": 64, \"max_pool\": 3, \"mul\": 3, \"reshape\": 8, \"sigmoid\": 1, \"silu\": 57, \"softmax\": 1, \"split\": 9, \"sub\": 2, \"transpose\": 1, \"upsample_nearest_neighbor\": 2}}, \"opset\": \"CoreML5\", \"output\": {\"count\": 1, \"dtype\": \"FLOAT32\", \"featureType\": \"MULTI_ARRAY\", \"index\": 0, \"layout\": \"N_ATTRIBUTES_ANCHORS\", \"name\": \"var_911\", \"shape\": [1, 84, 8400]}, \"preprocessing\": {\"colorConversion\": \"Core ML RGB Image feature\", \"fused\": [\"RGB image feature conversion\", \"multiply by 1/255\"], \"notFused\": [\"letterbox resize\", \"letterbox padding\"], \"scaleGraphEvidence\": {\"constant\": 0.003921568859368563, \"input\": \"image\", \"operation\": \"mul\", \"output\": \"image__scaled__\"}}, \"specificationVersion\": 6, \"volatileMetadata\": {\"date\": \"2026-08-11T20:25:59.118472\"}}, \"versions\": {\"coremltools\": \"9.0\", \"numpy\": \"2.3.5\", \"torch\": \"2.7.0+cpu\", \"torchvision\": \"0.22.0+cpu\", \"ultralytics\": \"8.4.104\"}}\n"
+      },
+      "normalizedPackageManifestSha256": "dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2",
+      "normalizedSpecSha256": "47861286655df41486c8ad6372ae03238f90d4830d59f30d730acf03d13d426b",
+      "round": 1,
+      "source": {
+        "after": {
+          "bytes": 6549796,
+          "mtimeNs": 1785471652000000000,
+          "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+        },
+        "before": {
+          "bytes": 6549796,
+          "mtimeNs": 1785471652000000000,
+          "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+        },
+        "logicalPath": "$HANDOFF_ASSETS/yolov8n.pt"
+      },
+      "worktreeAfter": {
+        "full": "?? evidence/scripts/__pycache__/\n?? evidence/scripts/export_coreml_model.py\n?? evidence/scripts/lock_coreml_tooling.mjs\n?? evidence/scripts/prepare_coreml_tooling.mjs\n?? evidence/scripts/run_coreml_replay.py\n?? evidence/tooling/coreml-requirements.in\n?? evidence/tooling/coreml-requirements.lock\n",
+        "tracked": ""
+      },
+      "worktreeBefore": {
+        "full": "?? evidence/scripts/__pycache__/\n?? evidence/scripts/export_coreml_model.py\n?? evidence/scripts/lock_coreml_tooling.mjs\n?? evidence/scripts/prepare_coreml_tooling.mjs\n?? evidence/scripts/run_coreml_replay.py\n?? evidence/tooling/coreml-requirements.in\n?? evidence/tooling/coreml-requirements.lock\n",
+        "tracked": ""
+      }
+    },
+    {
+      "artifactTree": {
+        "canonicalization": "sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded",
+        "digest": "11ec6908db348cd5c251e2423bb20cca4989a975584834c73a09a6020b32fc63",
+        "fileCount": 3,
+        "files": [
+          {
+            "bytes": 108049,
+            "path": "Data/com.apple.CoreML/model.mlmodel",
+            "sha256": "5d10aa33d749e4843af6e6316c99c7d9c1970e4c048f3baea6e6d22bb3e833bb"
+          },
+          {
+            "bytes": 12716736,
+            "path": "Data/com.apple.CoreML/weights/weight.bin",
+            "sha256": "d5ad84a03983780fe37c243e55ccd82d8fe76040b96140de929bb011e61ecf2c"
+          },
+          {
+            "bytes": 617,
+            "path": "Manifest.json",
+            "sha256": "0e987bab01abc156ee0c2ffeaba22243a9deba3fd82fc50837fb1b80b35d2c01"
+          }
+        ],
+        "totalFileBytes": 12825402
+      },
+      "conversion": {
+        "command": [
+          "$REPO/.evidence/coreml/verify-venv/bin/python",
+          "evidence/scripts/export_coreml_model.py",
+          "--pt",
+          "$HANDOFF_ASSETS/yolov8n.pt",
+          "--output-dir",
+          "$REPO/.evidence/coreml/replay/round-2/conversion"
+        ],
+        "endedAt": "2026-08-11T12:26:05.755802Z",
+        "exitCode": 0,
+        "startedAt": "2026-08-11T12:26:01.457509Z",
+        "stderr": "\nConverting PyTorch Frontend ==> MIL Ops:   0%|          | 0/593 [00:00<?, ? ops/s]\nConverting PyTorch Frontend ==> MIL Ops: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 592/593 [00:00<00:00, 8385.12 ops/s]\n\nRunning MIL frontend_pytorch pipeline:   0%|          | 0/5 [00:00<?, ? passes/s]\nRunning MIL frontend_pytorch pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 5/5 [00:00<00:00, 221.14 passes/s]\n\nRunning MIL default pipeline:   0%|          | 0/92 [00:00<?, ? passes/s]$REPO/.evidence/coreml/verify-venv/lib/python3.12/site-packages/coremltools/converters/mil/mil/passes/defs/preprocess.py:273: UserWarning: Output, '911', of the source model, has been renamed to 'var_911' in the Core ML model.\n  warnings.warn(msg.format(var.name, new_name))\n\nRunning MIL default pipeline:  26%|\u2588\u2588\u258c       | 24/92 [00:00<00:00, 232.87 passes/s]\nRunning MIL default pipeline:  52%|\u2588\u2588\u2588\u2588\u2588\u258f    | 48/92 [00:00<00:00, 207.33 passes/s]\nRunning MIL default pipeline:  75%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 69/92 [00:00<00:00, 201.99 passes/s]\nRunning MIL default pipeline:  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 90/92 [00:00<00:00, 196.81 passes/s]\nRunning MIL default pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 92/92 [00:00<00:00, 201.63 passes/s]\n\nRunning MIL backend_mlprogram pipeline:   0%|          | 0/12 [00:00<?, ? passes/s]\nRunning MIL backend_mlprogram pipeline: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 12/12 [00:00<00:00, 235.96 passes/s]\n",
+        "stdout": "Ultralytics 8.4.104 \ud83d\ude80 Python-3.12.3 torch-2.7.0+cpu CPU (AMD Ryzen 7 8840HS w/ Radeon 780M Graphics)\nYOLOv8n summary (fused): 72 layers, 3,151,904 parameters, 0 gradients, 8.7 GFLOPs\n\n\u001b[34m\u001b[1mPyTorch:\u001b[0m starting from '$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.pt' with input shape (1, 3, 640, 640) BCHW and output shape(s) (1, 84, 8400) (0.0 MB)\n\n\u001b[34m\u001b[1mCoreML:\u001b[0m starting export with coremltools 9.0...\n\u001b[34m\u001b[1mCoreML:\u001b[0m export success \u2705 1.7s, saved as '$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.mlpackage' (12.2 MB)\n\nExport complete (1.8s)\nResults saved to \u001b[1m$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.mlpackage\u001b[0m\nPredict:         yolo predict task=detect model=$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.mlpackage imgsz=640 \nValidate:        yolo val task=detect model=$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.mlpackage imgsz=640 data=coco.yaml  \nVisualize:       https://netron.app\n{\"artifact\": {\"format\": \"Core ML ML Program .mlpackage\", \"path\": \"$REPO/.evidence/coreml/replay/round-2/conversion/yolov8n.mlpackage\", \"trackedByGit\": false, \"tree\": {\"canonicalization\": \"sorted POSIX relative path + bytes + SHA-256; compact JSON with sorted keys; directory timestamps excluded\", \"digest\": \"11ec6908db348cd5c251e2423bb20cca4989a975584834c73a09a6020b32fc63\", \"fileCount\": 3, \"files\": [{\"bytes\": 108049, \"path\": \"Data/com.apple.CoreML/model.mlmodel\", \"sha256\": \"5d10aa33d749e4843af6e6316c99c7d9c1970e4c048f3baea6e6d22bb3e833bb\"}, {\"bytes\": 12716736, \"path\": \"Data/com.apple.CoreML/weights/weight.bin\", \"sha256\": \"d5ad84a03983780fe37c243e55ccd82d8fe76040b96140de929bb011e61ecf2c\"}, {\"bytes\": 617, \"path\": \"Manifest.json\", \"sha256\": \"0e987bab01abc156ee0c2ffeaba22243a9deba3fd82fc50837fb1b80b35d2c01\"}], \"totalFileBytes\": 12825402}}, \"commandParameters\": {\"batch\": 1, \"device\": \"cpu\", \"dynamic\": false, \"format\": \"coreml\", \"half\": false, \"imgsz\": 640, \"nms\": false, \"quantize\": null}, \"conversion\": {\"computePrecisionRequestedByExporter\": \"coremltools.precision.FLOAT32\", \"intermediates\": [\"torch.jit.trace(model.eval(), example_input, strict=False) in memory\", \"coremltools MIL Program in memory\"], \"minimumDeploymentTargetArgument\": null, \"path\": \"Ultralytics YOLO.export(format='coreml') -> torch.jit.trace -> coremltools.convert(convert_to='mlprogram')\"}, \"host\": {\"machine\": \"x86_64\", \"platform\": \"Linux-7.0.0-28-generic-x86_64-with-glibc2.39\", \"python\": \"3.12.3\"}, \"packageManifest\": {\"normalized\": {\"fileFormatVersion\": \"1.0.0\", \"itemsByPath\": [{\"author\": \"com.apple.CoreML\", \"description\": \"CoreML Model Specification\", \"name\": \"model.mlmodel\", \"path\": \"com.apple.CoreML/model.mlmodel\"}, {\"author\": \"com.apple.CoreML\", \"description\": \"CoreML Model Weights\", \"name\": \"weights\", \"path\": \"com.apple.CoreML/weights\"}], \"rootModelPath\": \"com.apple.CoreML/model.mlmodel\"}, \"normalizedSha256\": \"dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2\"}, \"source\": {\"after\": {\"bytes\": 6549796, \"mtimeNs\": 1785471652000000000, \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"before\": {\"bytes\": 6549796, \"mtimeNs\": 1785471652000000000, \"sha256\": \"f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36\"}, \"logicalPath\": \"$HANDOFF_ASSETS/yolov8n.pt\"}, \"spec\": {\"computePrecision\": {\"actual\": \"FLOAT32\", \"blobConstantDtypes\": {\"FLOAT32\": 129}, \"float16Present\": false, \"operationOutputDtypes\": {\"BOOL\": 20, \"FLOAT32\": 320, \"INT32\": 307, \"STRING\": 67}, \"requestedHalf\": false, \"requestedQuantization\": null}, \"coordinates\": {\"bboxEncoding\": \"xywh in 640x640 model-input pixel units\", \"evidence\": \"dbox is multiplied by the real stride tensor and concatenated directly with 80 sigmoid class scores; no later coordinate normalization op exists\", \"outputConcatInputs\": [\"dbox\", \"var_909\"], \"strideTensor\": {\"counts\": {\"16\": 1600, \"32\": 400, \"8\": 6400}, \"dtype\": \"FLOAT32\", \"name\": \"var_671\", \"shape\": [1, 8400], \"uniqueValues\": [8.0, 16.0, 32.0]}}, \"input\": {\"bias\": [0.0, 0.0, 0.0], \"colorSpace\": \"RGB\", \"featureType\": \"IMAGE\", \"functionTensorDtype\": \"FLOAT32\", \"height\": 640, \"index\": 0, \"layout\": \"RGB image feature; ML Program function tensor NCHW\", \"name\": \"image\", \"scale\": 0.003921568859368563, \"shape\": [1, 3, 640, 640], \"width\": 640}, \"minimumDeploymentTarget\": {\"derivation\": \"real specificationVersion 6 / CoreML5 ML Program\", \"iOS\": \"15.0\", \"macOS\": \"12.0\", \"tvOS\": \"15.0\", \"watchOS\": \"8.0\"}, \"modelType\": \"mlProgram\", \"nms\": {\"fused\": false, \"operators\": [], \"responsibility\": \"operator postprocess\"}, \"normalizedSpecSha256\": \"47861286655df41486c8ad6372ae03238f90d4830d59f30d730acf03d13d426b\", \"operations\": {\"count\": 705, \"types\": {\"add\": 8, \"concat\": 17, \"const\": 529, \"conv\": 64, \"max_pool\": 3, \"mul\": 3, \"reshape\": 8, \"sigmoid\": 1, \"silu\": 57, \"softmax\": 1, \"split\": 9, \"sub\": 2, \"transpose\": 1, \"upsample_nearest_neighbor\": 2}}, \"opset\": \"CoreML5\", \"output\": {\"count\": 1, \"dtype\": \"FLOAT32\", \"featureType\": \"MULTI_ARRAY\", \"index\": 0, \"layout\": \"N_ATTRIBUTES_ANCHORS\", \"name\": \"var_911\", \"shape\": [1, 84, 8400]}, \"preprocessing\": {\"colorConversion\": \"Core ML RGB Image feature\", \"fused\": [\"RGB image feature conversion\", \"multiply by 1/255\"], \"notFused\": [\"letterbox resize\", \"letterbox padding\"], \"scaleGraphEvidence\": {\"constant\": 0.003921568859368563, \"input\": \"image\", \"operation\": \"mul\", \"output\": \"image__scaled__\"}}, \"specificationVersion\": 6, \"volatileMetadata\": {\"date\": \"2026-08-11T20:26:03.406989\"}}, \"versions\": {\"coremltools\": \"9.0\", \"numpy\": \"2.3.5\", \"torch\": \"2.7.0+cpu\", \"torchvision\": \"0.22.0+cpu\", \"ultralytics\": \"8.4.104\"}}\n"
+      },
+      "normalizedPackageManifestSha256": "dcf6f139f76a15f766123e21a87680d441a506cdb7bd98fb203a7adb7e66c3b2",
+      "normalizedSpecSha256": "47861286655df41486c8ad6372ae03238f90d4830d59f30d730acf03d13d426b",
+      "round": 2,
+      "source": {
+        "after": {
+          "bytes": 6549796,
+          "mtimeNs": 1785471652000000000,
+          "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+        },
+        "before": {
+          "bytes": 6549796,
+          "mtimeNs": 1785471652000000000,
+          "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36"
+        },
+        "logicalPath": "$HANDOFF_ASSETS/yolov8n.pt"
+      },
+      "worktreeAfter": {
+        "full": "?? evidence/scripts/__pycache__/\n?? evidence/scripts/export_coreml_model.py\n?? evidence/scripts/lock_coreml_tooling.mjs\n?? evidence/scripts/prepare_coreml_tooling.mjs\n?? evidence/scripts/run_coreml_replay.py\n?? evidence/tooling/coreml-requirements.in\n?? evidence/tooling/coreml-requirements.lock\n",
+        "tracked": ""
+      },
+      "worktreeBefore": {
+        "full": "?? evidence/scripts/__pycache__/\n?? evidence/scripts/export_coreml_model.py\n?? evidence/scripts/lock_coreml_tooling.mjs\n?? evidence/scripts/prepare_coreml_tooling.mjs\n?? evidence/scripts/run_coreml_replay.py\n?? evidence/tooling/coreml-requirements.in\n?? evidence/tooling/coreml-requirements.lock\n",
+        "tracked": ""
+      }
+    }
+  ],
+  "schemaVersion": 1
+}

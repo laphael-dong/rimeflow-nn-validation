@@ -48,6 +48,23 @@ HANDOFF_ASSETS=/home/raffael/下载/yolov8n_ios_benchmark_handoff/Assets
 
 候选产物固定为 `.evidence/litert/artifacts/yolov8n-fp32.tflite`，12,841,227 字节，SHA-256 `794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1`。该目录被 Git 忽略；重新生成方法、完整命令/时间/退出码/stdout/stderr、artifact manifest 和 golden 结果分别在 `evidence/scripts/run_litert_replay.py`、`evidence/reports/litert-conversion-report.json`、`evidence/conversions/litert-artifact-manifest.json` 与 `evidence/reports/litert-golden-report.json`。
 
+Apple Core ML 转换使用独立的 `coreml-requirements.lock`，锁定 CPython 3.12/Linux x86_64 的全部传递依赖和逐 wheel SHA-256。PyTorch `2.7.0+cpu` 是 coremltools 9.0 明确测试过的最新版本，配套 torchvision `0.22.0+cpu`；两者来自 PyTorch 官方 CPU index。其余依赖来自 PyPI，其中 Ultralytics 固定为 `8.4.104`、coremltools 固定为 `9.0`、NumPy 固定为 `2.3.5`。重新建立环境并执行两轮 scoped replay：
+
+```sh
+node evidence/scripts/lock_coreml_tooling.mjs
+RIMEFLOW_COREML_VENV=.evidence/coreml/verify-venv node evidence/scripts/prepare_coreml_tooling.mjs
+HANDOFF_ASSETS=/home/raffael/下载/yolov8n_ios_benchmark_handoff/Assets
+.evidence/coreml/verify-venv/bin/python evidence/scripts/run_coreml_replay.py \
+  --pt "$HANDOFF_ASSETS/yolov8n.pt" \
+  --workspace .evidence/coreml/replay \
+  --record
+node evidence/scripts/run_conversion_spikes.mjs --coreml-only
+```
+
+Core ML worker 在导入 Ultralytics/PyTorch 前校验 `.pt` 的 6,549,796 字节和锁定 SHA-256，并在转换结束后复核 size、SHA-256、mtime_ns 均未变化。正式路径为 `YOLO.export(format="coreml", batch=1, imgsz=640, dynamic=false, nms=false, device="cpu", half=false, quantize=None)`，内部执行 `torch.jit.trace` 和 coremltools MIL/ML Program conversion。转换器未显式接收 minimum deployment target；真实 spec 是 specificationVersion 6/CoreML5，对应 iOS 15、macOS 12、watchOS 8、tvOS 15。
+
+候选产物位于 `.evidence/coreml/artifacts/yolov8n-fp32.mlpackage`，只含 `model.mlmodel`、`weight.bin` 和 `Manifest.json` 三个文件，总计 12,825,402 字节；该路径被 Git 忽略。每轮均按排序后的 POSIX 相对路径、文件字节数和逐文件 SHA-256 计算 canonical tree digest，不读取目录时间戳。两轮原始 tree digest 不同：`weight.bin` 完全一致，差异仅为 `Manifest.json` 的随机 UUID 和 `model.mlmodel` 中 `description.metadata.userDefined.date`。比较层只为诊断计算移除这些字段后的 digest，未修改任何 package、模型图或权重；归一化 spec/manifest digest、I/O、精度和坐标契约均一致。
+
 外部模型 handoff 的 `.pt`/ONNX 审计使用独立、隔离的 CPU 环境，顶层版本固定在 `evidence/tooling/model-audit-requirements.lock`。先从 PyTorch CPU index 安装 `torch==2.12.1+cpu` 与 `torchvision==0.27.1+cpu`，再安装锁文件中的其余版本；随后执行：
 
 ```sh
@@ -64,6 +81,8 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 ## 状态判定
 
-Core ML 9.0 仍不接受 ONNX 作为直接转换源。Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
+Apple 已通过官方 `.pt`/Ultralytics/Core ML 路径生成 ML Program `.mlpackage` 并由 coremltools spec API 完成真实结构检查。输入由 ONNX FLOAT MultiArray 语义变为 Core ML RGB Image feature `image`/index 0/640×640，ML Program 函数张量仍为 NCHW FLOAT32 `[1,3,640,640]`；模型图融合 RGB image conversion 和 `1/255` 缩放，不融合 letterbox resize/padding。输出为 `var_911`/index 0/FLOAT32 `[1,84,8400]`，仍是 attributes-first；真实 stride blob 为 6400 个 8、1600 个 16、400 个 32，bbox 直接乘 stride 后作为 640×640 输入像素单位 `xywh` 输出。129 个外置 blob constant 和全部浮点 op 输出均为 FLOAT32，图中不存在 FLOAT16 或 NMS op。Linux 只能保存/解析 `.mlpackage`，不能调用 Core ML runtime，因此 macOS/iOS Load/Run、golden、包加载和性能仍未验证，Apple 仅为 `artifact-spec-verified`，`supported=false`。
 
-`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Android conversion 子项已达到 `artifact-verified` 和 `host-inference-verified`，但尚未完成 Android arm64 真机 runner、adapter、性能、包加载或 fallback 验证，因此 `supported` 保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。
+Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
+
+`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Apple conversion 子项达到 `artifact-spec-verified`，Android conversion 子项达到 `artifact-verified` 和 `host-inference-verified`；两者均缺真实目标平台 runner，且未实现 adapter、性能、包加载或 fallback 验证，因此 `supported` 均保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。

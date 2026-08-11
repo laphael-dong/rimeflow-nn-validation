@@ -104,8 +104,13 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 37041,
-      "sha256": "28f078746c1d543e86e296138b744f4d91fa3672ed89505108ffddaefe7412be"
+      "bytes": 35350,
+      "sha256": "3f6efe3c7d27e8472b41037b19269e1204843d284c451e9c74b627d3892185fb"
+    },
+    {
+      "path": "evidence/conversions/coreml-artifact-manifest.json",
+      "bytes": 9342,
+      "sha256": "f1b279a2f7afb55303b532e68af751bc7bb0bd5c034c17310a21e9606107ba44"
     },
     {
       "path": "evidence/conversions/litert-artifact-manifest.json",
@@ -114,8 +119,8 @@
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
-      "bytes": 16352,
-      "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
+      "bytes": 16413,
+      "sha256": "2e48a1eeb6893673b8b0b9bfb9485d3cad580ee4a21ae5efb7dafb82e0898307"
     },
     {
       "path": "evidence/reports/model-provenance.json",
@@ -126,6 +131,11 @@
       "path": "evidence/reports/preprocess-conformance.json",
       "bytes": 3624,
       "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+    },
+    {
+      "path": "evidence/reports/coreml-conversion-report.json",
+      "bytes": 23299,
+      "sha256": "34bc04c3fb306c14cea947b3f6899b3f457a9240d515e66ec77cae3538629fbe"
     },
     {
       "path": "evidence/reports/litert-conversion-report.json",
@@ -151,6 +161,16 @@
       "path": "evidence/tooling/model-audit-requirements.lock",
       "bytes": 214,
       "sha256": "fa5485531e80b11b6ada856f32a87f4b69efeb3c3532e0e98d6958d4fe947f3e"
+    },
+    {
+      "path": "evidence/tooling/coreml-requirements.in",
+      "bytes": 324,
+      "sha256": "720b3959955a98adad9598e02e142fba8c2bc4e17351138948c17afc0e3b1abc"
+    },
+    {
+      "path": "evidence/tooling/coreml-requirements.lock",
+      "bytes": 4160,
+      "sha256": "aeb99c606a6e301e99724eb4fb66dddb0f194558ef6783d2b8db9ab7b6e3e6e8"
     },
     {
       "path": "evidence/tooling/litert-requirements.in",

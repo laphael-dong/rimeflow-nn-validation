@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateCoverageEvidence, validateLitertEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoremlEvidence, validateCoverageEvidence, validateLitertEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -39,4 +39,22 @@ const nondeterministic = structuredClone(litertReplay);
 nondeterministic.comparison.artifactSha256Equal = false;
 await expectFailure('LiteRT replay digest mismatch', async () => validateLitertEvidence(litertManifest, litertGolden, nondeterministic, frozen));
 
-console.log(JSON.stringify({ ok: true, positiveCases: ['LiteRT evidence with differently ordered tolerance keys'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch'] }));
+const coremlManifest = await readJson('evidence/conversions/coreml-artifact-manifest.json');
+const coremlReplay = await readJson('evidence/reports/coreml-conversion-report.json');
+validateCoremlEvidence(coremlManifest, coremlReplay);
+const coremlSupported = structuredClone(coremlManifest);
+coremlSupported.status.supported = true;
+await expectFailure('Core ML supported without macOS/iOS runner', async () => validateCoremlEvidence(coremlSupported, coremlReplay));
+const coremlTreeDrift = structuredClone(coremlManifest);
+coremlTreeDrift.artifact.tree.digest = '0'.repeat(64);
+coremlTreeDrift.artifact.tree.files[0].sha256 = 'not-a-sha';
+await expectFailure('Core ML package tree digest drift', async () => validateCoremlEvidence(coremlTreeDrift, coremlReplay));
+const coremlFp16 = structuredClone(coremlManifest);
+coremlFp16.spec.computePrecision.float16Present = true;
+await expectFailure('Core ML FP16 precision drift', async () => validateCoremlEvidence(coremlFp16, coremlReplay));
+const coremlNms = structuredClone(coremlManifest);
+coremlNms.spec.nms.fused = true;
+coremlNms.spec.nms.operators = ['non_maximum_suppression'];
+await expectFailure('Core ML fused NMS overclaim', async () => validateCoremlEvidence(coremlNms, coremlReplay));
+
+console.log(JSON.stringify({ ok: true, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Core ML artifact/spec evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim'] }));

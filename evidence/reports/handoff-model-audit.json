@@ -153,7 +153,7 @@
   },
   "decision": {
     "blockers": [
-      "LiteRT host artifact/inference/golden 已单独验证；Core ML、Windows ML、MindSpore Lite、其余 Linux provider 和 LiteRT Android runner evidence 尚未闭环"
+      "LiteRT host artifact/inference/golden 与 Core ML artifact/spec 已单独验证；Core ML macOS/iOS runtime、Windows ML、MindSpore Lite、其余 Linux provider 和 LiteRT Android runner evidence 尚未闭环"
     ],
     "ptAndOnnxTechnicalVerification": "passed",
     "sourceTraceability": "sha-pinned-for-framework-validation",
@@ -345,7 +345,7 @@
   "schemaVersion": 1,
   "scope": {
     "delegated": [
-      "Core ML",
+      "Core ML macOS/iOS runner",
       "LiteRT v2 Android runner",
       "Windows ML",
       "MindSpore Lite",

@@ -15,6 +15,9 @@ const litertManifest = JSON.parse(litertManifestBytes);
 const litertGoldenBytes = await readFile(resolve(root, 'evidence/reports/litert-golden-report.json'));
 const litertGolden = JSON.parse(litertGoldenBytes);
 const litertConversionBytes = await readFile(resolve(root, 'evidence/reports/litert-conversion-report.json'));
+const coremlManifestBytes = await readFile(resolve(root, 'evidence/conversions/coreml-artifact-manifest.json'));
+const coremlManifest = JSON.parse(coremlManifestBytes);
+const coremlConversionBytes = await readFile(resolve(root, 'evidence/reports/coreml-conversion-report.json'));
 const reportPath = resolve(root, 'evidence/conversions/conversion-spikes.json');
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => JSON.stringify(value, null, 2) + '\n';
@@ -84,6 +87,90 @@ function androidSpike(legacyOnnxAsRuntimeInputProbe) {
   };
 }
 
+function appleSpike(legacyOnnxProbe) {
+  return {
+    platform: 'apple',
+    format: 'coreml-mlprogram-mlpackage',
+    state: 'artifact-spec-verified',
+    supported: false,
+    tool: {
+      name: 'Ultralytics Core ML exporter / coremltools',
+      version: coremlManifest.toolchain.coremltools,
+      torchVersion: coremlManifest.toolchain.torch,
+      ultralyticsVersion: coremlManifest.toolchain.ultralytics,
+      officialSource: 'https://docs.ultralytics.com/integrations/coreml/',
+      converterSource: 'https://github.com/apple/coremltools',
+    },
+    attempt: {
+      command: coremlManifest.conversion.command,
+      conversionExecuted: true,
+      exitCode: 0,
+      specInspectionExecuted: true,
+      macosRuntimeExecuted: false,
+      iosRuntimeExecuted: false,
+      report: {
+        path: 'evidence/reports/coreml-conversion-report.json',
+        bytes: coremlConversionBytes.length,
+        sha256: sha256(coremlConversionBytes),
+      },
+      legacyOnnxProbe,
+    },
+    artifact: {
+      location: coremlManifest.artifact.location,
+      format: coremlManifest.artifact.format,
+      fileCount: coremlManifest.artifact.tree.fileCount,
+      totalFileBytes: coremlManifest.artifact.tree.totalFileBytes,
+      treeDigest: coremlManifest.artifact.tree.digest,
+      trackedByGit: false,
+    },
+    artifactManifest: {
+      path: 'evidence/conversions/coreml-artifact-manifest.json',
+      bytes: coremlManifestBytes.length,
+      sha256: sha256(coremlManifestBytes),
+    },
+    sourceCheckpoint: {
+      bytes: coremlManifest.source.before.bytes,
+      sha256: coremlManifest.source.before.sha256,
+      auditPath: 'evidence/reports/handoff-model-audit.json',
+    },
+    ioChanges: 'ONNX NCHW FLOAT MultiArray 输入变为 RGB Image feature；ML Program 函数张量仍为 NCHW FLOAT32 [1,3,640,640]。输出名称变为 var_911，Shape/layout/dtype 仍为 [1,84,8400]/attributes-first/FLOAT32。',
+    computePrecision: coremlManifest.spec.computePrecision,
+    minimumDeploymentTarget: coremlManifest.spec.minimumDeploymentTarget,
+    preprocessingResponsibility: 'Core ML 图融合 RGB Image feature 到 NCHW 及 1/255 缩放；letterbox resize/padding 仍由 runtime adapter 负责',
+    coordinateContract: coremlManifest.spec.coordinates,
+    nmsResponsibility: 'operator；实际 ML Program op 列表无 NMS',
+    failedOperator: null,
+    macosRuntimeVerified: false,
+    iosRuntimeVerified: false,
+    license: 'coremltools BSD-3-Clause；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0',
+    redistribution: '仅允许隔离的内部框架验证 evidence；.mlpackage 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录',
+    conclusion: '官方 .pt -> Ultralytics YOLO.export(format=coreml) -> coremltools ML Program 路径已生成并检查真实 .mlpackage spec；Linux 无 Core ML runtime，尚未执行 macOS/iOS Load/Run，不能标记 supported。',
+  };
+}
+
+if (process.argv.includes('--coreml-only')) {
+  const previous = JSON.parse(await readFile(reportPath, 'utf8'));
+  const previousApple = previous.spikes.find((item) => item.platform === 'apple');
+  if (!previousApple) throw new Error('conversion-spikes.json 缺少 Apple 条目');
+  const legacyOnnxProbe = previousApple.attempt.legacyOnnxProbe ?? {
+    acceptedSources: previousApple.attempt.acceptedSources,
+    error: previousApple.attempt.error,
+    errorType: previousApple.attempt.errorType,
+    exitCode: previousApple.attempt.exitCode,
+    purpose: '历史 ONNX 直接输入负向证据；不作为本轮 .pt 转换结论',
+  };
+  const nonAppleBefore = stable(previous.spikes.filter((item) => item.platform !== 'apple'));
+  previous.spikes = previous.spikes.map((item) => (
+    item.platform === 'apple' ? appleSpike(legacyOnnxProbe) : item
+  ));
+  const nonAppleAfter = stable(previous.spikes.filter((item) => item.platform !== 'apple'));
+  if (nonAppleBefore !== nonAppleAfter) throw new Error('CoreML-only 更新改变了其他平台证据');
+  const bytes = Buffer.from(stable(previous));
+  await writeFile(reportPath, bytes);
+  console.log(JSON.stringify({ mode: 'coreml-only', sha256: sha256(bytes) }));
+  process.exit(0);
+}
+
 if (process.argv.includes('--litert-only')) {
   const previous = JSON.parse(await readFile(reportPath, 'utf8'));
   const previousAndroid = previous.spikes.find((item) => item.platform === 'android');
@@ -143,7 +230,13 @@ const report = {
   source: { commit: 'eacbcf00dfc2fba941b494e2955e87fffd707382', modelPath: 'models/yolov8n.onnx', modelSha256: sha256(modelBytes) },
   usageScope: { intendedUse: 'internal-onnx-base-framework-validation-only', authorizationEvaluation: 'out-of-scope', artifactHandling: 'isolated-test-evidence-only', productPackaging: 'excluded' },
   spikes: [
-    { platform: 'apple', format: 'coreml', state: 'blocked', tool: { name: 'coremltools', version: pythonResult.coremltools.version, officialSource: 'https://apple.github.io/coremltools/docs-guides/source/convert-learning-models.html' }, attempt: { command: pythonProbe.command, exitCode: pythonResult.coremltools.attempt.exitCode, stdout: pythonProbe.stdout, stderr: pythonProbe.stderr, apiSignature: pythonResult.coremltools.convertSignature, acceptedSources: pythonResult.coremltools.acceptedSources, errorType: pythonResult.coremltools.attempt.errorType, error: pythonResult.coremltools.attempt.error }, artifact: null, sourceCheckpoint: { sha256: handoffAudit.sourceCheckpoint.sha256, auditPath: 'evidence/reports/handoff-model-audit.json' }, ioChanges: '未生成 artifact；原 ONNX I/O 保持 [1,3,640,640] -> [1,84,8400]', quantization: '未执行', nmsResponsibility: 'operator', failedOperator: 'delegated Apple conversion/runner evidence not returned', license: 'coremltools BSD；模型 checkpoint/ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: 'coremltools 9.0 官方入口不直接接受 ONNX；同源 .pt 已由独立审计确认，但本机不是 macOS，Core ML 转换与真实 runner spike 已委托外部负责人，证据回传前保持 blocked。' },
+    appleSpike({
+      acceptedSources: pythonResult.coremltools.acceptedSources,
+      error: pythonResult.coremltools.attempt.error,
+      errorType: pythonResult.coremltools.attempt.errorType,
+      exitCode: pythonResult.coremltools.attempt.exitCode,
+      purpose: '历史 ONNX 直接输入负向证据；不作为本轮 .pt 转换结论',
+    }),
     androidSpike({
       acceptedModelFormat: pythonResult.litert.acceptedModelFormat,
       error: pythonResult.litert.attempt.error,

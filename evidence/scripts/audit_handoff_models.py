@@ -242,7 +242,7 @@ def main() -> None:
         "checkedOn": "2026-08-11",
         "scope": {
             "verified": ["source .pt", "candidate ONNX", "Linux x86_64 ORT CPU"],
-            "delegated": ["Core ML", "LiteRT v2 Android runner", "Windows ML", "MindSpore Lite", "其他真实平台 runner"],
+            "delegated": ["Core ML macOS/iOS runner", "LiteRT v2 Android runner", "Windows ML", "MindSpore Lite", "其他真实平台 runner"],
             "doesNotReplaceFrozenGolden": True,
         },
         "sourceCheckpoint": {
@@ -344,7 +344,7 @@ def main() -> None:
             "task14": "blocked",
             "task14Complete": False,
             "blockers": [
-                "LiteRT host artifact/inference/golden 已单独验证；Core ML、Windows ML、MindSpore Lite、其余 Linux provider 和 LiteRT Android runner evidence 尚未闭环",
+                "LiteRT host artifact/inference/golden 与 Core ML artifact/spec 已单独验证；Core ML macOS/iOS runtime、Windows ML、MindSpore Lite、其余 Linux provider 和 LiteRT Android runner evidence 尚未闭环",
             ],
         },
     }
