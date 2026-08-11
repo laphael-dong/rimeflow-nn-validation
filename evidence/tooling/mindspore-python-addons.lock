@@ -1,0 +1,7 @@
+# MindSpore 转换 replay 在 coreml-requirements.lock 环境上追加的结构化 ONNX 工具。
+# 适用平台：CPython 3.12、Linux x86_64；安装命令见 evidence/scripts/prepare_mindspore_python.mjs。
+--index-url https://pypi.org/simple
+flatbuffers==25.2.10 --hash=sha256:ebba5f4d5ea615af3f7fd70fc310636fbb2bbd1f566ac0a23d98dd412de50051
+ml-dtypes==0.5.4 --hash=sha256:9ad459e99793fa6e13bd5b7e6792c8f9190b4e5a1b45c63aba14a4d0a7f1d5ff
+onnx==1.22.0 --hash=sha256:955e02e1f6d385b53d52f9cd7b9cdf5caf417c300bcfe3c64c6d542be763845b
+onnxruntime==1.27.0 --hash=sha256:7c65a7438632d55dfbc8a02ee60bd6cf7dd9d1ba05a43d4b851452f32338e194

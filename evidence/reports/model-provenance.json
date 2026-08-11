@@ -42,7 +42,7 @@
     "state": "source-identified-and-weight-equivalent",
     "evidence": {
       "path": "evidence/reports/handoff-model-audit.json",
-      "sha256": "79948ba4f49c2575055c8a067c9de1806f6f49a359bbffa1a36d43e764997586"
+      "sha256": "2e48a1eeb6893673b8b0b9bfb9485d3cad580ee4a21ae5efb7dafb82e0898307"
     },
     "gitPtArtifactCommits": []
   },
@@ -78,7 +78,7 @@
     "task14": "blocked",
     "task1": "blocked",
     "publication": "test-evidence-only",
-    "reason": "模型来源与同源性及 LiteRT host artifact/inference/golden 已验证；1.4 仍等待其余平台 spike 与 Android runner evidence，模型及临时转换物不进入 RimeCut 产品包。"
+    "reason": "模型来源与同源性、LiteRT host artifact/inference/golden 及 MindSpore Lite host conversion/inference/golden 已验证；1.4 仍等待 Windows/Linux 等其他子项及真实目标平台 runner evidence，模型及临时转换物不进入 RimeCut 产品包。"
   },
   "tooling": {
     "python": "3.12.3",

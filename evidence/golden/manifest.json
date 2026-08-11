@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 35351,
-      "sha256": "bfce849df328afd531ae6cf980b84c7868d7bd0832297ee2ee1f28e32f7dfbac"
+      "bytes": 39512,
+      "sha256": "9de4420b1e5847223509e8fe431067e103ee0e89995e2453199dcff76e19608c"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -118,14 +118,19 @@
       "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
     },
     {
+      "path": "evidence/conversions/mindspore-artifact-manifest.json",
+      "bytes": 19709,
+      "sha256": "3e1c255fc3d10f9094766485b34f2f52a9e7d8cf15def7940eb34b652a6fa6ee"
+    },
+    {
       "path": "evidence/reports/handoff-model-audit.json",
       "bytes": 16413,
       "sha256": "2e48a1eeb6893673b8b0b9bfb9485d3cad580ee4a21ae5efb7dafb82e0898307"
     },
     {
       "path": "evidence/reports/model-provenance.json",
-      "bytes": 5231,
-      "sha256": "a2801f4beeec37e4f6e5bad123d6a29af90d4c65fad5a63b07e8c40ef93379fc"
+      "bytes": 5303,
+      "sha256": "478b09fc38b18929e70dc00968a1d31760a3ec5844a322a5bcbc648bd5f3403c"
     },
     {
       "path": "evidence/reports/preprocess-conformance.json",
@@ -146,6 +151,16 @@
       "path": "evidence/reports/litert-golden-report.json",
       "bytes": 20179,
       "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
+    },
+    {
+      "path": "evidence/reports/mindspore-conversion-report.json",
+      "bytes": 336498,
+      "sha256": "2a4e237ba85c0a83eff5785554ca8d56cd3353f11a9cb91535d941d5f326775c"
+    },
+    {
+      "path": "evidence/reports/mindspore-golden-report.json",
+      "bytes": 13880,
+      "sha256": "eab99187e001661e669c74e73555e683dfe9f0f04f611574a81271f3d7e30934"
     },
     {
       "path": "evidence/reports/web-wasm-performance.json",
@@ -183,6 +198,11 @@
       "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
     },
     {
+      "path": "evidence/tooling/mindspore-python-addons.lock",
+      "bytes": 633,
+      "sha256": "5f338240181579282a2576e729041f013b2ba72da9dd5fc9e78b9d96315caaae"
+    },
+    {
       "path": "evidence/tooling/raw-golden/src/lib.rs",
       "bytes": 4428,
       "sha256": "90b7a373ee51547ef5543bd61f37a39c36471d70a0afc7e91917566711933e31"
@@ -191,6 +211,11 @@
       "path": "evidence/tooling/raw-golden/src/main.rs",
       "bytes": 1770,
       "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
+    },
+    {
+      "path": "evidence/tooling/mindspore-host-runner/main.cpp",
+      "bytes": 5741,
+      "sha256": "2cbddf80171f26470aae54dcd629c85bb4b500189068eb9443b12adf21981903"
     }
   ]
 }

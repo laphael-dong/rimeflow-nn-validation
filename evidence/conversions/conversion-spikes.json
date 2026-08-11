@@ -239,36 +239,515 @@
     },
     {
       "platform": "harmonyos",
-      "format": "mindir/ms",
-      "state": "blocked",
+      "format": "mindir-lite-ms",
+      "state": "host-inference-verified",
+      "supported": false,
+      "harmonyOsDeviceVerified": false,
       "tool": {
-        "name": "MindSpore Lite converter_lite",
+        "name": "MindSpore Lite converter_lite / benchmark / C++ runtime",
         "version": "2.7.0",
         "archiveSha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+        "commitId": "d2b243f75f33a7a896483b09e567d845155cad06",
         "officialSource": "https://www.mindspore.cn/lite/docs/en/r2.7.0/use/downloads.html"
       },
       "attempt": {
         "command": [
-          ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+          "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
           "--fmk=ONNX",
-          "--modelFile=models/yolov8n.onnx",
-          "--outputFile=.evidence/mindspore/yolov8n",
+          "--modelFile=$REPO/.evidence/mindspore/replay/round-2/onnx/yolov8n-opset17-dfl-reduced.onnx",
+          "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/pt-reexport-opset17-dfl-reduced-static-general",
+          "--inputShape=images:1,3,640,640",
           "--optimize=general"
         ],
-        "exitCode": 255,
-        "signal": null,
-        "stdout": "ERROR [mindspore-lite/tools/converter/converter_lite/main.cc:107] main] Convert failed. Ret: Common error code.\nConvert failed. Ret: Common error code.",
-        "stderr": "[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/parser/onnx/onnx_model_parser.cc:680] CheckOnnxModel] Cannot find input:  of node: /model.10/Resize\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/parser/onnx/onnx_model_parser.cc:680] CheckOnnxModel] Cannot find input:  of node: /model.13/Resize\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/const_fold/constant_folding_fusion.h:48] Run] Do constant fold failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/node_infershape.cc:310] InferShapeByNNACL] InferShapeByNNACL for op: /model.22/dfl/conv/Conv failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:318] InferProcess] node infer shape failed, node is /model.22/dfl/conv/Conv\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/optimizer/graph/infershape_pass.cc:192] Run] infer shape failed.\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/src/litert/infer_manager.cc:153] CheckInfershapeResult] Unexpected input format 0\n[WARNING] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/legacy_optimizer/graph/infershape_pass.cc:633] InferSubgraph] InferShape failed, name: /model.22/dfl/conv/Conv, type: Conv2DFusion\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/legacy_optimizer/graph/infershape_pass.cc:650] Run] InferSubgraph index: 0 failed, ret: -500\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/optimizer.cc:78] Run] Run GraphPass failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/graphdef_transform.cc:71] QuantTransform] Run quant_node_optimizer graphPasses Failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter_metagraph.cc:102] Build] Transform meta graph failed!ret = -500\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1260] SaveGraph] Convert to meta graph failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1213] HandleGraphCommon] Save graph failed: -1 Common error code.\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1152] Convert] Handle graph failed: -1 Common error code.\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/converter.cc:1345] RunConverter] Convert model failed\n[ERROR] LITE(<pid>,<thread>,converter_lite):<timestamp> [mindspore-lite/tools/converter/cxx_api/converter.cc:361] Convert] Convert model failed, ret=Common error code.",
-        "logNormalization": "仅将仓库绝对路径替换为 $REPO，并将 converter_lite 的时间戳/PID/thread 替换为占位符；其余 stdout/stderr 逐字保留"
+        "conversionExecuted": true,
+        "exitCode": 0,
+        "hostBenchmarkExecuted": true,
+        "hostLoadRunExecuted": true,
+        "goldenPassed": true,
+        "failedPaths": [
+          {
+            "command": [
+              "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+              "--fmk=ONNX",
+              "--modelFile=$REPO/models/yolov8n.onnx",
+              "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/reference-baseline-general",
+              "--optimize=general"
+            ],
+            "exitCode": 255,
+            "failureSignature": {
+              "failedOperator": "/model.22/dfl/conv/Conv",
+              "inputShape": [
+                1,
+                16,
+                4,
+                8400
+              ],
+              "operatorType": "Conv2DFusion",
+              "outputShape": [
+                1,
+                1,
+                4,
+                8400
+              ],
+              "phase": "legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass",
+              "resizeOptionalEmptyInputWarnings": [
+                "/model.10/Resize",
+                "/model.13/Resize"
+              ],
+              "weightShape": [
+                1,
+                16,
+                1,
+                1
+              ]
+            },
+            "id": "reference-baseline-general",
+            "rationale": "先逐字重放既有规范 ONNX 失败，确认失败阶段、算子和 Resize 警告没有漂移。"
+          },
+          {
+            "command": [
+              "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+              "--fmk=ONNX",
+              "--modelFile=$REPO/models/yolov8n.onnx",
+              "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/reference-static-general",
+              "--inputShape=images:1,3,640,640",
+              "--optimize=general"
+            ],
+            "exitCode": 255,
+            "failureSignature": {
+              "failedOperator": "/model.22/dfl/conv/Conv",
+              "inputShape": [
+                1,
+                16,
+                4,
+                8400
+              ],
+              "operatorType": "Conv2DFusion",
+              "outputShape": [
+                1,
+                1,
+                4,
+                8400
+              ],
+              "phase": "legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass",
+              "resizeOptionalEmptyInputWarnings": [
+                "/model.10/Resize",
+                "/model.13/Resize"
+              ],
+              "weightShape": [
+                1,
+                16,
+                1,
+                1
+              ]
+            },
+            "id": "reference-static-general",
+            "rationale": "规范 ONNX 已声明静态 Shape，但 converter 明确支持 inputShape；用于排除解析后静态 Shape 未传播。"
+          },
+          {
+            "command": [
+              "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+              "--fmk=ONNX",
+              "--modelFile=$HANDOFF_ASSETS/yolov8n.onnx",
+              "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/handoff-static-general",
+              "--inputShape=images:1,3,640,640",
+              "--optimize=general"
+            ],
+            "exitCode": 255,
+            "failureSignature": {
+              "failedOperator": "/model.22/dfl/conv/Conv",
+              "inputShape": [
+                1,
+                16,
+                4,
+                8400
+              ],
+              "operatorType": "Conv2DFusion",
+              "outputShape": [
+                1,
+                1,
+                4,
+                8400
+              ],
+              "phase": "legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass",
+              "resizeOptionalEmptyInputWarnings": [
+                "/model.10/Resize",
+                "/model.13/Resize"
+              ],
+              "weightShape": [
+                1,
+                16,
+                1,
+                1
+              ]
+            },
+            "id": "handoff-static-general",
+            "rationale": "handoff ONNX 与规范模型权重及固定输入输出等价，但由 Ultralytics 8.4.104/opset 20 生成；用于隔离 exporter/opset 图表示差异。"
+          },
+          {
+            "command": [
+              "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+              "--fmk=ONNX",
+              "--modelFile=$REPO/.evidence/mindspore/replay/round-2/onnx/yolov8n-opset17-unsimplified.onnx",
+              "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/pt-reexport-opset17-unsimplified-static-general",
+              "--inputShape=images:1,3,640,640",
+              "--optimize=general"
+            ],
+            "exitCode": 255,
+            "failureSignature": {
+              "failedOperator": "/model.22/dfl/conv/Conv",
+              "inputShape": [
+                1,
+                16,
+                4,
+                8400
+              ],
+              "operatorType": "Conv2DFusion",
+              "outputShape": [
+                1,
+                1,
+                4,
+                8400
+              ],
+              "phase": "legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass",
+              "resizeOptionalEmptyInputWarnings": [
+                "/model.10/Resize",
+                "/model.13/Resize"
+              ],
+              "weightShape": [
+                1,
+                16,
+                1,
+                1
+              ]
+            },
+            "id": "pt-reexport-opset17-unsimplified-static-general",
+            "rationale": "从锁定 .pt 以静态、nms=false、opset 17、simplify=false 重导出；规范模型也是 opset 17，关闭 simplify 用于隔离图简化重写。"
+          },
+          {
+            "command": [
+              "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+              "--fmk=ONNX",
+              "--modelFile=$REPO/models/yolov8n.onnx",
+              "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/reference-static-none",
+              "--inputShape=images:1,3,640,640",
+              "--optimize=none"
+            ],
+            "exitCode": 255,
+            "failureSignature": {
+              "failedOperator": "/model.22/dfl/conv/Conv",
+              "inputShape": [
+                1,
+                16,
+                4,
+                8400
+              ],
+              "operatorType": "Conv2DFusion",
+              "outputShape": [
+                1,
+                1,
+                4,
+                8400
+              ],
+              "phase": "legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass",
+              "resizeOptionalEmptyInputWarnings": [
+                "/model.10/Resize",
+                "/model.13/Resize"
+              ],
+              "weightShape": [
+                1,
+                16,
+                1,
+                1
+              ]
+            },
+            "id": "reference-static-none",
+            "rationale": "已知错误位于 converter graph optimization/infer-shape；官方 optimize=none 是有边界的故障阶段隔离，不遍历其他优化模式。"
+          }
+        ],
+        "replayComparison": {
+          "allDeterministic": true,
+          "derivedOnnxDigestEqual": true,
+          "fixtureResultsEqual": true,
+          "paths": {
+            "handoff-static-general": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            },
+            "pt-reexport-opset17-dfl-reduced-static-general": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            },
+            "pt-reexport-opset17-unsimplified-static-general": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            },
+            "reference-baseline-general": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            },
+            "reference-static-general": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            },
+            "reference-static-none": {
+              "artifactDigestEqual": true,
+              "exitCodeEqual": true,
+              "failureSignatureEqual": true,
+              "resultEqual": true
+            }
+          },
+          "reexportOnnxDigestEqual": true,
+          "trackedWorktreeStateStable": true
+        },
+        "report": {
+          "path": "evidence/reports/mindspore-conversion-report.json",
+          "bytes": 336498,
+          "sha256": "2a4e237ba85c0a83eff5785554ca8d56cd3353f11a9cb91535d941d5f326775c"
+        },
+        "goldenReport": {
+          "path": "evidence/reports/mindspore-golden-report.json",
+          "bytes": 13880,
+          "sha256": "eab99187e001661e669c74e73555e683dfe9f0f04f611574a81271f3d7e30934"
+        }
       },
-      "artifact": null,
-      "ioChanges": "转换失败，无 artifact；原始 I/O 为 [1,3,640,640] -> [1,84,8400]",
-      "quantization": "命令未请求量化，FP32",
-      "nmsResponsibility": "operator",
-      "failedOperator": "/model.22/dfl/conv/Conv (Conv2DFusion infer-shape/graph pass)",
-      "license": "MindSpore Apache-2.0；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
-      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "官方 converter_lite 2.7.0 已进入 ONNX parse/graph optimization，因 Conv2DFusion infer-shape 失败；缺 HarmonyOS runner。"
+      "artifact": {
+        "bytes": 12832800,
+        "format": "MindIR Lite / MINDIR_LITE FlatBuffer (.ms)",
+        "location": ".evidence/mindspore/artifacts/yolov8n-fp32.ms",
+        "path": ".evidence/mindspore/artifacts/yolov8n-fp32.ms",
+        "sha256": "7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5",
+        "trackedByGit": false
+      },
+      "artifactManifest": {
+        "path": "evidence/conversions/mindspore-artifact-manifest.json",
+        "bytes": 19709,
+        "sha256": "3e1c255fc3d10f9094766485b34f2f52a9e7d8cf15def7940eb34b652a6fa6ee"
+      },
+      "sourceCheckpoint": {
+        "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "auditPath": "evidence/reports/handoff-model-audit.json"
+      },
+      "derivedOnnx": {
+        "equivalence": {
+          "allCasesWithinTolerance": true,
+          "cases": [
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "6204a40d45d3b8555ffbda2e6826f91a6adc77bd0514d8754a956b1217edd9aa",
+              "id": "zeros",
+              "inputSha256Float32Le": "f824c1a8a1128713f17dd8d1190d70e6012b509606d986e7a6c81e40b628df2b",
+              "maxAbsoluteDifference": 0.0001220703125,
+              "maxRelativeDifference": 0.0000018044092544541843,
+              "meanAbsoluteDifference": 5.415980778043232e-8,
+              "referenceSha256Float32Le": "ce71e246b9909cfffe775286695511a054fc1e766621e9a526840a9c516d34f6",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "3c5fc1d46eaea9999671d9fe37944ef1aae6444d742b0d49d4e8d0bbffac5de2",
+              "id": "gray114",
+              "inputSha256Float32Le": "d4e05bfc32af71b56bac53465531642c4a5824f39e042c89f34ffbc4884a7966",
+              "maxAbsoluteDifference": 0.0001220703125,
+              "maxRelativeDifference": 0.0000013825044067327964,
+              "meanAbsoluteDifference": 6.73981886061411e-8,
+              "referenceSha256Float32Le": "b0730679a2e6114b4dfa952d07f2f556e4b50d966af4f203d0d29deca18ca08a",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "6dbd030dcd4561a851ace5fcc6ce2b90b530a3c7bcbe08bec90674fa384d06c8",
+              "id": "seed20260811",
+              "inputSha256Float32Le": "56da2c02d8f2b85dc94b1ae5d87c569e4adc4e099ffffe67589d3a8e4ad230c8",
+              "maxAbsoluteDifference": 0.0001220703125,
+              "maxRelativeDifference": 0.0000019898517560441746,
+              "meanAbsoluteDifference": 6.605302936095499e-8,
+              "referenceSha256Float32Le": "6f98d088c4e648d0fcd3fdfc53800042e1aaa99781bb91290ed92511ef5c90d7",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "67392b7c272126847ddf810b4005ae4dd2b15a09e993cc54b1d1981bc8401e7c",
+              "id": "fixture:no-detection",
+              "inputSha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b",
+              "maxAbsoluteDifference": 0.0001220703125,
+              "maxRelativeDifference": 0.000002035275393113442,
+              "meanAbsoluteDifference": 7.743873293437655e-8,
+              "referenceSha256Float32Le": "1ef6f07d2b5794d657373fa9873b32dfdbcc56dbf02397c8ff55d475aa4aacf4",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "206b87acd446cb30eb85a455d361ab0eb90a2c15f9beefec11f574280fb5ed43",
+              "id": "fixture:single-target",
+              "inputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+              "maxAbsoluteDifference": 0.0001220703125,
+              "maxRelativeDifference": 0.0000026446630699248914,
+              "meanAbsoluteDifference": 6.319106030626361e-8,
+              "referenceSha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "5632a00b7b372684e198e996827874d185d1208b77bb84e9c3e7d224e3b44f93",
+              "id": "fixture:multi-class",
+              "inputSha256Float32Le": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c",
+              "maxAbsoluteDifference": 0.000091552734375,
+              "maxRelativeDifference": 0.000003980796637023001,
+              "meanAbsoluteDifference": 4.5351565830291267e-8,
+              "referenceSha256Float32Le": "53378591b174c87804cdf5ecf01572bb5c5bd8139cd9f29ba68d983319c283a8",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "86108b251a2138ff5ccbca8e8ba0ec81af76f3f6d1f45abcc6f2192a1d6738f8",
+              "id": "fixture:boundary-box",
+              "inputSha256Float32Le": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0",
+              "maxAbsoluteDifference": 0.00006103515625,
+              "maxRelativeDifference": 0.000002572916452256962,
+              "meanAbsoluteDifference": 4.513767841451563e-8,
+              "referenceSha256Float32Le": "f057d9a4d9ee243ddca4ffac3161443319627e795495aaab7326ceaf65324cfc",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            },
+            {
+              "allclose": true,
+              "candidateSha256Float32Le": "ba3a8205d6ecec785e7ea594df9243e8e0d96c436303f57f323a11a6ca41ea55",
+              "id": "fixture:extreme-aspect",
+              "inputSha256Float32Le": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf",
+              "maxAbsoluteDifference": 0.000091552734375,
+              "maxRelativeDifference": 0.0000018023473772240967,
+              "meanAbsoluteDifference": 6.021285543636399e-8,
+              "referenceSha256Float32Le": "573397ff67075e796e6c88d686969a7563eae87ddf810ee642e393cc6edbebda",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            }
+          ],
+          "tolerances": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "graph": {
+          "bytes": 12824387,
+          "inputs": [
+            {
+              "name": "images",
+              "shape": [
+                1,
+                3,
+                640,
+                640
+              ]
+            }
+          ],
+          "nmsInGraph": false,
+          "operators": {
+            "Add": 9,
+            "Concat": 17,
+            "Constant": 24,
+            "Conv": 63,
+            "Div": 2,
+            "Gather": 1,
+            "MaxPool": 3,
+            "Mul": 61,
+            "ReduceSum": 1,
+            "Reshape": 8,
+            "Resize": 2,
+            "Shape": 1,
+            "Sigmoid": 58,
+            "Slice": 2,
+            "Softmax": 1,
+            "Split": 8,
+            "Sub": 2,
+            "Transpose": 1
+          },
+          "opsets": [
+            {
+              "domain": "",
+              "version": 17
+            }
+          ],
+          "outputs": [
+            {
+              "name": "output0",
+              "shape": [
+                1,
+                84,
+                8400
+              ]
+            }
+          ],
+          "sha256": "a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea"
+        },
+        "transform": {
+          "insertedNodes": [
+            "/model.22/dfl/conv/Mul",
+            "/model.22/dfl/conv/ReduceSum"
+          ],
+          "removedNode": "/model.22/dfl/conv/Conv",
+          "weightInitializer": "model.22.dfl.conv.weight",
+          "weightSha256Float32Le": "58dda328598e2f7fe472621bfc54935aaa354d1a6ebcaf9562cd743fd575eb19"
+        }
+      },
+      "ioChanges": [
+        "输入 runtime Shape/layout 从 NCHW [1,3,640,640] 变为 NHWC [1,640,640,3]；输入名称 images、index 0、FP32 保持。",
+        "DFL 的单个 1x1 Conv(weight=0..15) 由结构化 ONNX API 改写为 Mul+ReduceSum(axis=1, keepdims=1)。",
+        "输出名称 output0、index 0、attributes-first Shape [1,84,8400]、FP32 和 640x640 输入像素 xywh 坐标保持。",
+        "产物格式从 ONNX 变为 MindIR Lite .ms；输入输出均无量化参数。"
+      ],
+      "quantization": {
+        "input": [],
+        "mode": "FP32; converter input/output type defaults, fp16 off, no quantization requested",
+        "output": []
+      },
+      "preprocessingResponsibility": "runtime adapter owns letterbox, RGB, /255 normalization and NCHW-to-NHWC transpose; model artifact folds none of them",
+      "coordinateContract": "output attributes 0..3 are xywh in 640x640 letterboxed input pixels; no coordinate remapping in the model",
+      "nmsResponsibility": "operator; source/derived ONNX contain no NonMaxSuppression and host runner performs no decode/NMS",
+      "failedOperator": null,
+      "license": "MindSpore Apache-2.0；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0",
+      "redistribution": "仅允许隔离的内部框架验证 evidence；.ms 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录",
+      "conclusion": "结构化改写 DFL Conv 后，官方 converter_lite 2.7.0 生成 MindIR Lite .ms；官方 benchmark 与 C++ runtime 在 Linux host 对五个 fixture 完成真实 Load/Run，冻结 golden 和生产 Rust decode/NMS 全部通过。尚无 HarmonyOS 真机证据，supported=false。"
     },
     {
       "platform": "linux-x86_64-cpu",

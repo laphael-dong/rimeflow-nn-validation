@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -113,7 +113,11 @@ for (const line of coremlLock.split('\n').filter((line) => line && !line.startsW
 const windows = conversion.spikes.find((item) => item.platform === 'windows-x86_64-and-arm64');
 if (windows.state !== 'blocked' || windows.conversion !== '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入' || windows.artifact.sha256 !== actualModelSha) fail('Windows ML spike evidence');
 const mindspore = conversion.spikes.find((item) => item.platform === 'harmonyos');
-if (mindspore.tool.version !== '2.7.0' || mindspore.tool.archiveSha256 !== '8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b' || !mindspore.attempt.command.includes('--fmk=ONNX') || mindspore.attempt.exitCode === null) fail('MindSpore spike evidence');
+const mindsporeManifest = await readJson('evidence/conversions/mindspore-artifact-manifest.json');
+const mindsporeGolden = await readJson('evidence/reports/mindspore-golden-report.json');
+const mindsporeConversion = await readJson('evidence/reports/mindspore-conversion-report.json');
+validateMindsporeEvidence(mindsporeManifest, mindsporeGolden, mindsporeConversion, reference.tolerances);
+if (mindspore.state !== 'host-inference-verified' || mindspore.supported || mindspore.harmonyOsDeviceVerified || mindspore.tool.version !== '2.7.0' || mindspore.tool.archiveSha256 !== '8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b' || !mindspore.attempt.command.includes('--fmk=ONNX') || mindspore.attempt.exitCode !== 0 || !mindspore.attempt.hostBenchmarkExecuted || !mindspore.attempt.hostLoadRunExecuted || !mindspore.attempt.goldenPassed || mindspore.artifact.sha256 !== mindsporeManifest.artifact.sha256) fail('MindSpore spike evidence');
 const linuxCpu = conversion.spikes.find((item) => item.platform === 'linux-x86_64-cpu');
 if (linuxCpu.state !== 'inference-verified' || linuxCpu.attempt.inferenceExecuted !== true || linuxCpu.attempt.output.finiteCount !== 84 * 8400) fail('Linux ORT CPU inference evidence');
 for (const provider of ['openvino', 'cuda', 'tensorrt']) if (conversion.spikes.find((item) => item.platform === `linux-x86_64-${provider}`).state !== 'blocked') fail(`${provider} must remain independently blocked`);
@@ -145,7 +149,13 @@ const coremlReplayStep = replay.steps.find((item) => item.id === 'apple-coreml-c
 if (!coremlReplayStep?.executed || coremlReplayStep.rounds.length !== 2 || !coremlReplayStep.repeatComparison.allExitCodesZero || coremlReplayStep.repeatComparison.deterministicOutputDigestsEqual || !coremlReplayStep.repeatComparison.semanticDeterminismVerified) fail('Core ML task replay semantics');
 validateCoremlReplayEvidence(coremlManifest, coremlReplayStep);
 for (const round of coremlReplayStep.rounds) if (round.exitCode !== 0 || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || round.outputs[0].kind !== 'workspace-package-tree' || !/^[0-9a-f]{64}$/.test(round.outputs[0].workspacePackageTreeDigest) || Object.hasOwn(round.outputs[0], 'sha256')) fail(`Core ML task replay round: ${round.run}`);
+const mindsporeReplayStep = replay.steps.find((item) => item.id === 'harmonyos-mindspore-conversion-and-host-golden');
+if (!mindsporeReplayStep?.executed || mindsporeReplayStep.rounds.length !== 2 || !mindsporeReplayStep.repeatComparison.allExitCodesZero || !mindsporeReplayStep.repeatComparison.deterministicOutputDigestsEqual || !mindsporeReplayStep.repeatComparison.failureSignaturesEqual) fail('MindSpore task replay semantics');
+if (!mindsporeReplayStep.command.includes('run_mindspore_replay.py') || mindsporeReplayStep.repeatComparison.details.allDeterministic !== true || mindsporeReplayStep.repeatComparison.details.derivedOnnxDigestEqual !== true || mindsporeReplayStep.repeatComparison.details.fixtureResultsEqual !== true || mindsporeReplayStep.repeatComparison.details.reexportOnnxDigestEqual !== true) fail('MindSpore task replay determinism');
+for (const round of mindsporeReplayStep.rounds) {
+  if (round.exitCode !== 0 || round.worktreeBefore.tracked !== '' || round.worktreeAfter.tracked !== '' || round.hostFixtureCount !== 5 || round.outputs[0].sha256 !== mindsporeManifest.artifact.sha256 || round.outputs[1].sha256 !== '8718af53d53b6336f301ef7eacb529376f29f0c04bec415815fde7d734b9def2' || round.outputs[2].sha256 !== 'a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea' || round.expectedFailureSignatures.length !== 5) fail(`MindSpore task replay round: ${round.run}`);
+}
 const conversionReplayStep = replay.steps.find((item) => item.id === 'conversion-report-regeneration');
-if (conversionReplayStep.command !== 'node evidence/scripts/run_conversion_spikes.mjs --coreml-only') fail('CoreML-only conversion replay scope');
+if (conversionReplayStep.command !== 'node evidence/scripts/run_conversion_spikes.mjs --mindspore-only') fail('MindSpore-only conversion replay scope');
 if (replay.steps.find((item) => item.id === 'delegated-platform-spikes').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));

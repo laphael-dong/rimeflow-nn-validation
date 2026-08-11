@@ -10,8 +10,9 @@ const git = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' })
 const repositoryHeadAtReplay = git(['rev-parse', 'HEAD']);
 const litertOnly = process.argv.includes('--litert-only');
 const coremlOnly = process.argv.includes('--coreml-only');
-if (litertOnly && coremlOnly) throw new Error('一次只能选择一个 scoped replay 模式');
-const scopedOnly = litertOnly || coremlOnly;
+const mindsporeOnly = process.argv.includes('--mindspore-only');
+if ([litertOnly, coremlOnly, mindsporeOnly].filter(Boolean).length > 1) throw new Error('一次只能选择一个 scoped replay 模式');
+const scopedOnly = litertOnly || coremlOnly || mindsporeOnly;
 const previousReplay = scopedOnly
   ? JSON.parse(await readFile(outputPath, 'utf8'))
   : null;
@@ -27,11 +28,15 @@ const outputs = [
   'evidence/conversions/conversion-spikes.json',
   'evidence/conversions/coreml-artifact-manifest.json',
   'evidence/conversions/litert-artifact-manifest.json',
+  'evidence/conversions/mindspore-artifact-manifest.json',
   'evidence/reports/coreml-conversion-report.json',
   'evidence/reports/litert-conversion-report.json',
   'evidence/reports/litert-golden-report.json',
+  'evidence/reports/mindspore-conversion-report.json',
+  'evidence/reports/mindspore-golden-report.json',
   'evidence/tooling/coreml-requirements.lock',
   'evidence/tooling/litert-requirements.lock',
+  'evidence/tooling/mindspore-python-addons.lock',
 ];
 const commonInputs = ['models/yolov8n.onnx', 'evidence/fixtures/manifest.json'];
 const steps = [];
@@ -59,7 +64,7 @@ steps.push(await runRepeatedStep({
   inputPaths: ['evidence/fixtures/raw/overlap-nms.json', 'src/postprocess.rs'],
   outputPaths: [],
 }));
-const conversionMode = coremlOnly ? '--coreml-only' : '--litert-only';
+const conversionMode = coremlOnly ? '--coreml-only' : mindsporeOnly ? '--mindspore-only' : '--litert-only';
 const conversionInputs = coremlOnly
   ? [
       'evidence/conversions/conversion-spikes.json',
@@ -67,7 +72,15 @@ const conversionInputs = coremlOnly
       'evidence/reports/handoff-model-audit.json',
       'evidence/reports/coreml-conversion-report.json',
     ]
-  : [
+    : mindsporeOnly
+      ? [
+        'evidence/conversions/conversion-spikes.json',
+        'evidence/conversions/mindspore-artifact-manifest.json',
+        'evidence/reports/handoff-model-audit.json',
+        'evidence/reports/mindspore-conversion-report.json',
+        'evidence/reports/mindspore-golden-report.json',
+      ]
+      : [
       'evidence/conversions/conversion-spikes.json',
       'evidence/conversions/litert-artifact-manifest.json',
       'evidence/reports/handoff-model-audit.json',
@@ -83,7 +96,7 @@ steps.push(await runRepeatedStep({
   inputPaths: conversionInputs,
   outputPaths: ['evidence/conversions/conversion-spikes.json'],
 }));
-if (coremlOnly) {
+if (coremlOnly || mindsporeOnly) {
   const previousLitert = previousReplay.steps.find((step) => step.id === 'android-litert-conversion-and-host-golden');
   if (!previousLitert) throw new Error('历史 task1 replay 缺少 LiteRT replay');
   steps.push(previousLitert);
@@ -136,7 +149,7 @@ if (coremlOnly) {
   });
 }
 
-if (litertOnly) {
+if (litertOnly || mindsporeOnly) {
   const previousCoreml = previousReplay.steps.find((step) => step.id === 'apple-coreml-conversion-and-spec-inspection');
   if (previousCoreml) steps.push(previousCoreml);
 } else {
@@ -196,10 +209,67 @@ if (litertOnly) {
     },
   });
 }
+
+if (litertOnly || coremlOnly) {
+  const previousMindspore = previousReplay.steps.find((step) => step.id === 'harmonyos-mindspore-conversion-and-host-golden');
+  if (!previousMindspore) throw new Error('历史 task1 replay 缺少 MindSpore replay');
+  steps.push(previousMindspore);
+} else {
+  const mindsporeReplayPath = resolve(root, '.evidence/mindspore/replay/mindspore-replay.json');
+  const mindsporeReplay = JSON.parse(await readFile(mindsporeReplayPath, 'utf8').catch(() => {
+    throw new Error('缺少两轮 MindSpore replay；先执行 evidence/scripts/run_mindspore_replay.py');
+  }));
+  const mindsporeCommand = '$MINDSPORE_PYTHON evidence/scripts/run_mindspore_replay.py --pt $HANDOFF_ASSETS/yolov8n.pt --handoff-onnx $HANDOFF_ASSETS/yolov8n.onnx --workspace .evidence/mindspore/replay';
+  steps.push({
+    id: 'harmonyos-mindspore-conversion-and-host-golden',
+    command: mindsporeCommand,
+    executed: true,
+    blockedReason: null,
+    rounds: mindsporeReplay.rounds.map((round) => {
+      const success = round.matrix.find((item) => item.result === 'success');
+      const stdout = [round.webReference.stdout, round.export.stdout, round.derivation.stdout, ...round.matrix.map((item) => item.stdout), ...round.hostValidation.fixtures.flatMap((item) => [item.benchmark.stdout, item.runtime.stdout, item.productionRust.stdout])].join('\n');
+      const stderr = [round.webReference.stderr, round.export.stderr, round.derivation.stderr, ...round.matrix.map((item) => item.stderr), round.hostValidation.compile.stderr, round.hostValidation.productionRustBuild.stderr, ...round.hostValidation.fixtures.flatMap((item) => [item.benchmark.stderr, item.runtime.stderr, item.productionRust.stderr])].join('\n');
+      return {
+        run: round.round,
+        actualCommand: mindsporeCommand,
+        startedAt: round.webReference.startedAt,
+        endedAt: round.hostValidation.fixtures.at(-1).productionRust.endedAt,
+        exitCode: success?.exitCode === 0 && round.hostValidation.passed ? 0 : 1,
+        signal: null,
+        repositoryHead: repositoryHeadAtReplay,
+        runnerId: runnerIdentity().id,
+        worktreeBefore: round.worktreeBefore,
+        worktreeAfter: round.worktreeAfter,
+        inputs: Object.values(round.sourceBefore),
+        outputs: [
+          success.artifact,
+          { bytes: round.exportReport.output.bytes, path: '.evidence/mindspore/replay/round-N/onnx/yolov8n-opset17-unsimplified.onnx', sha256: round.exportReport.output.sha256 },
+          { bytes: round.derivationReport.derived.bytes, path: '.evidence/mindspore/replay/round-N/onnx/yolov8n-opset17-dfl-reduced.onnx', sha256: round.derivationReport.derived.sha256 },
+        ],
+        expectedFailureSignatures: round.matrix.filter((item) => item.result === 'failed').map((item) => ({ id: item.id, exitCode: item.exitCode, failureSignature: item.failureSignature })),
+        hostFixtureCount: round.hostValidation.fixtures.length,
+        log: {
+          storage: 'embedded-in-replay-manifest',
+          stdout,
+          stderr,
+          bytes: Buffer.byteLength(stdout) + Buffer.byteLength(stderr),
+          sha256: sha256(Buffer.from(`${stdout}\0${stderr}`)),
+        },
+      };
+    }),
+    repeatComparison: {
+      runs: 2,
+      allExitCodesZero: mindsporeReplay.rounds.every((round) => round.matrix.find((item) => item.result === 'success')?.exitCode === 0 && round.hostValidation.passed),
+      deterministicOutputDigestsEqual: mindsporeReplay.comparison.allDeterministic && mindsporeReplay.comparison.derivedOnnxDigestEqual && mindsporeReplay.comparison.reexportOnnxDigestEqual && mindsporeReplay.comparison.fixtureResultsEqual,
+      failureSignaturesEqual: Object.values(mindsporeReplay.comparison.paths).every((item) => item.failureSignatureEqual),
+      details: mindsporeReplay.comparison,
+    },
+  });
+}
 steps.push(blockedStep(
   'delegated-platform-spikes',
-  'Windows ML/MindSpore/Linux accelerated provider platform commands and real Apple runtime commands',
-  'Core ML 已完成 Linux host artifact/spec 验证但缺 macOS/iOS Load/Run；LiteRT 缺 Android runner；Windows ML、MindSpore Lite 与加速 Linux provider 仍缺完整平台证据。',
+  'Windows ML/Linux accelerated provider platform commands and real Apple/Android/HarmonyOS runtime commands',
+  'MindSpore Lite 已完成 Linux host artifact/inference/golden，但缺 HarmonyOS 真机；Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 与加速 Linux provider 仍缺完整平台证据。',
 ));
 const artifacts = [];
 for (const path of outputs) {
@@ -216,7 +286,7 @@ const manifest = {
     fixtureSourceCommit: '42ef8a125df038dcca49f6216f446fe9112946c1',
   },
   runner: runnerIdentity(),
-  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', coremltools: '9.0', litertRuntime: '2.1.6', litertTorch: '0.9.3' },
+  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', coremltools: '9.0', litertRuntime: '2.1.6', litertTorch: '0.9.3', mindsporeLite: '2.7.0' },
   immutableLogEvidence: { kind: 'embedded-in-manifest', path: 'evidence/replay/task1-replay.json', ciJobUrl: process.env.CI_JOB_URL ?? null },
   steps,
   outputs: artifacts,

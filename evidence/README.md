@@ -67,6 +67,27 @@ Core ML worker 在导入 Ultralytics/PyTorch 前校验 `.pt` 的 6,549,796 字�
 
 候选产物位于 `.evidence/coreml/artifacts/yolov8n-fp32.mlpackage`，只含 `model.mlmodel`、`weight.bin` 和 `Manifest.json` 三个文件，总计 12,825,402 字节；该路径被 Git 忽略。每轮均按排序后的 POSIX 相对路径、文件字节数和逐文件 SHA-256 计算 canonical tree digest，不读取目录时间戳。两轮原始 tree digest 不同：`weight.bin` 完全一致，差异仅为 `Manifest.json` 的随机 UUID 和 `model.mlmodel` 中 `description.metadata.userDefined.date`。比较层只为诊断计算移除这些字段后的 digest，未修改任何 package、模型图或权重；归一化 spec/manifest digest、I/O、精度和坐标契约均一致。
 
+HarmonyOS 转换 spike 固定使用官方 MindSpore Lite 2.7.0 Linux x64 archive，archive SHA-256 为 `8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b`，内部 commit 为 `d2b243f75f33a7a896483b09e567d845155cad06`。`converter_lite` 没有可用的 `--version` 子命令，因此版本证据由官方 archive 文件名/SHA、`.commit_id`、converter 二进制 SHA 和 `--help` 输出共同组成。执行两轮有限矩阵、Linux host Load/Run 与生产 Rust golden：
+
+```sh
+node evidence/scripts/prepare_mindspore_lite.mjs
+HANDOFF_ASSETS=/home/raffael/下载/yolov8n_ios_benchmark_handoff/Assets
+RIMEFLOW_MINDSPORE_VENV=.evidence/mindspore/python-venv node evidence/scripts/prepare_mindspore_python.mjs
+MINDSPORE_PYTHON=.evidence/mindspore/python-venv/bin/python
+$MINDSPORE_PYTHON evidence/scripts/run_mindspore_replay.py \
+  --pt "$HANDOFF_ASSETS/yolov8n.pt" \
+  --handoff-onnx "$HANDOFF_ASSETS/yolov8n.onnx" \
+  --workspace .evidence/mindspore/replay \
+  --record
+node evidence/scripts/run_conversion_spikes.mjs --mindspore-only
+```
+
+脚本在每轮开始和结束验证 `.pt`、handoff ONNX、规范 ONNX 与 archive 的字节数和锁定 SHA，源文件只读且不得覆盖。矩阵只包含六条有依据的路径：规范 ONNX 原命令重放、规范 ONNX 加静态 `inputShape`、handoff ONNX 加静态 `inputShape`、从锁定 `.pt` 以 `imgsz=640,batch=1,opset=17,dynamic=false,simplify=false,nms=false,optimize=false` 重导出后转换、规范 ONNX 加 `optimize=none`，以及对重导出图进行 DFL 等价改写后转换。前五条均稳定失败于 `legacy_optimizer/InferSubgraph -> Conv2DFusion infer-shape -> graph pass` 的 `/model.22/dfl/conv/Conv`；输入、权重和输出 Shape 分别为 `[1,16,4,8400]`、`[1,16,1,1]`、`[1,1,4,8400]`，并保留 `/model.10/Resize` 与 `/model.13/Resize` 的可选空输入警告。
+
+唯一成功路径使用 `derive_mindspore_onnx.py` 的结构化 ONNX API，把权重已断言精确为 `0..15` 的单个无 bias DFL `1x1 Conv` 替换为 `Mul + ReduceSum(axis=1, keepdims=1)`。重导出 ONNX 为 12,824,178 字节、SHA-256 `8718af53d53b6336f301ef7eacb529376f29f0c04bec415815fde7d734b9def2`；派生 ONNX 为 12,824,387 字节、SHA-256 `a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea`。重导出图与规范 ONNX 在三个合成输入和五个图片 fixture 上逐元素一致，派生图在相同八个输入上通过冻结 raw 容差；两图均无 NMS。两轮转换得到完全相同的 MindIR Lite `.ms`，12,832,800 字节、SHA-256 `7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5`，只保存在 ignored `.evidence/mindspore/artifacts/`。
+
+官方 `benchmark` 与官方 C++ MindSpore Lite runtime 已在 Linux x64 host 对五个图片 fixture 真实 Load/Run。实际输入为 `images`/index 0/NHWC FP32 `[1,640,640,3]`，输出为 `output0`/index 0/attributes-first FP32 `[1,84,8400]`，输入输出 quantization 均为空。未来 adapter 负责 letterbox、RGB、`/255` 和 NCHW 到 NHWC 转置；模型输出仍是 640×640 letterbox 输入像素单位的 `xywh`，NMS 仍由 operator 的单份生产 `src/postprocess.rs` 负责。本子项未实现 adapter，也没有 HarmonyOS 真机、性能、fallback 或包加载证据，因此仅为 `host-inference-verified`，`supported=false`，任务 1.4 保持未完成。
+
 外部模型 handoff 的 `.pt`/ONNX 审计使用独立、隔离的 CPU 环境，顶层版本固定在 `evidence/tooling/model-audit-requirements.lock`。先从 PyTorch CPU index 安装 `torch==2.12.1+cpu` 与 `torchvision==0.27.1+cpu`，再安装锁文件中的其余版本；随后执行：
 
 ```sh
@@ -85,6 +106,6 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 Apple 已通过官方 `.pt`/Ultralytics/Core ML 路径生成 ML Program `.mlpackage` 并由 coremltools spec API 完成真实结构检查。输入由 ONNX FLOAT MultiArray 语义变为 Core ML RGB Image feature `image`/index 0/640×640，ML Program 函数张量仍为 NCHW FLOAT32 `[1,3,640,640]`；模型图融合 RGB image conversion 和 `1/255` 缩放，不融合 letterbox resize/padding。输出为 `var_911`/index 0/FLOAT32 `[1,84,8400]`，仍是 attributes-first；真实 stride blob 为 6400 个 8、1600 个 16、400 个 32，bbox 直接乘 stride 后作为 640×640 输入像素单位 `xywh` 输出。129 个外置 blob constant 和全部浮点 op 输出均为 FLOAT32，图中不存在 FLOAT16 或 NMS op。Linux 只能保存/解析 `.mlpackage`，不能调用 Core ML runtime，因此 macOS/iOS Load/Run、golden、包加载和性能仍未验证，Apple 仅为 `artifact-spec-verified`，`supported=false`。
 
-Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。官方 MindSpore Lite 2.7.0 `converter_lite` 已进入 ONNX graph optimization 并记录失败算子。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
+Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。HarmonyOS MindSpore Lite 已达到 Linux host `host-inference-verified`，但没有 HarmonyOS 真机证据。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
 
-`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Apple conversion 子项达到 `artifact-spec-verified`，Android conversion 子项达到 `artifact-verified` 和 `host-inference-verified`；两者均缺真实目标平台 runner，且未实现 adapter、性能、包加载或 fallback 验证，因此 `supported` 均保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。
+`evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Apple conversion 子项达到 `artifact-spec-verified`，Android 与 HarmonyOS conversion 子项达到 Linux host `host-inference-verified`；三者均缺真实目标平台 runner，且未实现对应 adapter、性能、包加载或 fallback 验证，因此 `supported` 均保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。

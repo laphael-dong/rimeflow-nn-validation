@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
+import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateThirdPartyFixtureLicenses } from './evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -83,4 +83,27 @@ Object.assign(missingArtifactOverclaim.recordedArtifactVerification, {
 });
 await expectFailure('Core ML missing artifact exact identity overclaim', async () => validateCoremlReplayEvidence(coremlManifest, missingArtifactOverclaim));
 
-console.log(JSON.stringify({ ok: true, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim'] }));
+const mindsporeManifest = await readJson('evidence/conversions/mindspore-artifact-manifest.json');
+const mindsporeGolden = await readJson('evidence/reports/mindspore-golden-report.json');
+const mindsporeReplay = await readJson('evidence/reports/mindspore-conversion-report.json');
+validateMindsporeEvidence(mindsporeManifest, mindsporeGolden, mindsporeReplay, frozen);
+const mindsporeSupported = structuredClone(mindsporeManifest);
+mindsporeSupported.status.supported = true;
+await expectFailure('MindSpore supported without HarmonyOS device', async () => validateMindsporeEvidence(mindsporeSupported, mindsporeGolden, mindsporeReplay, frozen));
+const mindsporeLayout = structuredClone(mindsporeManifest);
+mindsporeLayout.ioContract.inputs[0].shape = [1, 3, 640, 640];
+await expectFailure('MindSpore runtime input layout drift', async () => validateMindsporeEvidence(mindsporeLayout, mindsporeGolden, mindsporeReplay, frozen));
+const mindsporeArtifact = structuredClone(mindsporeManifest);
+mindsporeArtifact.artifact.sha256 = '0'.repeat(64);
+await expectFailure('MindSpore artifact digest drift', async () => validateMindsporeEvidence(mindsporeArtifact, mindsporeGolden, mindsporeReplay, frozen));
+const mindsporeTolerance = structuredClone(mindsporeGolden);
+mindsporeTolerance.tolerances.rawTensorAbsolute = 1;
+await expectFailure('MindSpore relaxed frozen tolerance', async () => validateMindsporeEvidence(mindsporeManifest, mindsporeTolerance, mindsporeReplay, frozen));
+const mindsporeFailure = structuredClone(mindsporeReplay);
+mindsporeFailure.rounds[0].matrix[0].failureSignature.failedOperator = '/wrong/operator';
+await expectFailure('MindSpore failure signature drift', async () => validateMindsporeEvidence(mindsporeManifest, mindsporeGolden, mindsporeFailure, frozen));
+const mindsporePostprocess = structuredClone(mindsporeGolden);
+mindsporePostprocess.productionPostprocess.platformSpecificImplementationAdded = true;
+await expectFailure('MindSpore platform postprocess duplication', async () => validateMindsporeEvidence(mindsporeManifest, mindsporePostprocess, mindsporeReplay, frozen));
+
+console.log(JSON.stringify({ ok: true, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite conversion/host golden evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication'] }));

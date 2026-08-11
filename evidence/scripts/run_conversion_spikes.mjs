@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, stat, writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ortNative from '../tooling/web/node_modules/onnxruntime-node/dist/index.js';
@@ -18,6 +18,12 @@ const litertConversionBytes = await readFile(resolve(root, 'evidence/reports/lit
 const coremlManifestBytes = await readFile(resolve(root, 'evidence/conversions/coreml-artifact-manifest.json'));
 const coremlManifest = JSON.parse(coremlManifestBytes);
 const coremlConversionBytes = await readFile(resolve(root, 'evidence/reports/coreml-conversion-report.json'));
+const mindsporeManifestBytes = await readFile(resolve(root, 'evidence/conversions/mindspore-artifact-manifest.json'));
+const mindsporeManifest = JSON.parse(mindsporeManifestBytes);
+const mindsporeGoldenBytes = await readFile(resolve(root, 'evidence/reports/mindspore-golden-report.json'));
+const mindsporeGolden = JSON.parse(mindsporeGoldenBytes);
+const mindsporeConversionBytes = await readFile(resolve(root, 'evidence/reports/mindspore-conversion-report.json'));
+const mindsporeConversion = JSON.parse(mindsporeConversionBytes);
 const reportPath = resolve(root, 'evidence/conversions/conversion-spikes.json');
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => JSON.stringify(value, null, 2) + '\n';
@@ -148,6 +154,56 @@ function appleSpike(legacyOnnxProbe) {
   };
 }
 
+function mindsporeSpike() {
+  const finalRound = mindsporeConversion.rounds.at(-1);
+  const failedPaths = finalRound.matrix.filter((item) => item.result === 'failed').map((item) => ({
+    command: item.command,
+    exitCode: item.exitCode,
+    failureSignature: item.failureSignature,
+    id: item.id,
+    rationale: item.rationale,
+  }));
+  return {
+    platform: 'harmonyos',
+    format: 'mindir-lite-ms',
+    state: 'host-inference-verified',
+    supported: false,
+    harmonyOsDeviceVerified: false,
+    tool: {
+      name: 'MindSpore Lite converter_lite / benchmark / C++ runtime',
+      version: mindsporeManifest.toolchain.converterVersion,
+      archiveSha256: mindsporeManifest.toolchain.archive.sha256,
+      commitId: mindsporeManifest.toolchain.commitId,
+      officialSource: mindsporeManifest.toolchain.officialDownloadPage,
+    },
+    attempt: {
+      command: mindsporeManifest.conversion.command,
+      conversionExecuted: true,
+      exitCode: 0,
+      hostBenchmarkExecuted: true,
+      hostLoadRunExecuted: true,
+      goldenPassed: mindsporeGolden.passed,
+      failedPaths,
+      replayComparison: mindsporeConversion.comparison,
+      report: { path: 'evidence/reports/mindspore-conversion-report.json', bytes: mindsporeConversionBytes.length, sha256: sha256(mindsporeConversionBytes) },
+      goldenReport: { path: 'evidence/reports/mindspore-golden-report.json', bytes: mindsporeGoldenBytes.length, sha256: sha256(mindsporeGoldenBytes) },
+    },
+    artifact: mindsporeManifest.artifact,
+    artifactManifest: { path: 'evidence/conversions/mindspore-artifact-manifest.json', bytes: mindsporeManifestBytes.length, sha256: sha256(mindsporeManifestBytes) },
+    sourceCheckpoint: { sha256: handoffAudit.sourceCheckpoint.sha256, auditPath: 'evidence/reports/handoff-model-audit.json' },
+    derivedOnnx: mindsporeManifest.derivedOnnx,
+    ioChanges: mindsporeManifest.differencesFromReferenceOnnx,
+    quantization: mindsporeManifest.quantization,
+    preprocessingResponsibility: mindsporeManifest.ownership.preprocessing,
+    coordinateContract: mindsporeManifest.ownership.coordinates,
+    nmsResponsibility: mindsporeManifest.ownership.nms,
+    failedOperator: null,
+    license: 'MindSpore Apache-2.0；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0',
+    redistribution: '仅允许隔离的内部框架验证 evidence；.ms 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录',
+    conclusion: '结构化改写 DFL Conv 后，官方 converter_lite 2.7.0 生成 MindIR Lite .ms；官方 benchmark 与 C++ runtime 在 Linux host 对五个 fixture 完成真实 Load/Run，冻结 golden 和生产 Rust decode/NMS 全部通过。尚无 HarmonyOS 真机证据，supported=false。',
+  };
+}
+
 if (process.argv.includes('--coreml-only')) {
   const previous = JSON.parse(await readFile(reportPath, 'utf8'));
   const previousApple = previous.spikes.find((item) => item.platform === 'apple');
@@ -193,18 +249,25 @@ if (process.argv.includes('--litert-only')) {
   process.exit(0);
 }
 
+if (process.argv.includes('--mindspore-only')) {
+  const previous = JSON.parse(await readFile(reportPath, 'utf8'));
+  if (!previous.spikes.some((item) => item.platform === 'harmonyos')) throw new Error('conversion-spikes.json 缺少 HarmonyOS 条目');
+  const nonMindsporeBefore = stable(previous.spikes.filter((item) => item.platform !== 'harmonyos'));
+  previous.spikes = previous.spikes.map((item) => (
+    item.platform === 'harmonyos' ? mindsporeSpike() : item
+  ));
+  const nonMindsporeAfter = stable(previous.spikes.filter((item) => item.platform !== 'harmonyos'));
+  if (nonMindsporeBefore !== nonMindsporeAfter) throw new Error('MindSpore-only 更新改变了其他平台证据');
+  const bytes = Buffer.from(stable(previous));
+  await writeFile(reportPath, bytes);
+  console.log(JSON.stringify({ mode: 'mindspore-only', sha256: sha256(bytes) }));
+  process.exit(0);
+}
+
 const pythonProbe = command('.evidence/python-tools/bin/python', ['evidence/scripts/probe_python_converters.py', 'models/yolov8n.onnx']);
 if (pythonProbe.exitCode !== 0) throw new Error(`Python converter probe failed: ${pythonProbe.stderr}`);
 const pythonResult = JSON.parse(pythonProbe.stdout.split('\n').at(-1));
 const windowsMl = command('dotnet', ['--info']);
-const mindsporeRoot = resolve(root, '.evidence/mindspore/mindspore-lite-2.7.0-linux-x64');
-const mindsporeBinary = resolve(mindsporeRoot, 'tools/converter/converter/converter_lite');
-const mindsporeOutput = resolve(root, '.evidence/mindspore/yolov8n');
-const mindspore = command(mindsporeBinary, ['--fmk=ONNX', '--modelFile=models/yolov8n.onnx', `--outputFile=${mindsporeOutput}`, '--optimize=general'], { env: { ...process.env, LD_LIBRARY_PATH: `${resolve(mindsporeRoot, 'tools/converter/lib')}:${resolve(mindsporeRoot, 'runtime/lib')}` } });
-mindspore.command[0] = '.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite';
-mindspore.command[3] = '--outputFile=.evidence/mindspore/yolov8n';
-const mindsporeArtifactPath = `${mindsporeOutput}.ms`;
-const mindsporeArtifact = await stat(mindsporeArtifactPath).then(async (info) => ({ path: '.evidence/mindspore/yolov8n.ms', bytes: info.size, sha256: sha256(await readFile(mindsporeArtifactPath)) }), () => null);
 const fixtureManifest = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
 const inferenceFixture = fixtureManifest.images.find((item) => item.id === 'single-target');
 const image = readPpm(await readFile(resolve(root, inferenceFixture.path)));
@@ -244,7 +307,7 @@ const report = {
       purpose: '历史负向证据；不作为本轮转换结论',
     }),
     { platform: 'windows-x86_64-and-arm64', format: 'onnx', state: 'blocked', conversion: '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入', tool: { name: 'Windows ML / Windows App SDK', version: '1.8 target; unavailable on Linux host', officialSource: 'https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models' }, attempt: { ...windowsMl, requiredRunnerCommand: 'dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin', requiredApi: 'Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)' }, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: 'Windows runner/toolchain discovery before Windows ML model load', license: 'Windows ML follows Windows App SDK terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: '没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。' },
-    { platform: 'harmonyos', format: 'mindir/ms', state: mindspore.exitCode === 0 && mindsporeArtifact ? 'converted-not-load-verified' : 'blocked', tool: { name: 'MindSpore Lite converter_lite', version: '2.7.0', archiveSha256: '8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b', officialSource: 'https://www.mindspore.cn/lite/docs/en/r2.7.0/use/downloads.html' }, attempt: mindspore, artifact: mindsporeArtifact, ioChanges: mindsporeArtifact ? '需要 HarmonyOS runner 检查实际 I/O；原始 I/O 为 [1,3,640,640] -> [1,84,8400]' : '转换失败，无 artifact；原始 I/O 为 [1,3,640,640] -> [1,84,8400]', quantization: '命令未请求量化，FP32', nmsResponsibility: 'operator', failedOperator: mindspore.exitCode === 0 ? null : '/model.22/dfl/conv/Conv (Conv2DFusion infer-shape/graph pass)', license: 'MindSpore Apache-2.0；模型 checkpoint/ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: mindspore.exitCode === 0 ? '已进入真实 ONNX 转换并生成本地 artifact；缺 HarmonyOS runner，保持 test-evidence-only。' : '官方 converter_lite 2.7.0 已进入 ONNX parse/graph optimization，因 Conv2DFusion infer-shape 失败；缺 HarmonyOS runner。' },
+    mindsporeSpike(),
     ...linuxProviders.map((attempt) => ({ platform: `linux-x86_64-${attempt.requestedProvider}`, format: 'onnx', state: attempt.exitCode === 0 ? 'inference-verified' : 'blocked', tool: { name: 'onnxruntime-node', version: '1.24.3' }, attempt, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: attempt.exitCode === 0 ? null : 'provider/session initialization before graph execution', license: 'ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: attempt.exitCode === 0 ? `${attempt.requestedProvider} provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。` : `${attempt.requestedProvider} provider 未能进入固定输入 inference，保持 blocked。` })),
   ],
 };

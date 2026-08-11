@@ -1,0 +1,383 @@
+{
+  "artifact": {
+    "bytes": 12832800,
+    "format": "MindIR Lite / MINDIR_LITE FlatBuffer (.ms)",
+    "location": ".evidence/mindspore/artifacts/yolov8n-fp32.ms",
+    "path": ".evidence/mindspore/artifacts/yolov8n-fp32.ms",
+    "sha256": "7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5",
+    "trackedByGit": false
+  },
+  "conversion": {
+    "candidateId": "pt-reexport-opset17-dfl-reduced-static-general",
+    "command": [
+      "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+      "--fmk=ONNX",
+      "--modelFile=$REPO/.evidence/mindspore/replay/round-2/onnx/yolov8n-opset17-dfl-reduced.onnx",
+      "--outputFile=$REPO/.evidence/mindspore/replay/round-2/conversions/pt-reexport-opset17-dfl-reduced-static-general",
+      "--inputShape=images:1,3,640,640",
+      "--optimize=general"
+    ],
+    "parameters": {
+      "fmk": "ONNX",
+      "inputShape": "images:1,3,640,640",
+      "optimize": "general",
+      "saveType": "MINDIR_LITE (converter default)"
+    },
+    "sourceGraph": {
+      "bytes": 12824387,
+      "path": "$REPO/.evidence/mindspore/replay/round-2/onnx/yolov8n-opset17-dfl-reduced.onnx",
+      "sha256": "a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea"
+    }
+  },
+  "derivedOnnx": {
+    "equivalence": {
+      "allCasesWithinTolerance": true,
+      "cases": [
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "6204a40d45d3b8555ffbda2e6826f91a6adc77bd0514d8754a956b1217edd9aa",
+          "id": "zeros",
+          "inputSha256Float32Le": "f824c1a8a1128713f17dd8d1190d70e6012b509606d986e7a6c81e40b628df2b",
+          "maxAbsoluteDifference": 0.0001220703125,
+          "maxRelativeDifference": 1.8044092544541843e-06,
+          "meanAbsoluteDifference": 5.415980778043232e-08,
+          "referenceSha256Float32Le": "ce71e246b9909cfffe775286695511a054fc1e766621e9a526840a9c516d34f6",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "3c5fc1d46eaea9999671d9fe37944ef1aae6444d742b0d49d4e8d0bbffac5de2",
+          "id": "gray114",
+          "inputSha256Float32Le": "d4e05bfc32af71b56bac53465531642c4a5824f39e042c89f34ffbc4884a7966",
+          "maxAbsoluteDifference": 0.0001220703125,
+          "maxRelativeDifference": 1.3825044067327964e-06,
+          "meanAbsoluteDifference": 6.73981886061411e-08,
+          "referenceSha256Float32Le": "b0730679a2e6114b4dfa952d07f2f556e4b50d966af4f203d0d29deca18ca08a",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "6dbd030dcd4561a851ace5fcc6ce2b90b530a3c7bcbe08bec90674fa384d06c8",
+          "id": "seed20260811",
+          "inputSha256Float32Le": "56da2c02d8f2b85dc94b1ae5d87c569e4adc4e099ffffe67589d3a8e4ad230c8",
+          "maxAbsoluteDifference": 0.0001220703125,
+          "maxRelativeDifference": 1.9898517560441746e-06,
+          "meanAbsoluteDifference": 6.605302936095499e-08,
+          "referenceSha256Float32Le": "6f98d088c4e648d0fcd3fdfc53800042e1aaa99781bb91290ed92511ef5c90d7",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "67392b7c272126847ddf810b4005ae4dd2b15a09e993cc54b1d1981bc8401e7c",
+          "id": "fixture:no-detection",
+          "inputSha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b",
+          "maxAbsoluteDifference": 0.0001220703125,
+          "maxRelativeDifference": 2.035275393113442e-06,
+          "meanAbsoluteDifference": 7.743873293437655e-08,
+          "referenceSha256Float32Le": "1ef6f07d2b5794d657373fa9873b32dfdbcc56dbf02397c8ff55d475aa4aacf4",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "206b87acd446cb30eb85a455d361ab0eb90a2c15f9beefec11f574280fb5ed43",
+          "id": "fixture:single-target",
+          "inputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+          "maxAbsoluteDifference": 0.0001220703125,
+          "maxRelativeDifference": 2.6446630699248914e-06,
+          "meanAbsoluteDifference": 6.319106030626361e-08,
+          "referenceSha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "5632a00b7b372684e198e996827874d185d1208b77bb84e9c3e7d224e3b44f93",
+          "id": "fixture:multi-class",
+          "inputSha256Float32Le": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c",
+          "maxAbsoluteDifference": 9.1552734375e-05,
+          "maxRelativeDifference": 3.980796637023001e-06,
+          "meanAbsoluteDifference": 4.5351565830291267e-08,
+          "referenceSha256Float32Le": "53378591b174c87804cdf5ecf01572bb5c5bd8139cd9f29ba68d983319c283a8",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "86108b251a2138ff5ccbca8e8ba0ec81af76f3f6d1f45abcc6f2192a1d6738f8",
+          "id": "fixture:boundary-box",
+          "inputSha256Float32Le": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0",
+          "maxAbsoluteDifference": 6.103515625e-05,
+          "maxRelativeDifference": 2.572916452256962e-06,
+          "meanAbsoluteDifference": 4.513767841451563e-08,
+          "referenceSha256Float32Le": "f057d9a4d9ee243ddca4ffac3161443319627e795495aaab7326ceaf65324cfc",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        },
+        {
+          "allclose": true,
+          "candidateSha256Float32Le": "ba3a8205d6ecec785e7ea594df9243e8e0d96c436303f57f323a11a6ca41ea55",
+          "id": "fixture:extreme-aspect",
+          "inputSha256Float32Le": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf",
+          "maxAbsoluteDifference": 9.1552734375e-05,
+          "maxRelativeDifference": 1.8023473772240967e-06,
+          "meanAbsoluteDifference": 6.021285543636399e-08,
+          "referenceSha256Float32Le": "573397ff67075e796e6c88d686969a7563eae87ddf810ee642e393cc6edbebda",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        }
+      ],
+      "tolerances": {
+        "absolute": 1e-05,
+        "relative": 0.0001
+      }
+    },
+    "graph": {
+      "bytes": 12824387,
+      "inputs": [
+        {
+          "name": "images",
+          "shape": [
+            1,
+            3,
+            640,
+            640
+          ]
+        }
+      ],
+      "nmsInGraph": false,
+      "operators": {
+        "Add": 9,
+        "Concat": 17,
+        "Constant": 24,
+        "Conv": 63,
+        "Div": 2,
+        "Gather": 1,
+        "MaxPool": 3,
+        "Mul": 61,
+        "ReduceSum": 1,
+        "Reshape": 8,
+        "Resize": 2,
+        "Shape": 1,
+        "Sigmoid": 58,
+        "Slice": 2,
+        "Softmax": 1,
+        "Split": 8,
+        "Sub": 2,
+        "Transpose": 1
+      },
+      "opsets": [
+        {
+          "domain": "",
+          "version": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output0",
+          "shape": [
+            1,
+            84,
+            8400
+          ]
+        }
+      ],
+      "sha256": "a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea"
+    },
+    "transform": {
+      "insertedNodes": [
+        "/model.22/dfl/conv/Mul",
+        "/model.22/dfl/conv/ReduceSum"
+      ],
+      "removedNode": "/model.22/dfl/conv/Conv",
+      "weightInitializer": "model.22.dfl.conv.weight",
+      "weightSha256Float32Le": "58dda328598e2f7fe472621bfc54935aaa354d1a6ebcaf9562cd743fd575eb19"
+    }
+  },
+  "differencesFromReferenceOnnx": [
+    "\u8f93\u5165 runtime Shape/layout \u4ece NCHW [1,3,640,640] \u53d8\u4e3a NHWC [1,640,640,3]\uff1b\u8f93\u5165\u540d\u79f0 images\u3001index 0\u3001FP32 \u4fdd\u6301\u3002",
+    "DFL \u7684\u5355\u4e2a 1x1 Conv(weight=0..15) \u7531\u7ed3\u6784\u5316 ONNX API \u6539\u5199\u4e3a Mul+ReduceSum(axis=1, keepdims=1)\u3002",
+    "\u8f93\u51fa\u540d\u79f0 output0\u3001index 0\u3001attributes-first Shape [1,84,8400]\u3001FP32 \u548c 640x640 \u8f93\u5165\u50cf\u7d20 xywh \u5750\u6807\u4fdd\u6301\u3002",
+    "\u4ea7\u7269\u683c\u5f0f\u4ece ONNX \u53d8\u4e3a MindIR Lite .ms\uff1b\u8f93\u5165\u8f93\u51fa\u5747\u65e0\u91cf\u5316\u53c2\u6570\u3002"
+  ],
+  "ioContract": {
+    "inputs": [
+      {
+        "bytes": 4915200,
+        "dtype": "float32",
+        "index": 0,
+        "name": "images",
+        "quantization": [],
+        "shape": [
+          1,
+          640,
+          640,
+          3
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "bytes": 2822400,
+        "dtype": "float32",
+        "index": 0,
+        "name": "output0",
+        "quantization": [],
+        "shape": [
+          1,
+          84,
+          8400
+        ]
+      }
+    ]
+  },
+  "ownership": {
+    "coordinates": "output attributes 0..3 are xywh in 640x640 letterboxed input pixels; no coordinate remapping in the model",
+    "nms": "operator; source/derived ONNX contain no NonMaxSuppression and host runner performs no decode/NMS",
+    "postprocessing": "production src/postprocess.rs through evidence/tooling/raw-golden",
+    "preprocessing": "runtime adapter owns letterbox, RGB, /255 normalization and NCHW-to-NHWC transpose; model artifact folds none of them"
+  },
+  "quantization": {
+    "input": [],
+    "mode": "FP32; converter input/output type defaults, fp16 off, no quantization requested",
+    "output": []
+  },
+  "schemaVersion": 1,
+  "sourceInputs": {
+    "archive": {
+      "bytes": 66063055,
+      "expectedSha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+      "path": "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64.tar.gz",
+      "sha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+      "verified": true
+    },
+    "handoffOnnx": {
+      "bytes": 12769289,
+      "expectedSha256": "71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45",
+      "path": "$HANDOFF_ASSETS/yolov8n.onnx",
+      "sha256": "71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45",
+      "verified": true
+    },
+    "pt": {
+      "bytes": 6549796,
+      "expectedSha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "path": "$HANDOFF_ASSETS/yolov8n.pt",
+      "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "verified": true
+    },
+    "referenceOnnx": {
+      "bytes": 12851098,
+      "expectedSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+      "path": "$REPO/models/yolov8n.onnx",
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+      "verified": true
+    }
+  },
+  "status": {
+    "artifactVerified": true,
+    "harmonyOsDeviceVerified": false,
+    "hostInferenceVerified": true,
+    "supported": false,
+    "task14Complete": false,
+    "value": "host-inference-verified"
+  },
+  "toolchain": {
+    "archive": {
+      "bytes": 66063055,
+      "expectedSha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+      "path": "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64.tar.gz",
+      "sha256": "8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b",
+      "verified": true
+    },
+    "benchmark": {
+      "bytes": 728136,
+      "path": ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/benchmark/benchmark",
+      "sha256": "5293e6739d375184fd11cdbbb4daad3d7d1132d891c4b08cfeed3e2ecff14b7d"
+    },
+    "commitId": "d2b243f75f33a7a896483b09e567d845155cad06",
+    "converter": {
+      "bytes": 412688,
+      "path": ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+      "sha256": "d10fe9b20a368e02ce4278ad111010a1b4c62b1e4334a2f4003d64470894e035"
+    },
+    "converterHelpProbe": {
+      "command": [
+        "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+        "--help"
+      ],
+      "endedAt": "2026-08-11T13:43:49.038880Z",
+      "exitCode": 0,
+      "startedAt": "2026-08-11T13:43:48.956355Z",
+      "stderr": "",
+      "stdout": "\nusage: converter_lite [options]\n --configFile=VALUE Configuration for post-training, offline split op to parallel,disable op fusion ability and set plugin so path (default: )\n --decryptKey=VALUE The key used to decrypt the file, expressed in hexadecimal characters. Only valid when fmkIn is 'MINDIR' (default: )\n --decryptMode=VALUE Decryption method for the MindIR file. Only valid when dec_key is set.AES-GCM | AES-CBC (default: AES-GCM)\n --device=VALUE Set the target device, support Ascend, Ascend310 and Ascend310P will be deprecated. (default: )\n --fmk=VALUE Input model framework type. TF | TFLITE | CAFFE | MINDIR | ONNX | OM | PYTORCH | MSLITE. When set MSLITE, micro must be enabled. When set OM, device must be set to Ascend. (default: )\n --fp16=VALUE Serialize const tensor in Float16 data type, only effective for const tensor in Float32 data type. on | off (default: off)\n --help print usage message (default: \u0000)\n --infer=VALUE Whether to do pre-inference after convert. true | false (default: false)\n --inputDataFormat=VALUE Assign the input format of exported model. Only Valid for 4-dimensional input. NHWC | NCHW (default: )\n --inputDataType=VALUE Data type of input tensors, default is same with the type defined in model. FLOAT16 | FLOAT | INT8 | UINT8 | INT32 | INT64 | DEFAULT (default: DEFAULT)\n --inputShape=VALUE Set the dimension of the model input, the order of input dimensions is consistent with the original model. For some models, the model structure can be further optimized, but the transformed model may lose the characteristics of dynamic shape. e.g. \"inTensor1:1,32,32,32;inTensor2:1,1,32,32,4\" (default: )\n --modelFile=VALUE Input model file. TF: *.pb | TFLITE: *.tflite | CAFFE: *.prototxt | MINDIR: *.mindir | ONNX: *.onnx | MSLITE: *.ms | OM: *.om (default: )\n --optimize=VALUE The type of optimization. none | general | gpu_oriented | ascend_oriented (default: general)\n --optimizeTransformer=VALUE Enable Fast-Transformer fusion true|false (default: false)\n --outputDataFormat=VALUE Assign the output format of exported model. Only Valid for 4-dimensional output. NHWC | NCHW (default: )\n --outputDataType=VALUE Data type of output and output tensors, default is same with the type defined in model. FLOAT16 | FLOAT | INT8 | UINT8 | DEFAULT (default: DEFAULT)\n --outputFile=VALUE Output model file path. (default: )\n --saveType=VALUE The type of saved model. MINDIR | MINDIR_LITE (default: MINDIR_LITE)\n --trainModel=VALUE whether the model is going to be trained on device. true | false (default: false)\n --weightFile=VALUE Input model weight file. Needed when fmk is CAFFE. CAFFE: *.caffemodel (default: )\n\n"
+    },
+    "converterVersion": "2.7.0",
+    "converterVersionProbe": {
+      "command": [
+        "$REPO/.evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite",
+        "--version"
+      ],
+      "endedAt": "2026-08-11T13:43:48.956326Z",
+      "exitCode": 168,
+      "interpretation": "converter_lite 2.7.0 does not implement --version; version is pinned by official archive name/SHA and internal .commit_id",
+      "startedAt": "2026-08-11T13:43:48.872695Z",
+      "stderr": "version is not a valid flag\n\nusage: converter_lite [options]\n --configFile=VALUE Configuration for post-training, offline split op to parallel,disable op fusion ability and set plugin so path (default: )\n --decryptKey=VALUE The key used to decrypt the file, expressed in hexadecimal characters. Only valid when fmkIn is 'MINDIR' (default: )\n --decryptMode=VALUE Decryption method for the MindIR file. Only valid when dec_key is set.AES-GCM | AES-CBC (default: AES-GCM)\n --device=VALUE Set the target device, support Ascend, Ascend310 and Ascend310P will be deprecated. (default: )\n --fmk=VALUE Input model framework type. TF | TFLITE | CAFFE | MINDIR | ONNX | OM | PYTORCH | MSLITE. When set MSLITE, micro must be enabled. When set OM, device must be set to Ascend. (default: )\n --fp16=VALUE Serialize const tensor in Float16 data type, only effective for const tensor in Float32 data type. on | off (default: off)\n --help print usage message (default: \u0000)\n --infer=VALUE Whether to do pre-inference after convert. true | false (default: false)\n --inputDataFormat=VALUE Assign the input format of exported model. Only Valid for 4-dimensional input. NHWC | NCHW (default: )\n --inputDataType=VALUE Data type of input tensors, default is same with the type defined in model. FLOAT16 | FLOAT | INT8 | UINT8 | INT32 | INT64 | DEFAULT (default: DEFAULT)\n --inputShape=VALUE Set the dimension of the model input, the order of input dimensions is consistent with the original model. For some models, the model structure can be further optimized, but the transformed model may lose the characteristics of dynamic shape. e.g. \"inTensor1:1,32,32,32;inTensor2:1,1,32,32,4\" (default: )\n --modelFile=VALUE Input model file. TF: *.pb | TFLITE: *.tflite | CAFFE: *.prototxt | MINDIR: *.mindir | ONNX: *.onnx | MSLITE: *.ms | OM: *.om (default: )\n --optimize=VALUE The type of optimization. none | general | gpu_oriented | ascend_oriented (default: general)\n --optimizeTransformer=VALUE Enable Fast-Transformer fusion true|false (default: false)\n --outputDataFormat=VALUE Assign the output format of exported model. Only Valid for 4-dimensional output. NHWC | NCHW (default: )\n --outputDataType=VALUE Data type of output and output tensors, default is same with the type defined in model. FLOAT16 | FLOAT | INT8 | UINT8 | DEFAULT (default: DEFAULT)\n --outputFile=VALUE Output model file path. (default: )\n --saveType=VALUE The type of saved model. MINDIR | MINDIR_LITE (default: MINDIR_LITE)\n --trainModel=VALUE whether the model is going to be trained on device. true | false (default: false)\n --weightFile=VALUE Input model weight file. Needed when fmk is CAFFE. CAFFE: *.caffemodel (default: )\n\n",
+      "stdout": "ERROR [mindspore-lite/tools/converter/converter_lite/main.cc:50] main] Flags PreInit failed. Ret: -600\nFlags PreInit failed. Ret: -600\n"
+    },
+    "officialDownloadPage": "https://www.mindspore.cn/lite/docs/en/r2.7.0/use/downloads.html",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "pythonEnvironment": {
+      "numpy": "2.3.5",
+      "onnx": "1.22.0",
+      "onnxruntime": "1.27.0",
+      "python": "3.12.3",
+      "torch": "2.7.0+cpu",
+      "torchvision": "0.22.0+cpu",
+      "ultralytics": "8.4.104"
+    },
+    "pythonRequirements": {
+      "bytes": 633,
+      "path": "evidence/tooling/mindspore-python-addons.lock",
+      "sha256": "5f338240181579282a2576e729041f013b2ba72da9dd5fc9e78b9d96315caaae"
+    },
+    "runtimeLibrary": {
+      "bytes": 8897616,
+      "path": ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/runtime/lib/libmindspore-lite.so",
+      "sha256": "f73f5d350b926d1a06d4269cae8295e5e8512a760637a722afddd708d04feda1"
+    }
+  },
+  "usageScope": {
+    "artifactRedistributionAllowed": false,
+    "modelLicenseMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
+    "productPackaging": "excluded",
+    "purpose": "internal-onnx-base-framework-validation-only",
+    "trackedByGit": false
+  }
+}

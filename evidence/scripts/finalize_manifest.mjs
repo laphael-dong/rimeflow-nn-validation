@@ -19,12 +19,15 @@ const paths = [
   'evidence/conversions/conversion-spikes.json',
   'evidence/conversions/coreml-artifact-manifest.json',
   'evidence/conversions/litert-artifact-manifest.json',
+  'evidence/conversions/mindspore-artifact-manifest.json',
   'evidence/reports/handoff-model-audit.json',
   'evidence/reports/model-provenance.json',
   'evidence/reports/preprocess-conformance.json',
   'evidence/reports/coreml-conversion-report.json',
   'evidence/reports/litert-conversion-report.json',
   'evidence/reports/litert-golden-report.json',
+  'evidence/reports/mindspore-conversion-report.json',
+  'evidence/reports/mindspore-golden-report.json',
   'evidence/reports/web-wasm-performance.json',
   'evidence/tooling/requirements.lock',
   'evidence/tooling/model-audit-requirements.lock',
@@ -32,8 +35,10 @@ const paths = [
   'evidence/tooling/coreml-requirements.lock',
   'evidence/tooling/litert-requirements.in',
   'evidence/tooling/litert-requirements.lock',
+  'evidence/tooling/mindspore-python-addons.lock',
   'evidence/tooling/raw-golden/src/lib.rs',
   'evidence/tooling/raw-golden/src/main.rs',
+  'evidence/tooling/mindspore-host-runner/main.cpp',
 ];
 for (const path of paths) {
   const bytes = await readFile(resolve(root, path)); entries.push({ path, bytes: bytes.length, sha256: sha256(bytes) });

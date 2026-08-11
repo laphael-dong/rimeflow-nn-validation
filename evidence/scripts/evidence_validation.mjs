@@ -78,6 +78,53 @@ export function validateLitertEvidence(manifest, golden, replay, frozenTolerance
   }
 }
 
+export function validateMindsporeEvidence(manifest, golden, replay, frozenTolerances) {
+  const expected = {
+    archive: '8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b',
+    artifact: '7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5',
+    derivedOnnx: 'a5a73dd7a25245eb47f7de8d35fa1f612212b38587d88494bb67ad6e0753b6ea',
+    handoffOnnx: '71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45',
+    pt: 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36',
+    referenceOnnx: '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad',
+    reexportOnnx: '8718af53d53b6336f301ef7eacb529376f29f0c04bec415815fde7d734b9def2',
+  };
+  if (manifest.sourceInputs.archive.sha256 !== expected.archive || manifest.sourceInputs.handoffOnnx.sha256 !== expected.handoffOnnx || manifest.sourceInputs.pt.sha256 !== expected.pt || manifest.sourceInputs.referenceOnnx.sha256 !== expected.referenceOnnx || Object.values(manifest.sourceInputs).some((item) => !item.verified || item.sha256 !== item.expectedSha256)) throw new Error('MindSpore locked input drift');
+  if (manifest.artifact.sha256 !== expected.artifact || manifest.artifact.bytes !== 12832800 || manifest.artifact.trackedByGit || manifest.artifact.format !== 'MindIR Lite / MINDIR_LITE FlatBuffer (.ms)' || !manifest.artifact.location.startsWith('.evidence/')) throw new Error('MindSpore artifact metadata drift');
+  if (manifest.status.value !== 'host-inference-verified' || !manifest.status.artifactVerified || !manifest.status.hostInferenceVerified || manifest.status.harmonyOsDeviceVerified || manifest.status.supported || manifest.status.task14Complete) throw new Error('MindSpore support status overclaim');
+  if (manifest.toolchain.converterVersion !== '2.7.0' || manifest.toolchain.archive.sha256 !== expected.archive || manifest.toolchain.commitId !== 'd2b243f75f33a7a896483b09e567d845155cad06' || manifest.toolchain.converterVersionProbe.exitCode === 0 || manifest.toolchain.converterHelpProbe.exitCode !== 0 || manifest.toolchain.pythonRequirements.path !== 'evidence/tooling/mindspore-python-addons.lock' || !/^[0-9a-f]{64}$/.test(manifest.toolchain.pythonRequirements.sha256)) throw new Error('MindSpore toolchain provenance drift');
+  if (JSON.stringify(manifest.toolchain.pythonEnvironment) !== JSON.stringify({ numpy: '2.3.5', onnx: '1.22.0', onnxruntime: '1.27.0', python: '3.12.3', torch: '2.7.0+cpu', torchvision: '0.22.0+cpu', ultralytics: '8.4.104' })) throw new Error('MindSpore Python toolchain drift');
+  if (manifest.derivedOnnx.graph.sha256 !== expected.derivedOnnx || manifest.derivedOnnx.graph.nmsInGraph || manifest.derivedOnnx.transform.removedNode !== '/model.22/dfl/conv/Conv' || JSON.stringify(manifest.derivedOnnx.transform.insertedNodes) !== '["/model.22/dfl/conv/Mul","/model.22/dfl/conv/ReduceSum"]' || !manifest.derivedOnnx.equivalence.allCasesWithinTolerance || manifest.derivedOnnx.equivalence.cases.length !== 8) throw new Error('MindSpore derived ONNX evidence drift');
+  const input = manifest.ioContract.inputs[0];
+  const output = manifest.ioContract.outputs[0];
+  if (manifest.ioContract.inputs.length !== 1 || input.name !== 'images' || input.index !== 0 || input.dtype !== 'float32' || JSON.stringify(input.shape) !== '[1,640,640,3]' || input.bytes !== 4915200 || input.quantization.length !== 0) throw new Error('MindSpore input contract drift');
+  if (manifest.ioContract.outputs.length !== 1 || output.name !== 'output0' || output.index !== 0 || output.dtype !== 'float32' || JSON.stringify(output.shape) !== '[1,84,8400]' || output.bytes !== 2822400 || output.quantization.length !== 0) throw new Error('MindSpore output contract drift');
+  if (!manifest.ownership.preprocessing.includes('NCHW-to-NHWC') || !manifest.ownership.coordinates.includes('xywh') || !manifest.ownership.nms.startsWith('operator;') || manifest.quantization.mode !== 'FP32; converter input/output type defaults, fp16 off, no quantization requested') throw new Error('MindSpore preprocessing/coordinate/NMS contract drift');
+  if (!golden.passed || golden.summary.fixtureCount !== 5 || golden.summary.passedCount !== 5 || golden.productionPostprocess.implementation !== 'src/postprocess.rs' || golden.productionPostprocess.platformSpecificImplementationAdded) throw new Error('MindSpore golden/production postprocess drift');
+  const frozenKeys = Object.keys(frozenTolerances);
+  if (Object.keys(golden.tolerances).length !== frozenKeys.length || frozenKeys.some((key) => !Object.hasOwn(golden.tolerances, key) || !Object.is(golden.tolerances[key], frozenTolerances[key]))) throw new Error('MindSpore frozen tolerance drift');
+  for (const fixture of golden.fixtures) {
+    if (!fixture.passed || !fixture.rawComparison.passed || fixture.rawComparison.elementCount !== 84 * 8400 || fixture.rawComparison.finiteCount !== fixture.rawComparison.elementCount || !fixture.decodedComparison.passed || JSON.stringify(fixture.runtimeInput.shape) !== '[1,640,640,3]' || !fixture.runtimeInput.mapping.includes('NCHW')) throw new Error(`MindSpore fixture evidence drift: ${fixture.id}`);
+  }
+  if (!replay.recorded || replay.rounds.length !== 2 || !replay.comparison.allDeterministic || !replay.comparison.derivedOnnxDigestEqual || !replay.comparison.fixtureResultsEqual || !replay.comparison.reexportOnnxDigestEqual || !replay.comparison.trackedWorktreeStateStable) throw new Error('MindSpore replay determinism drift');
+  const expectedIds = ['reference-baseline-general', 'reference-static-general', 'handoff-static-general', 'pt-reexport-opset17-unsimplified-static-general', 'reference-static-none', 'pt-reexport-opset17-dfl-reduced-static-general'];
+  for (const round of replay.rounds) {
+    if (round.exportReport.output.sha256 !== expected.reexportOnnx || round.derivationReport.derived.sha256 !== expected.derivedOnnx || !round.hostValidation.passed || round.hostValidation.fixtures.length !== 5 || round.worktreeBefore.tracked !== round.worktreeAfter.tracked || JSON.stringify(round.sourceBefore) !== JSON.stringify(round.sourceAfter)) throw new Error(`MindSpore replay round drift: ${round.round}`);
+    if (JSON.stringify(round.matrix.map((item) => item.id)) !== JSON.stringify(expectedIds)) throw new Error(`MindSpore bounded matrix drift: ${round.round}`);
+    for (const attempt of round.matrix) {
+      if (!attempt.startedAt || !attempt.endedAt || !Array.isArray(attempt.command) || !attempt.command.some((item) => item === '--fmk=ONNX') || typeof attempt.stdout !== 'string' || typeof attempt.stderr !== 'string') throw new Error(`MindSpore attempt log metadata missing: ${attempt.id}`);
+      if (attempt.id === expectedIds.at(-1)) {
+        if (attempt.result !== 'success' || attempt.exitCode !== 0 || attempt.artifact.sha256 !== expected.artifact || attempt.failureSignature !== null) throw new Error('MindSpore successful path drift');
+      } else {
+        const failure = attempt.failureSignature;
+        if (attempt.result !== 'failed' || attempt.exitCode !== 255 || attempt.artifact !== null || failure.failedOperator !== '/model.22/dfl/conv/Conv' || failure.operatorType !== 'Conv2DFusion' || JSON.stringify(failure.inputShape) !== '[1,16,4,8400]' || JSON.stringify(failure.outputShape) !== '[1,1,4,8400]' || JSON.stringify(failure.weightShape) !== '[1,16,1,1]' || JSON.stringify(failure.resizeOptionalEmptyInputWarnings) !== '["/model.10/Resize","/model.13/Resize"]') throw new Error(`MindSpore failure signature drift: ${attempt.id}`);
+      }
+    }
+    for (const fixture of round.hostValidation.fixtures) if (fixture.benchmark.exitCode !== 0 || fixture.runtime.exitCode !== 0 || fixture.productionRust.exitCode !== 0 || !fixture.passed) throw new Error(`MindSpore host Load/Run drift: ${fixture.id}`);
+  }
+  if (Object.values(replay.comparison.paths).some((item) => Object.values(item).some((value) => value !== true))) throw new Error('MindSpore per-path replay comparison drift');
+  if (JSON.stringify(replay).includes('/home/')) throw new Error('MindSpore report leaked a host absolute path');
+}
+
 export function validateCoremlEvidence(manifest, replay) {
   const expectedPtSha = 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36';
   if (manifest.source.logicalPath !== '$HANDOFF_ASSETS/yolov8n.pt' || manifest.source.before.sha256 !== expectedPtSha || manifest.source.before.bytes !== 6549796 || JSON.stringify(manifest.source.before) !== JSON.stringify(manifest.source.after)) throw new Error('Core ML source checkpoint drift');

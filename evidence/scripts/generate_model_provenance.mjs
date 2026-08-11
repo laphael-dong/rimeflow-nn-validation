@@ -67,7 +67,7 @@ const report = {
     task14: 'blocked',
     task1: 'blocked',
     publication: 'test-evidence-only',
-    reason: '模型来源与同源性及 LiteRT host artifact/inference/golden 已验证；1.4 仍等待其余平台 spike 与 Android runner evidence，模型及临时转换物不进入 RimeCut 产品包。',
+    reason: '模型来源与同源性、LiteRT host artifact/inference/golden 及 MindSpore Lite host conversion/inference/golden 已验证；1.4 仍等待 Windows/Linux 等其他子项及真实目标平台 runner evidence，模型及临时转换物不进入 RimeCut 产品包。',
   },
   tooling: { python: toolProbe.python, onnx: toolProbe.onnxVersion, handoffAudit: handoffAudit.reExport.toolVersions },
 };
