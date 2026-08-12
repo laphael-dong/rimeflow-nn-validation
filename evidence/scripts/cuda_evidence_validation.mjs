@@ -337,7 +337,7 @@ export async function validateCudaReplay(root, replay) {
     const path = replayReportPath;
     const current = await readFile(resolve(root, path));
     assert(equal(JSON.parse(current), replay), 'CUDA recorded replay object differs from the current tracked report bytes');
-    const committed = spawnSync('git', ['show', `HEAD:${path}`], { cwd: root });
-    assert(committed.status === 0 && current.equals(committed.stdout), 'CUDA recorded replay current bytes differ from the committed Git blob');
+    const staged = spawnSync('git', ['show', `:${path}`], { cwd: root });
+    assert(staged.status === 0 && current.equals(staged.stdout), 'CUDA recorded replay current bytes differ from the staged Git blob');
   }
 }

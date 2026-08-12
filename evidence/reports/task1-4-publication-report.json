@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "openspec": {
+    "change": "rimeflow-backend-contract",
+    "taskId": "1.4",
+    "tasksBeforeSha256": "54db708645bca38150425c23b68d20869710c6269825ce6e4517d022bc7188c2",
+    "tasksAfterSha256": "08b07922fbf93dfb8bb265440205bb059109f3fb6f46bb3029dbccee2acc5f47",
+    "beforeProgress": "4/63",
+    "expectedAfterProgress": "5/63",
+    "onlyTask14CheckboxMayChange": true
+  },
+  "recordedAtUtc": "2026-08-12T14:08:07Z",
+  "github": {
+    "repository": "laphael-dong/rimeflow-nn-validation",
+    "remoteUrl": "https://github.com/laphael-dong/rimeflow-nn-validation.git",
+    "remoteRef": "refs/heads/feature/rimeflow-backend-contract-task1-aggregate",
+    "actor": "laphael-dong",
+    "actorPushPermission": true
+  },
+  "aggregate": {
+    "commit": "19193a34f2fb2b36465538b02687a07608f7810e",
+    "parent": "7eba039ef1c55408216f0f54d543f0fdcbf1693b",
+    "subject": "[ENH] Aggregate task 1.4 spike evidence",
+    "singleParent": true,
+    "commitObjectVerified": true,
+    "modelsChanged": false
+  },
+  "remoteVerification": {
+    "lsRemote": {
+      "sha": "19193a34f2fb2b36465538b02687a07608f7810e",
+      "ref": "refs/heads/feature/rimeflow-backend-contract-task1-aggregate"
+    },
+    "githubApi": {
+      "ref": "refs/heads/feature/rimeflow-backend-contract-task1-aggregate",
+      "objectType": "commit",
+      "objectSha": "19193a34f2fb2b36465538b02687a07608f7810e"
+    }
+  },
+  "readback": {
+    "clonePath": "/home/raffael/algo/github/rimeflow-nn-validation",
+    "fetchHead": "19193a34f2fb2b36465538b02687a07608f7810e",
+    "commitObjectVerified": true,
+    "commit": "19193a34f2fb2b36465538b02687a07608f7810e",
+    "parent": "7eba039ef1c55408216f0f54d543f0fdcbf1693b",
+    "subject": "[ENH] Aggregate task 1.4 spike evidence"
+  },
+  "canonicalModel": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "gitBlob": "22f19afe710dfa942b3e644c4e5a7ac5c42ac403",
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "validationMainGitBlob": "22f19afe710dfa942b3e644c4e5a7ac5c42ac403",
+    "aggregateRefGitBlob": "22f19afe710dfa942b3e644c4e5a7ac5c42ac403",
+    "validationMainMatchesAggregate": true,
+    "aggregateCommitModifiedModels": false
+  },
+  "requiredSpikes": [
+    {
+      "platform": "apple",
+      "provider": "coreml",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "android",
+      "provider": "litert-v2",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "windows",
+      "provider": "windows-ml",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "harmonyos",
+      "provider": "mindspore-lite",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "linux-x86_64-cpu",
+      "provider": "cpuexecutionprovider",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "linux-x86_64-openvino",
+      "provider": "openvinoexecutionprovider",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "linux-x86_64-cuda",
+      "provider": "cudaexecutionprovider",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "platform": "linux-x86_64-tensorrt",
+      "provider": "tensorrtexecutionprovider",
+      "spikeClosure": true,
+      "supported": false
+    }
+  ],
+  "boundaries": {
+    "upstream": {
+      "repository": "caozisheng/rimeflow-yolov8n",
+      "remoteUrl": "https://github.com/caozisheng/rimeflow-yolov8n.git",
+      "aggregateRefPresent": false,
+      "pushTarget": false
+    },
+    "baseFork": {
+      "repository": "laphael-dong/rimeflow-nn-base",
+      "remoteUrl": "https://github.com/laphael-dong/rimeflow-nn-base.git",
+      "aggregateRefPresent": false,
+      "receivedValidationAggregate": false,
+      "pushTarget": false
+    },
+    "githubSideEffects": {
+      "tagCreated": false,
+      "pullRequestCreated": false,
+      "releaseCreated": false
+    }
+  },
+  "verification": {
+    "aggregateRemoteVerified": true,
+    "aggregateCommitFetchVerified": true,
+    "canonicalModelRemoteIdentityVerified": true,
+    "publicationEvidenceRecorded": true,
+    "allRequiredSpikesRecorded": true,
+    "technicalSpikeClosure": true,
+    "allPlatformsSupported": false
+  },
+  "remainingScope": [
+    "真实目标 runner 的 supported 闭环",
+    "adapter、性能、fallback、包加载与后续 OpenSpec 任务"
+  ]
+}

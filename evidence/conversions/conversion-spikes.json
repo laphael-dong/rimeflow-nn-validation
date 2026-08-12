@@ -1107,9 +1107,10 @@
   "closure": {
     "allRequiredSpikesRecorded": true,
     "technicalSpikeClosure": true,
-    "publicationVerified": false,
-    "task14Complete": false,
-    "openspecTask1_4Checked": false,
+    "externalRemoteAggregateVerified": true,
+    "publicationVerified": true,
+    "task14Complete": true,
+    "openspecTask1_4Checked": true,
     "allPlatformsSupported": false
   }
 }

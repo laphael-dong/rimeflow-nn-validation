@@ -23,8 +23,8 @@
           "--output",
           ".evidence/cuda/replay/round-1/report.json"
         ],
-        "startedAt": "2026-08-12T10:32:29.689Z",
-        "endedAt": "2026-08-12T10:32:29.994Z",
+        "startedAt": "2026-08-12T14:17:16.980Z",
+        "endedAt": "2026-08-12T14:17:17.265Z",
         "exitCode": 21,
         "stdout": "{\"state\": \"blocked\", \"failureStage\": \"nvidia-hardware-driver-preflight\", \"exitCode\": 21, \"report\": \".evidence/cuda/replay/round-1/report.json\"}\n",
         "stderr": ""
@@ -38,9 +38,9 @@
               "uname",
               "-a"
             ],
-            "endedAt": "2026-08-12T10:32:29.751711Z",
+            "endedAt": "2026-08-12T14:17:17.036370Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:29.750312Z",
+            "startedAt": "2026-08-12T14:17:17.035234Z",
             "stderr": "",
             "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n"
           },
@@ -49,9 +49,9 @@
               "cat",
               "/etc/os-release"
             ],
-            "endedAt": "2026-08-12T10:32:29.752923Z",
+            "endedAt": "2026-08-12T14:17:17.037845Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:29.751981Z",
+            "startedAt": "2026-08-12T14:17:17.036752Z",
             "stderr": "",
             "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
           },
@@ -61,9 +61,9 @@
               "-lc",
               "lspci -nn | grep -Ei 'VGA|3D controller'"
             ],
-            "endedAt": "2026-08-12T10:32:29.893862Z",
+            "endedAt": "2026-08-12T14:17:17.175939Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:29.753187Z",
+            "startedAt": "2026-08-12T14:17:17.038088Z",
             "stderr": "",
             "stdout": "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)\n"
           },
@@ -73,9 +73,9 @@
               "-lc",
               "ldconfig -p | grep -E 'lib(cuda|cudnn|cublas|cudart|onnxruntime_providers_cuda)'"
             ],
-            "endedAt": "2026-08-12T10:32:29.902399Z",
+            "endedAt": "2026-08-12T14:17:17.184708Z",
             "exitCode": 1,
-            "startedAt": "2026-08-12T10:32:29.894304Z",
+            "startedAt": "2026-08-12T14:17:17.176390Z",
             "stderr": "",
             "stdout": ""
           },
@@ -85,9 +85,9 @@
               "-c",
               "import onnxruntime as ort; print(ort.__version__); print(ort.get_available_providers()); print(ort.__file__)"
             ],
-            "endedAt": "2026-08-12T10:32:29.984785Z",
+            "endedAt": "2026-08-12T14:17:17.256525Z",
             "exitCode": 1,
-            "startedAt": "2026-08-12T10:32:29.902490Z",
+            "startedAt": "2026-08-12T14:17:17.184803Z",
             "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'onnxruntime'\n",
             "stdout": ""
           },
@@ -97,14 +97,14 @@
               "--query-gpu=name,uuid,driver_version,compute_cap",
               "--format=csv,noheader"
             ],
-            "endedAt": "2026-08-12T10:32:29.985414Z",
+            "endedAt": "2026-08-12T14:17:17.257152Z",
             "exitCode": 127,
-            "startedAt": "2026-08-12T10:32:29.985410Z",
+            "startedAt": "2026-08-12T14:17:17.257148Z",
             "stderr": "nvidia-smi: command not found\n",
             "stdout": ""
           }
         ],
-        "endedAt": "2026-08-12T10:32:29.985419Z",
+        "endedAt": "2026-08-12T14:17:17.257157Z",
         "failure": {
           "message": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
           "missing": [
@@ -209,7 +209,7 @@
             "libonnxruntime_providers_cuda.so": false
           }
         },
-        "startedAt": "2026-08-12T10:32:29.740161Z",
+        "startedAt": "2026-08-12T14:17:17.025042Z",
         "state": "blocked",
         "staticVerified": true,
         "supported": false,
@@ -225,44 +225,44 @@
       "reportArtifact": {
         "path": ".evidence/cuda/replay/round-1/report.json",
         "bytes": 5689,
-        "sha256": "07e829a2a07ab1fe04d72e0dc9683f22ebf81cd6f64da0f808b8aa6174982a73"
+        "sha256": "59d54e89287c82fd97592eada4161703a32294690323b184c6eec53d68362a92"
       },
       "trackedBefore": {
         "evidence/conversions/cuda-ep-spike-manifest.json": {
           "exists": true,
           "bytes": 3336,
           "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-spike-report.json": {
           "exists": true,
           "bytes": 5353,
           "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-replay-report.json": {
           "exists": true,
           "bytes": 22057,
-          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
-          "mtimeNs": "1786530146069903400"
+          "sha256": "98c45a02a383bc368e84172970dfa3c0aae61f9d0496baa43d4d978a8402def9",
+          "mtimeNs": "1786543965312312800"
         },
         "evidence/golden/manifest.json": {
           "exists": true,
-          "bytes": 18318,
-          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
-          "mtimeNs": "1786530749646823700"
+          "bytes": 19236,
+          "sha256": "26ecec95758612792ff95c08796d7839a1ff4456cd49c58e09b2fc121d0d3a29",
+          "mtimeNs": "1786544236945290000"
         },
         "evidence/replay/task1-replay.json": {
           "exists": true,
-          "bytes": 310919,
-          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
-          "mtimeNs": "1786530749652823300"
+          "bytes": 311546,
+          "sha256": "9ac2c470affe7df7878f7a6107e2e3eec46e0241b7ac1959b434ab883b5bbf5f",
+          "mtimeNs": "1786544236949290000"
         },
         "evidence/conversions/conversion-spikes.json": {
           "exists": true,
-          "bytes": 44348,
-          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
-          "mtimeNs": "1786530749603826400"
+          "bytes": 44390,
+          "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b",
+          "mtimeNs": "1786544236893291800"
         }
       },
       "trackedAfter": {
@@ -270,37 +270,37 @@
           "exists": true,
           "bytes": 3336,
           "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-spike-report.json": {
           "exists": true,
           "bytes": 5353,
           "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-replay-report.json": {
           "exists": true,
           "bytes": 22057,
-          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
-          "mtimeNs": "1786530146069903400"
+          "sha256": "98c45a02a383bc368e84172970dfa3c0aae61f9d0496baa43d4d978a8402def9",
+          "mtimeNs": "1786543965312312800"
         },
         "evidence/golden/manifest.json": {
           "exists": true,
-          "bytes": 18318,
-          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
-          "mtimeNs": "1786530749646823700"
+          "bytes": 19236,
+          "sha256": "26ecec95758612792ff95c08796d7839a1ff4456cd49c58e09b2fc121d0d3a29",
+          "mtimeNs": "1786544236945290000"
         },
         "evidence/replay/task1-replay.json": {
           "exists": true,
-          "bytes": 310919,
-          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
-          "mtimeNs": "1786530749652823300"
+          "bytes": 311546,
+          "sha256": "9ac2c470affe7df7878f7a6107e2e3eec46e0241b7ac1959b434ab883b5bbf5f",
+          "mtimeNs": "1786544236949290000"
         },
         "evidence/conversions/conversion-spikes.json": {
           "exists": true,
-          "bytes": 44348,
-          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
-          "mtimeNs": "1786530749603826400"
+          "bytes": 44390,
+          "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b",
+          "mtimeNs": "1786544236893291800"
         }
       }
     },
@@ -315,8 +315,8 @@
           "--output",
           ".evidence/cuda/replay/round-2/report.json"
         ],
-        "startedAt": "2026-08-12T10:32:29.996Z",
-        "endedAt": "2026-08-12T10:32:30.235Z",
+        "startedAt": "2026-08-12T14:17:17.267Z",
+        "endedAt": "2026-08-12T14:17:17.488Z",
         "exitCode": 21,
         "stdout": "{\"state\": \"blocked\", \"failureStage\": \"nvidia-hardware-driver-preflight\", \"exitCode\": 21, \"report\": \".evidence/cuda/replay/round-2/report.json\"}\n",
         "stderr": ""
@@ -330,9 +330,9 @@
               "uname",
               "-a"
             ],
-            "endedAt": "2026-08-12T10:32:30.059105Z",
+            "endedAt": "2026-08-12T14:17:17.321712Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:30.057684Z",
+            "startedAt": "2026-08-12T14:17:17.320362Z",
             "stderr": "",
             "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n"
           },
@@ -341,9 +341,9 @@
               "cat",
               "/etc/os-release"
             ],
-            "endedAt": "2026-08-12T10:32:30.060249Z",
+            "endedAt": "2026-08-12T14:17:17.323115Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:30.059377Z",
+            "startedAt": "2026-08-12T14:17:17.321995Z",
             "stderr": "",
             "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
           },
@@ -353,9 +353,9 @@
               "-lc",
               "lspci -nn | grep -Ei 'VGA|3D controller'"
             ],
-            "endedAt": "2026-08-12T10:32:30.137645Z",
+            "endedAt": "2026-08-12T14:17:17.399080Z",
             "exitCode": 0,
-            "startedAt": "2026-08-12T10:32:30.060494Z",
+            "startedAt": "2026-08-12T14:17:17.323380Z",
             "stderr": "",
             "stdout": "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)\n"
           },
@@ -365,9 +365,9 @@
               "-lc",
               "ldconfig -p | grep -E 'lib(cuda|cudnn|cublas|cudart|onnxruntime_providers_cuda)'"
             ],
-            "endedAt": "2026-08-12T10:32:30.146731Z",
+            "endedAt": "2026-08-12T14:17:17.407087Z",
             "exitCode": 1,
-            "startedAt": "2026-08-12T10:32:30.138089Z",
+            "startedAt": "2026-08-12T14:17:17.399525Z",
             "stderr": "",
             "stdout": ""
           },
@@ -377,9 +377,9 @@
               "-c",
               "import onnxruntime as ort; print(ort.__version__); print(ort.get_available_providers()); print(ort.__file__)"
             ],
-            "endedAt": "2026-08-12T10:32:30.225843Z",
+            "endedAt": "2026-08-12T14:17:17.478567Z",
             "exitCode": 1,
-            "startedAt": "2026-08-12T10:32:30.146845Z",
+            "startedAt": "2026-08-12T14:17:17.407138Z",
             "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'onnxruntime'\n",
             "stdout": ""
           },
@@ -389,14 +389,14 @@
               "--query-gpu=name,uuid,driver_version,compute_cap",
               "--format=csv,noheader"
             ],
-            "endedAt": "2026-08-12T10:32:30.226449Z",
+            "endedAt": "2026-08-12T14:17:17.479151Z",
             "exitCode": 127,
-            "startedAt": "2026-08-12T10:32:30.226445Z",
+            "startedAt": "2026-08-12T14:17:17.479148Z",
             "stderr": "nvidia-smi: command not found\n",
             "stdout": ""
           }
         ],
-        "endedAt": "2026-08-12T10:32:30.226455Z",
+        "endedAt": "2026-08-12T14:17:17.479156Z",
         "failure": {
           "message": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
           "missing": [
@@ -501,7 +501,7 @@
             "libonnxruntime_providers_cuda.so": false
           }
         },
-        "startedAt": "2026-08-12T10:32:30.046987Z",
+        "startedAt": "2026-08-12T14:17:17.310592Z",
         "state": "blocked",
         "staticVerified": true,
         "supported": false,
@@ -517,44 +517,44 @@
       "reportArtifact": {
         "path": ".evidence/cuda/replay/round-2/report.json",
         "bytes": 5689,
-        "sha256": "cc61682af29d37dea7f64fde566858bce773901917847e62788c71c8ecd90e77"
+        "sha256": "f83407111c9e0780dc27e128f313956e24ad5cd5fec2aec1dca9ec296b819194"
       },
       "trackedBefore": {
         "evidence/conversions/cuda-ep-spike-manifest.json": {
           "exists": true,
           "bytes": 3336,
           "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-spike-report.json": {
           "exists": true,
           "bytes": 5353,
           "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-replay-report.json": {
           "exists": true,
           "bytes": 22057,
-          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
-          "mtimeNs": "1786530146069903400"
+          "sha256": "98c45a02a383bc368e84172970dfa3c0aae61f9d0496baa43d4d978a8402def9",
+          "mtimeNs": "1786543965312312800"
         },
         "evidence/golden/manifest.json": {
           "exists": true,
-          "bytes": 18318,
-          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
-          "mtimeNs": "1786530749646823700"
+          "bytes": 19236,
+          "sha256": "26ecec95758612792ff95c08796d7839a1ff4456cd49c58e09b2fc121d0d3a29",
+          "mtimeNs": "1786544236945290000"
         },
         "evidence/replay/task1-replay.json": {
           "exists": true,
-          "bytes": 310919,
-          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
-          "mtimeNs": "1786530749652823300"
+          "bytes": 311546,
+          "sha256": "9ac2c470affe7df7878f7a6107e2e3eec46e0241b7ac1959b434ab883b5bbf5f",
+          "mtimeNs": "1786544236949290000"
         },
         "evidence/conversions/conversion-spikes.json": {
           "exists": true,
-          "bytes": 44348,
-          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
-          "mtimeNs": "1786530749603826400"
+          "bytes": 44390,
+          "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b",
+          "mtimeNs": "1786544236893291800"
         }
       },
       "trackedAfter": {
@@ -562,37 +562,37 @@
           "exists": true,
           "bytes": 3336,
           "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-spike-report.json": {
           "exists": true,
           "bytes": 5353,
           "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
-          "mtimeNs": "1786527578048093200"
+          "mtimeNs": "1786530849729558800"
         },
         "evidence/reports/cuda-ep-replay-report.json": {
           "exists": true,
           "bytes": 22057,
-          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
-          "mtimeNs": "1786530146069903400"
+          "sha256": "98c45a02a383bc368e84172970dfa3c0aae61f9d0496baa43d4d978a8402def9",
+          "mtimeNs": "1786543965312312800"
         },
         "evidence/golden/manifest.json": {
           "exists": true,
-          "bytes": 18318,
-          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
-          "mtimeNs": "1786530749646823700"
+          "bytes": 19236,
+          "sha256": "26ecec95758612792ff95c08796d7839a1ff4456cd49c58e09b2fc121d0d3a29",
+          "mtimeNs": "1786544236945290000"
         },
         "evidence/replay/task1-replay.json": {
           "exists": true,
-          "bytes": 310919,
-          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
-          "mtimeNs": "1786530749652823300"
+          "bytes": 311546,
+          "sha256": "9ac2c470affe7df7878f7a6107e2e3eec46e0241b7ac1959b434ab883b5bbf5f",
+          "mtimeNs": "1786544236949290000"
         },
         "evidence/conversions/conversion-spikes.json": {
           "exists": true,
-          "bytes": 44348,
-          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
-          "mtimeNs": "1786530749603826400"
+          "bytes": 44390,
+          "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b",
+          "mtimeNs": "1786544236893291800"
         }
       }
     }

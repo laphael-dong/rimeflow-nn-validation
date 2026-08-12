@@ -185,21 +185,35 @@ node evidence/scripts/validate_tensorrt_ep.mjs
 
 `evidence/conversions/task1-4-aggregate.json` 是八个必需平台/provider spike 的机器可读技术聚合。
 其中 blocked 是完整且有效的 spike 结论，前提是失败阶段、runner、依赖、命令、许可证、I/O、
-量化、NMS 责任和不可冒充保护均可审计。聚合结论固定为
-`allRequiredSpikesRecorded=true`、`technicalSpikeClosure=true`，同时保持
-`publicationVerified=false`、`task14Complete=false`、`openspecTask1_4Checked=false`、
-`allPlatformsSupported=false`。这表示 spike 技术工作已有结论，不表示平台 supported，也不表示
-OpenSpec 任务完成。
+量化、NMS 责任和不可冒充保护均可审计。`evidence/reports/task1-4-publication-report.json`
+是唯一机器可读 publication receipt，只绑定已经远端验证的 aggregate commit
+`19193a34f2fb2b36465538b02687a07608f7810e`，不记录 closure commit 自身 SHA。receipt 的
+repository/ref、GitHub API object、validation clone 回读、canonical ONNX bytes/Git blob/SHA-256、
+upstream/base 边界与无 tag/PR/release 副作用由独立 live verifier 重新检查，不能用 receipt 自报的
+`passed` 或 `verified` 布尔值替代。
+
+publication closure 后聚合结论固定为 `allRequiredSpikesRecorded=true`、
+`technicalSpikeClosure=true`、`externalRemoteAggregateVerified=true`、
+`publicationVerified=true`、`task14Complete=true`、`openspecTask1_4Checked=true`，同时保持
+`allPlatformsSupported=false`。这只关闭 OpenSpec 1.4 的转换/provider spike 与 publication 证据，
+不表示任一真实目标平台 supported。Windows、CUDA、TensorRT 仍为 blocked，OpenVINO 仍为
+`host-inference-verified`；adapter、性能、fallback、包加载与真实目标 runner 属于后续任务。
 
 确定性刷新顺序为：
 
 ```sh
+node evidence/scripts/record_task14_publication.mjs --record
+node evidence/scripts/verify_task14_publication.mjs
+node evidence/scripts/test_task14_publication_negative.mjs
 node evidence/scripts/generate_task14_aggregate.mjs
-node evidence/scripts/finalize_manifest.mjs
 bun run evidence/scripts/validate_evidence.mjs
 node evidence/scripts/test_validator_negative.mjs
 ```
 
-当前最终 blocker 不再是 MindSpore、CUDA 或 TensorRT harness 缺失，而是聚合 commit 尚未推送、远端
-ref 尚未验证，以及各平台真实目标 runner、adapter、性能、fallback、包加载与 supported 发布闭环仍属
-后续任务。完成技术聚合不得修改或勾选 OpenSpec 任务 1.4。
+生成顺序是 receipt/provider reports 生成 aggregate 与 conversion summary，再生成 artifact manifest，
+最后生成 replay ledger。artifact manifest 纳入 receipt、aggregate、生成器和 validator，但明确排除
+replay；replay 哈希上游产物但不哈希自身。这个最小排除避免 manifest/replay/receipt 循环哈希，且
+生成器不重写 `observedAt`、不访问网络、不修改 canonical ONNX、不创建第二份 ONNX。连续运行两次必须
+得到逐字节一致的 aggregate、conversion summary、artifact manifest 与 replay ledger。普通 recorder
+模式和 verifier 只读验证，不修改 tracked evidence；只有显式 `--record` 才通过同目录 staging、重读
+校验和原子 replace 更新 receipt。

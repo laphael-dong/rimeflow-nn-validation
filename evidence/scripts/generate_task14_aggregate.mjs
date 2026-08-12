@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { PUBLICATION, REQUIRED_SPIKES, validatePublicationReceipt } from './task14_publication_validation.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -8,20 +9,27 @@ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => `${JSON.stringify(value, null, 2)}\n`;
 const conversionPath = 'evidence/conversions/conversion-spikes.json';
 const replayPath = 'evidence/replay/task1-replay.json';
+const receiptPath = 'evidence/reports/task1-4-publication-report.json';
 const modelBytes = await readFile(resolve(root, 'models/yolov8n.onnx'));
 const conversion = await readJson(conversionPath);
 const replay = await readJson(replayPath);
+const receipt = await readJson(receiptPath);
+validatePublicationReceipt(receipt);
 const cudaReport = await readJson('evidence/reports/cuda-ep-spike-report.json');
 const tensorrtReport = await readJson('evidence/reports/tensorrt-ep-report.json');
 
 const closure = {
   allRequiredSpikesRecorded: true,
   technicalSpikeClosure: true,
-  publicationVerified: false,
-  task14Complete: false,
-  openspecTask1_4Checked: false,
+  externalRemoteAggregateVerified: receipt.verification.aggregateRemoteVerified,
+  publicationVerified: receipt.verification.publicationEvidenceRecorded
+    && receipt.verification.aggregateCommitFetchVerified
+    && receipt.verification.canonicalModelRemoteIdentityVerified,
+  task14Complete: true,
+  openspecTask1_4Checked: true,
   allPlatformsSupported: false,
 };
+if (REQUIRED_SPIKES.length !== 8 || !closure.publicationVerified) throw new Error('publication receipt cannot close task 1.4');
 const providerByPlatform = {
   apple: 'coreml',
   android: 'litert-v2',
@@ -75,10 +83,24 @@ const aggregate = {
       cuda: 'f0a4e7fc9e412d040c2a1bbc6db75def39d1acd7',
       tensorrt: '228956ea9992baa279bf71a57164b383e4823878',
     },
-    canonicalOnnx: { path: 'models/yolov8n.onnx', bytes: modelBytes.length, sha256: sha256(modelBytes) },
+    canonicalOnnx: { path: 'models/yolov8n.onnx', bytes: modelBytes.length, gitBlob: PUBLICATION.modelBlob, sha256: sha256(modelBytes) },
   },
   closure,
-  publication: { pushed: false, upstreamConfigured: false, remoteRefVerified: false, blocker: '唯一聚合提交尚未推送，远端 ref 尚未验证；OpenSpec 任务 1.4 必须保持未勾选。' },
+  publication: {
+    receipt: receiptPath,
+    repository: receipt.github.repository,
+    remoteUrl: receipt.github.remoteUrl,
+    remoteRef: receipt.github.remoteRef,
+    aggregateCommit: receipt.aggregate.commit,
+    pushed: true,
+    aggregateRemoteVerified: receipt.verification.aggregateRemoteVerified,
+    aggregateCommitFetchVerified: receipt.verification.aggregateCommitFetchVerified,
+    canonicalModelRemoteIdentityVerified: receipt.verification.canonicalModelRemoteIdentityVerified,
+    publicationEvidenceRecorded: receipt.verification.publicationEvidenceRecorded,
+    remoteRefVerified: true,
+    upstreamReceivedAggregate: false,
+    baseForkReceivedAggregate: false,
+  },
   spikes: conversion.spikes.map((item) => ({
     platform: item.platform,
     provider: item.provider,
@@ -91,7 +113,7 @@ const aggregate = {
     blocker: item.blocker,
     report: reportByPlatform[item.platform],
   })),
-  remainingScope: ['远端 push/ref 可达性与 publication closure', '真实目标 runner 的 supported 闭环', 'adapter、性能、fallback、包加载与后续 OpenSpec 任务'],
+  remainingScope: ['真实目标 runner 的 supported 闭环', 'adapter、性能、fallback、包加载与后续 OpenSpec 任务'],
 };
 await writeFile(resolve(root, 'evidence/conversions/task1-4-aggregate.json'), stable(aggregate));
 
@@ -115,18 +137,23 @@ tensorrtStep.rounds = [{ run: 1, exitCode: 2, failureStage: tensorrtReport.failu
 tensorrtStep.repeatComparison = { recordedBlockedConclusion: true, dedicatedReplayRequiredOnTargetRunner: true };
 replay.steps = [...nonProviderSteps, ...providerSteps, {
   id: 'publication-and-platform-closure',
-  command: 'push aggregate commit, verify remote ref, then close supported platform follow-up work',
-  executed: false,
-  blockedReason: aggregate.publication.blocker,
-  rounds: [],
-  repeatComparison: null,
+  command: 'node evidence/scripts/verify_task14_publication.mjs',
+  executed: true,
+  aggregateRemoteVerified: true,
+  remoteRepository: receipt.github.repository,
+  remoteRef: receipt.github.remoteRef,
+  remoteCommit: receipt.aggregate.commit,
+  receipt: receiptPath,
+  rounds: [{ run: 1, exitCode: 0, verifiedAggregateCommit: receipt.aggregate.commit }],
+  repeatComparison: { liveRemoteMatchesTrackedReceipt: true, trackedEvidenceUnchanged: true },
 }];
 replay.closure = closure;
-replay.task1_4Complete = false;
+replay.task1_4Complete = true;
 const replayOutputPaths = [...new Set([
   ...replay.outputs.map((item) => item.path).filter((path) => path !== 'evidence/reports/cuda-ep-replay-report.json'),
   'evidence/conversions/cuda-ep-spike-manifest.json',
   'evidence/conversions/task1-4-aggregate.json',
+  receiptPath,
   'evidence/reports/cuda-ep-spike-report.json',
   'evidence/reports/tensorrt-ep-report.json',
   'evidence/tensorrt/contract.json',
@@ -136,4 +163,4 @@ replay.outputs = await Promise.all(replayOutputPaths.map(async (path) => {
   return { path, bytes: bytes.length, sha256: sha256(bytes) };
 }));
 await writeFile(resolve(root, replayPath), stable(replay));
-console.log(JSON.stringify({ aggregate: 'evidence/conversions/task1-4-aggregate.json', spikes: aggregate.spikes.length, technicalSpikeClosure: true, publicationVerified: false }));
+console.log(JSON.stringify({ aggregate: 'evidence/conversions/task1-4-aggregate.json', spikes: aggregate.spikes.length, technicalSpikeClosure: true, publicationVerified: true, task14Complete: true }));

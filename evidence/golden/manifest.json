@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 44348,
-      "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2"
+      "bytes": 44390,
+      "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -139,8 +139,8 @@
     },
     {
       "path": "evidence/conversions/task1-4-aggregate.json",
-      "bytes": 4711,
-      "sha256": "e4845a31cc61eab4bc83bf0e7d6289432dc10f1d266294e26f37b5b78c927a1c"
+      "bytes": 5202,
+      "sha256": "f0ddc81ccab0a5d21d8db61cfdedaef674c50b29f918430d53eecab69b465669"
     },
     {
       "path": "evidence/reports/windows-ml-spike-report.json",
@@ -166,6 +166,11 @@
       "path": "evidence/reports/tensorrt-ep-report.json",
       "bytes": 4631,
       "sha256": "ec3008190f240adf0bcec0d56da5e98aa40e90b55f4781184e936767b5eb0694"
+    },
+    {
+      "path": "evidence/reports/task1-4-publication-report.json",
+      "bytes": 4430,
+      "sha256": "24a961a682279fe67cec3b711b99671eb58058a2c5cd87bdc2811785db655f6a"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -369,8 +374,8 @@
     },
     {
       "path": "evidence/scripts/cuda_evidence_validation.mjs",
-      "bytes": 28542,
-      "sha256": "9481b8051db5f9bff3a5ec1b82219c1adb091735fca5e938dd46a2d607a7e8ac"
+      "bytes": 28526,
+      "sha256": "bfd6b2bdde5eba8b9d5986c006b2bd34d5b15edfc1172638b5f42a7ac6f97f43"
     },
     {
       "path": "evidence/scripts/replay_cuda_ep.mjs",
@@ -434,13 +439,33 @@
     },
     {
       "path": "evidence/scripts/generate_task14_aggregate.mjs",
-      "bytes": 8283,
-      "sha256": "bc28301eb580a97ac88698dfd1e1e31626f483c547ec5e0a93ec567e3af0bc3c"
+      "bytes": 9664,
+      "sha256": "df2ed61383c26e7708dd338ecb1be53007335eb5335ccd4566a7ccf9bae82d27"
     },
     {
       "path": "evidence/scripts/aggregate_evidence_validation.mjs",
-      "bytes": 5455,
-      "sha256": "3cd38e4c35e9336d7ec4cb95453443a0d792752d8009fb9a509e8c57261a461f"
+      "bytes": 7836,
+      "sha256": "5ec9904345bd0f6fa77d8084fb4c033338c94b24b2573233c3eea01c145dedf7"
+    },
+    {
+      "path": "evidence/scripts/task14_publication_validation.mjs",
+      "bytes": 15181,
+      "sha256": "d74695670c7c8ac5b6d993dd3bb69aad82ff07bbaab94cb4c9c89e3e78f5a061"
+    },
+    {
+      "path": "evidence/scripts/record_task14_publication.mjs",
+      "bytes": 3944,
+      "sha256": "a1aff79219e1e3bf1a34d4d35f14e94431931a1a29be3e5b14a72ca13df92bae"
+    },
+    {
+      "path": "evidence/scripts/verify_task14_publication.mjs",
+      "bytes": 887,
+      "sha256": "bd2b22fb2e59e07b28760f4f79bfe89dda4cd5173caec5695d74fb7a39d5a6b8"
+    },
+    {
+      "path": "evidence/scripts/test_task14_publication_negative.mjs",
+      "bytes": 7701,
+      "sha256": "41c2bb4c903a827375f1d6d1534ca49681284f3527ee5e0caa23b77950dd3bd9"
     },
     {
       "path": "evidence/tensorrt/contract.json",
@@ -454,8 +479,8 @@
     },
     {
       "path": "evidence/scripts/test_validator_negative.mjs",
-      "bytes": 30466,
-      "sha256": "ef9e0f8e26c558aff78251befdf2943ecb94d4fa66a92d565d01ec978f4482e0"
+      "bytes": 31150,
+      "sha256": "c53d27a2a0218354fad85c4cac905182013026457ffe8f9930c2db07cad89910"
     },
     {
       "path": "evidence/scripts/test_windows_ml_runner_guards.mjs",
@@ -464,8 +489,8 @@
     },
     {
       "path": "evidence/scripts/validate_evidence.mjs",
-      "bytes": 24044,
-      "sha256": "f8a01beae462a98a97965455b900f1d155362e81f2b30c2c77c5f2a794db4ec5"
+      "bytes": 24167,
+      "sha256": "fc9c4469c4b8f735d4f5cdc195548c85d8ae3e0261359d2dd23e2fdaadd94172"
     },
     {
       "path": "evidence/tooling/windows-ml-runner/Program.cs",

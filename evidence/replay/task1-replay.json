@@ -1701,18 +1701,31 @@
     },
     {
       "id": "publication-and-platform-closure",
-      "command": "push aggregate commit, verify remote ref, then close supported platform follow-up work",
-      "executed": false,
-      "blockedReason": "唯一聚合提交尚未推送，远端 ref 尚未验证；OpenSpec 任务 1.4 必须保持未勾选。",
-      "rounds": [],
-      "repeatComparison": null
+      "command": "node evidence/scripts/verify_task14_publication.mjs",
+      "executed": true,
+      "aggregateRemoteVerified": true,
+      "remoteRepository": "laphael-dong/rimeflow-nn-validation",
+      "remoteRef": "refs/heads/feature/rimeflow-backend-contract-task1-aggregate",
+      "remoteCommit": "19193a34f2fb2b36465538b02687a07608f7810e",
+      "receipt": "evidence/reports/task1-4-publication-report.json",
+      "rounds": [
+        {
+          "run": 1,
+          "exitCode": 0,
+          "verifiedAggregateCommit": "19193a34f2fb2b36465538b02687a07608f7810e"
+        }
+      ],
+      "repeatComparison": {
+        "liveRemoteMatchesTrackedReceipt": true,
+        "trackedEvidenceUnchanged": true
+      }
     }
   ],
   "outputs": [
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 44348,
-      "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2"
+      "bytes": 44390,
+      "sha256": "55259e0d3fab6e602d7d919fea83b39e0caee864d05b26eb62e68648be03c31b"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -1741,8 +1754,8 @@
     },
     {
       "path": "evidence/conversions/task1-4-aggregate.json",
-      "bytes": 4711,
-      "sha256": "e4845a31cc61eab4bc83bf0e7d6289432dc10f1d266294e26f37b5b78c927a1c"
+      "bytes": 5202,
+      "sha256": "f0ddc81ccab0a5d21d8db61cfdedaef674c50b29f918430d53eecab69b465669"
     },
     {
       "path": "evidence/fixtures/manifest.json",
@@ -1756,8 +1769,8 @@
     },
     {
       "path": "evidence/golden/manifest.json",
-      "bytes": 18318,
-      "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210"
+      "bytes": 19236,
+      "sha256": "26ecec95758612792ff95c08796d7839a1ff4456cd49c58e09b2fc121d0d3a29"
     },
     {
       "path": "evidence/golden/web-reference.json",
@@ -1820,6 +1833,11 @@
       "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
     },
     {
+      "path": "evidence/reports/task1-4-publication-report.json",
+      "bytes": 4430,
+      "sha256": "24a961a682279fe67cec3b711b99671eb58058a2c5cd87bdc2811785db655f6a"
+    },
+    {
       "path": "evidence/reports/tensorrt-ep-report.json",
       "bytes": 4631,
       "sha256": "ec3008190f240adf0bcec0d56da5e98aa40e90b55f4781184e936767b5eb0694"
@@ -1851,13 +1869,14 @@
     }
   ],
   "task1_7OwnershipReplayComplete": true,
-  "task1_4Complete": false,
+  "task1_4Complete": true,
   "closure": {
     "allRequiredSpikesRecorded": true,
     "technicalSpikeClosure": true,
-    "publicationVerified": false,
-    "task14Complete": false,
-    "openspecTask1_4Checked": false,
+    "externalRemoteAggregateVerified": true,
+    "publicationVerified": true,
+    "task14Complete": true,
+    "openspecTask1_4Checked": true,
     "allPlatformsSupported": false
   }
 }

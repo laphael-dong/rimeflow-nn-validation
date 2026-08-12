@@ -164,7 +164,8 @@ if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetad
 if (provenance.licensing.originalWeights.authorizationState !== 'out-of-scope-test-only' || provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'test-evidence-only') fail('model test-only decision');
 const replay = await readJson('evidence/replay/task1-replay.json');
 const task14Aggregate = await readJson('evidence/conversions/task1-4-aggregate.json');
-const aggregateFacts = await validateTask14Aggregate(root, task14Aggregate, conversion, replay);
+const publicationReceipt = await readJson('evidence/reports/task1-4-publication-report.json');
+const aggregateFacts = await validateTask14Aggregate(root, task14Aggregate, conversion, replay, publicationReceipt, manifest);
 if (replay.schemaVersion !== 2 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true || replay.immutableLogEvidence.kind !== 'embedded-in-manifest') fail('operator replay metadata');
 for (const output of replay.outputs) {
   const bytes = await readFile(resolve(root, output.path));
@@ -202,5 +203,5 @@ for (const round of mindsporeReplayStep.rounds) {
 }
 const conversionReplayStep = replay.steps.find((item) => item.id === 'conversion-report-regeneration');
 if (conversionReplayStep.command !== 'node evidence/scripts/run_conversion_spikes.mjs --mindspore-only') fail('MindSpore-only conversion replay scope');
-if (replay.steps.find((item) => item.id === 'publication-and-platform-closure').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay publication-blocked semantics');
+if (replay.steps.find((item) => item.id === 'publication-and-platform-closure').executed !== true || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== true) fail('operator replay publication closure semantics');
 console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length, requiredSpikes: aggregateFacts.requiredSpikes, providerReplaySteps: aggregateFacts.providerReplaySteps }));
