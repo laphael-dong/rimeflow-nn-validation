@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence } from './evidence_validation.mjs';
+import { compareWindowsMlStaticCompileEvidence, validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence, validateWindowsMlStaticCompileEvidence } from './evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -114,6 +115,17 @@ const windows = conversion.spikes.find((item) => item.platform === 'windows');
 const windowsManifest = await readJson('evidence/conversions/windows-ml-spike-manifest.json');
 const windowsReport = await readJson('evidence/reports/windows-ml-spike-report.json');
 await validateWindowsMlEvidence(root, windows, windowsManifest, windowsReport);
+const recordedWindowsStaticCompile = await readJson(windowsReport.staticCompileReport);
+const replayWindowsStaticCompilePath = resolve(process.env.TMPDIR ?? '/tmp', `rimeflow-winml-validator-${process.pid}-${Date.now()}.json`);
+try {
+  const replayWindowsStaticCompile = spawnSync('node', ['evidence/scripts/replay_windows_ml_static_compile.mjs', '--report', replayWindowsStaticCompilePath], { cwd: root, encoding: 'utf8' });
+  if (replayWindowsStaticCompile.status !== 0) fail(`Windows ML clean static compile replay failed: ${replayWindowsStaticCompile.stdout}\n${replayWindowsStaticCompile.stderr}`);
+  const replayedWindowsStaticCompile = JSON.parse(await readFile(replayWindowsStaticCompilePath, 'utf8'));
+  await validateWindowsMlStaticCompileEvidence(root, replayedWindowsStaticCompile);
+  compareWindowsMlStaticCompileEvidence(recordedWindowsStaticCompile, replayedWindowsStaticCompile);
+} finally {
+  await rm(replayWindowsStaticCompilePath, { force: true });
+}
 const mindspore = conversion.spikes.find((item) => item.platform === 'harmonyos');
 const mindsporeManifest = await readJson('evidence/conversions/mindspore-artifact-manifest.json');
 const mindsporeGolden = await readJson('evidence/reports/mindspore-golden-report.json');

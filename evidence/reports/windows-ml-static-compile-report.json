@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-12T03:02:58.177Z",
+  "host": {
+    "os": "linux",
+    "arch": "x64"
+  },
+  "sdk": {
+    "version": "8.0.423",
+    "executable": "/tmp/rimeflow-dotnet-8.0.423/dotnet"
+  },
+  "nugetPackages": "/tmp/rimeflow-nuget-packages",
+  "source": {
+    "Program.cs": {
+      "bytes": 25810,
+      "sha256": "6b09fc3a1644fbbf0da2e26813b6ab2fabfefc93aca0de0bf05f0efefece76b0"
+    },
+    "RunnerSupport.cs": {
+      "bytes": 7466,
+      "sha256": "2579aa9406b5be54b19c2b3c0ffd3972c631c3b35d9edb1f0f1bcb3acf7f9d08"
+    },
+    "WindowsMlSpike.csproj": {
+      "bytes": 1289,
+      "sha256": "f7c50ab9492cd12517b72007c805733044df12dd01cb9f367ae1b48851f420c7"
+    },
+    "global.json": {
+      "bytes": 104,
+      "sha256": "248c17bb46fd7ff31402c62dc1870e90005fc1d9bcbc9a31cefcc78691149d76"
+    },
+    "packages.lock.json": {
+      "bytes": 4271,
+      "sha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255"
+    }
+  },
+  "lockFileSha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255",
+  "targets": {
+    "win-x64": {
+      "rid": "win-x64",
+      "cleanBefore": {
+        "binAbsent": true,
+        "objAbsent": true,
+        "projectAssetsAbsent": true
+      },
+      "workspacePolicy": "mkdtemp workspace deleted after evidence extraction; no bin/obj/project.assets.json reused",
+      "restore": {
+        "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet restore WindowsMlSpike.csproj --locked-mode",
+        "startedAt": "2026-08-12T03:02:58.180Z",
+        "endedAt": "2026-08-12T03:02:58.924Z",
+        "exitCode": 0,
+        "signal": null
+      },
+      "compile": {
+        "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet msbuild WindowsMlSpike.csproj -target:Compile -property:Configuration=Release -property:RuntimeIdentifier=win-x64 -property:OutputType=Library -property:WindowsAppSDKSelfContained=false -property:RestoreLockedMode=true -property:PathMap=/tmp/rimeflow-winml-win-x64-jTDOgM=/_/windows-ml-runner -verbosity:diagnostic -binaryLogger:win-x64-compile.binlog -fileLoggerParameters:LogFile=win-x64-compile.log;Verbosity=Diagnostic",
+        "startedAt": "2026-08-12T03:02:58.925Z",
+        "endedAt": "2026-08-12T03:03:00.056Z",
+        "exitCode": 0,
+        "signal": null,
+        "target": "Compile",
+        "coreCompileExecuted": true,
+        "roslynCscExecuted": true,
+        "programCsCompiled": true,
+        "rawLogEvidence": {
+          "coreCompileLine": "11:02:59.437     1>Target \"CoreCompile: (TargetId:93)\" in file \"/tmp/rimeflow-dotnet-8.0.423/sdk/8.0.423/Roslyn/Microsoft.CSharp.Core.targets\" from project \"/tmp/rimeflow-winml-win-x64-jTDOgM/WindowsMlSpike.csproj\" (target \"Compile\" depends on it):",
+          "cscLine": "Task \"Csc\" (TaskId:57)",
+          "programSourceLine": "Program.cs",
+          "supportSourceLine": "RunnerSupport.cs"
+        }
+      },
+      "assembly": {
+        "logicalPath": "obj/Release/net8.0-windows10.0.17763.0/win-x64/WindowsMlSpike.dll",
+        "bytes": 80896,
+        "sha256": "07c2a9878a1789ebf435563da1e6cd00db6288278c62bdc6dcd12248e34252fe",
+        "targetRidFromPath": "win-x64",
+        "retained": false
+      }
+    },
+    "win-arm64": {
+      "rid": "win-arm64",
+      "cleanBefore": {
+        "binAbsent": true,
+        "objAbsent": true,
+        "projectAssetsAbsent": true
+      },
+      "workspacePolicy": "mkdtemp workspace deleted after evidence extraction; no bin/obj/project.assets.json reused",
+      "restore": {
+        "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet restore WindowsMlSpike.csproj --locked-mode",
+        "startedAt": "2026-08-12T03:03:00.069Z",
+        "endedAt": "2026-08-12T03:03:00.843Z",
+        "exitCode": 0,
+        "signal": null
+      },
+      "compile": {
+        "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet msbuild WindowsMlSpike.csproj -target:Compile -property:Configuration=Release -property:RuntimeIdentifier=win-arm64 -property:OutputType=Library -property:WindowsAppSDKSelfContained=false -property:RestoreLockedMode=true -property:PathMap=/tmp/rimeflow-winml-win-arm64-JH1Hv8=/_/windows-ml-runner -verbosity:diagnostic -binaryLogger:win-arm64-compile.binlog -fileLoggerParameters:LogFile=win-arm64-compile.log;Verbosity=Diagnostic",
+        "startedAt": "2026-08-12T03:03:00.843Z",
+        "endedAt": "2026-08-12T03:03:01.566Z",
+        "exitCode": 0,
+        "signal": null,
+        "target": "Compile",
+        "coreCompileExecuted": true,
+        "roslynCscExecuted": true,
+        "programCsCompiled": true,
+        "rawLogEvidence": {
+          "coreCompileLine": "11:03:01.356     1>Target \"CoreCompile: (TargetId:93)\" in file \"/tmp/rimeflow-dotnet-8.0.423/sdk/8.0.423/Roslyn/Microsoft.CSharp.Core.targets\" from project \"/tmp/rimeflow-winml-win-arm64-JH1Hv8/WindowsMlSpike.csproj\" (target \"Compile\" depends on it):",
+          "cscLine": "Task \"Csc\" (TaskId:57)",
+          "programSourceLine": "Program.cs",
+          "supportSourceLine": "RunnerSupport.cs"
+        }
+      },
+      "assembly": {
+        "logicalPath": "obj/Release/net8.0-windows10.0.17763.0/win-arm64/WindowsMlSpike.dll",
+        "bytes": 80896,
+        "sha256": "5efe8721d0dcf62e0ea30e8f257d2e0f00d903617c5ba2cdb1b28858fee1eecf",
+        "targetRidFromPath": "win-arm64",
+        "retained": false
+      }
+    }
+  }
+}

@@ -133,26 +133,21 @@
       "result": "temporary SDK 8.0.423 installed outside repository"
     },
     {
-      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet restore WindowsMlSpike.csproj --use-lock-file -p:RestoreLockedMode=false",
+      "command": "node evidence/scripts/replay_windows_ml_static_compile.mjs --report evidence/reports/windows-ml-static-compile-report.json",
       "exitCode": 0,
-      "result": "exact [2.1.74] direct package ranges restored; packages.lock.json contains base, win-x64 and win-arm64 targets; NuGet cache is under /tmp"
+      "result": "each RID used an independent mkdtemp workspace with no bin/obj/project.assets.json; locked restore and MSBuild Compile completed with CoreCompile/Csc/source-input evidence and a non-retained RID-specific DLL"
     },
     {
       "command": "/tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore",
       "exitCode": 1,
       "result": "Windows mt.exe returned Exec format error on Linux (tool exit 126); not build-verified"
-    },
-    {
-      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore -property:RestoreLockedMode=true -property:ManifestTool=/bin/true -property:AppxGeneratePriEnabled=false",
-      "exitCode": 0,
-      "result": "C# and Windows ML API static build verified only; Windows manifest/PRI tools were explicitly bypassed, so this is not a Windows build or publish result"
-    },
-    {
-      "command": "DOTNET_CLI_TELEMETRY_OPTOUT=1 NUGET_PACKAGES=/tmp/rimeflow-nuget-packages /tmp/rimeflow-dotnet-8.0.423/dotnet build WindowsMlSpike.csproj --configuration Release --runtime win-arm64 --no-restore -property:RestoreLockedMode=true -property:ManifestTool=/bin/true -property:AppxGeneratePriEnabled=false",
-      "exitCode": 0,
-      "result": "C# and Windows ML API static build verified only; Windows manifest/PRI tools were explicitly bypassed, so this is not a Windows build or publish result"
     }
   ],
+  "staticCompileReport": "evidence/reports/windows-ml-static-compile-report.json",
+  "previousStaticCompileEvidenceCorrection": {
+    "invalid": "previous Linux evidence pre-created obj/.../Manifests/app.manifest and replaced ManifestTool with /bin/true, so it was not a clean reproducible compile",
+    "current": "MSBuild target Compile runs real CoreCompile and Roslyn Csc in an independent clean workspace, emits a RID-specific implementation DLL, records its SHA, and deletes the workspace"
+  },
   "targets": {
     "win-x64": {
       "runnerPrepared": true,
@@ -196,6 +191,14 @@
     "hostIdentityFrom": "RuntimeInformation, Environment.OSVersion, machine name and ORT hardware vendor/device IDs",
     "ordinaryLinuxOrtAccepted": false,
     "ordinaryCpuOrtClaimedAsWindowsMlAccepted": false
+  },
+  "runnerLifecycleContract": {
+    "failureStages": ["argument-validation", "platform-validation", "model-identity", "input-validation", "catalog-registration", "device-selection", "session-creation", "metadata-validation", "inference", "output-validation", "provider-introspection", "module-identity", "dependency-identity", "sdk-runtime-identity", "artifact-publication"],
+    "stateFields": ["failureStage", "windowsMlApiCalled", "catalogRegistrationAttempted", "catalogRegistrationCompleted", "sessionCreated", "inferenceExecuted", "runtimeIntrospectionComplete", "outputPublished"],
+    "output": "little-endian FP32 is written only to same-filesystem staging after every identity/introspection check succeeds",
+    "successPublication": "output and success report are atomically replaced as a rollback-capable pair",
+    "failurePublication": "final output is never touched; a failure report is atomically created, or written to a unique .failed-*.json sidecar when the requested final report already exists",
+    "profileCleanup": "outer finally deletes the returned ORT profile and all files matching the unique prefix on every exception path"
   },
   "artifactHandling": {
     "secondOnnxGenerated": false,

@@ -11,11 +11,47 @@ const WINDOWS_MODEL_SHA256 = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f14
 const WINDOWS_PACKAGE_VERSION = '2.1.74';
 const WINDOWS_DOTNET_RUNTIME_VERSION = '8.0.29';
 const WINDOWS_LOCK_SHA256 = '4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255';
+const WINDOWS_STATIC_SOURCE_FILES = ['Program.cs', 'RunnerSupport.cs', 'WindowsMlSpike.csproj', 'global.json', 'packages.lock.json'];
+
+export async function validateWindowsMlStaticCompileEvidence(root, staticReport) {
+  if (staticReport.schemaVersion !== 1 || staticReport.host?.os !== 'linux' || staticReport.host?.arch !== 'x64') throw new Error('Windows ML static compile report host/schema drift');
+  if (staticReport.sdk?.version !== '8.0.423' || !staticReport.sdk.executable?.endsWith('/dotnet') || staticReport.lockFileSha256 !== WINDOWS_LOCK_SHA256) throw new Error('Windows ML static compile SDK/lock drift');
+  if (JSON.stringify(Object.keys(staticReport.source)) !== JSON.stringify(WINDOWS_STATIC_SOURCE_FILES)) throw new Error('Windows ML static compile source set drift');
+  for (const file of WINDOWS_STATIC_SOURCE_FILES) {
+    const bytes = await readFile(resolve(root, 'evidence/tooling/windows-ml-runner', file));
+    if (staticReport.source[file]?.bytes !== bytes.length || staticReport.source[file]?.sha256 !== sha256(bytes)) throw new Error(`Windows ML static compile source identity drift: ${file}`);
+  }
+  if (JSON.stringify(Object.keys(staticReport.targets)) !== '["win-x64","win-arm64"]') throw new Error('Windows ML static compile RIDs must remain separate');
+  for (const rid of ['win-x64', 'win-arm64']) {
+    const target = staticReport.targets[rid];
+    if (!target || Object.values(target.cleanBefore ?? {}).some((value) => value !== true) || Object.keys(target.cleanBefore ?? {}).length !== 3) throw new Error(`${rid}: static compile did not begin without bin/obj/project.assets.json`);
+    if (!target.workspacePolicy?.includes('mkdtemp workspace deleted') || target.restore?.exitCode !== 0 || !target.restore.startedAt || !target.restore.endedAt || Date.parse(target.restore.startedAt) > Date.parse(target.restore.endedAt)) throw new Error(`${rid}: locked restore evidence invalid`);
+    if (!target.restore.command.includes('dotnet restore WindowsMlSpike.csproj --locked-mode') || /--runtime\s+win-/.test(target.restore.command)) throw new Error(`${rid}: restore command is not the locked all-RID restore`);
+    const compile = target.compile;
+    if (compile?.exitCode !== 0 || compile.target !== 'Compile' || !compile.startedAt || !compile.endedAt || Date.parse(compile.startedAt) > Date.parse(compile.endedAt) || !compile.coreCompileExecuted || !compile.roslynCscExecuted || !compile.programCsCompiled) throw new Error(`${rid}: CoreCompile/Roslyn evidence invalid`);
+    for (const fragment of ['dotnet msbuild WindowsMlSpike.csproj', '-target:Compile', `-property:RuntimeIdentifier=${rid}`, '-property:OutputType=Library', '-property:WindowsAppSDKSelfContained=false', '-property:RestoreLockedMode=true', '-property:PathMap=', '=/_/windows-ml-runner']) if (!compile.command.includes(fragment)) throw new Error(`${rid}: static compile command drift: ${fragment}`);
+    if (/ManifestTool|\/bin\/true|app\.manifest|SkipCompilerExecution|CoreCompile=false/i.test(compile.command)) throw new Error(`${rid}: static compile command bypasses compiler or reuses a manifest`);
+    const log = compile.rawLogEvidence;
+    if (!log?.coreCompileLine?.includes('Target "CoreCompile:') || !log.cscLine?.includes('Task "Csc"') || log.programSourceLine !== 'Program.cs' || log.supportSourceLine !== 'RunnerSupport.cs') throw new Error(`${rid}: raw Roslyn/source log evidence missing`);
+    const assembly = target.assembly;
+    const expectedPath = `obj/Release/net8.0-windows10.0.17763.0/${rid}/WindowsMlSpike.dll`;
+    if (assembly?.logicalPath !== expectedPath || assembly.targetRidFromPath !== rid || assembly.bytes <= 0 || !/^[0-9a-f]{64}$/.test(assembly.sha256) || assembly.retained !== false) throw new Error(`${rid}: static compile assembly identity missing or forged`);
+  }
+}
+
+export function compareWindowsMlStaticCompileEvidence(recorded, replayed) {
+  for (const rid of ['win-x64', 'win-arm64']) {
+    const expected = recorded.targets?.[rid]?.assembly;
+    const actual = replayed.targets?.[rid]?.assembly;
+    if (!expected || !actual || expected.logicalPath !== actual.logicalPath || expected.bytes !== actual.bytes || expected.sha256 !== actual.sha256 || actual.targetRidFromPath !== rid) throw new Error(`${rid}: clean static compile replay assembly differs from recorded evidence`);
+  }
+}
 
 function validateWindowsRuntimeClaim(targetId, target, runtimeEvidence) {
   if (!target.runtimeVerified) return;
   if (!target.runtimeExecuted || !target.runtimeIntrospectionComplete || !target.goldenExecuted) throw new Error(`${targetId}: runtime verified without execution/introspection/golden`);
   if (!runtimeEvidence || runtimeEvidence.target !== targetId || runtimeEvidence.state !== 'runtime-verified') throw new Error(`${targetId}: runtime evidence missing or belongs to another architecture`);
+  if (runtimeEvidence.failureStage !== 'artifact-publication' || !runtimeEvidence.catalogRegistrationAttempted || !runtimeEvidence.catalogRegistrationCompleted || !runtimeEvidence.sessionCreated || !runtimeEvidence.inferenceExecuted || !runtimeEvidence.runtimeIntrospectionComplete || !runtimeEvidence.outputPublished) throw new Error(`${targetId}: successful runtime evidence lacks completed lifecycle introspection/publication`);
   const expectedArchitecture = targetId === 'win-x64' ? 'X64' : 'Arm64';
   if (runtimeEvidence.host?.os !== 'windows' || runtimeEvidence.host?.processArchitecture !== expectedArchitecture || runtimeEvidence.host?.osArchitecture !== expectedArchitecture) throw new Error(`${targetId}: Linux ORT or wrong-architecture runtime evidence`);
   if (runtimeEvidence.runtime?.dotnetRuntimeVersion !== WINDOWS_DOTNET_RUNTIME_VERSION) throw new Error(`${targetId}: .NET runtime version drift`);
@@ -89,6 +125,12 @@ export async function validateWindowsMlEvidence(root, conversion, manifest, repo
     if (locked[id]?.type !== 'Direct' || locked[id].requested !== `[${version}, ${version}]` || locked[id].resolved !== version || !/^[A-Za-z0-9+/]{86}==$/.test(locked[id].contentHash)) throw new Error(`Windows ML lock package drift: ${id}`);
   }
   if (manifest.dependencies.windowsMlPackage.version !== WINDOWS_PACKAGE_VERSION || manifest.dependencies.windowsMlRuntimePackage.version !== WINDOWS_PACKAGE_VERSION || manifest.dependencies.dotnetSdk !== '8.0.423' || manifest.dependencies.dotnetRuntime !== WINDOWS_DOTNET_RUNTIME_VERSION || report.dependencies.dotnetRuntime !== WINDOWS_DOTNET_RUNTIME_VERSION || /[*+]/.test(JSON.stringify(manifest.dependencies))) throw new Error('Windows ML manifest contains missing/floating package, SDK, or runtime version');
+  const staticCompileReport = JSON.parse(await readFile(resolve(root, report.staticCompileReport), 'utf8'));
+  await validateWindowsMlStaticCompileEvidence(root, staticCompileReport);
+  for (const targetId of targetIds) {
+    const staticEvidence = manifest.targets[targetId].staticCompileEvidence;
+    if (staticEvidence?.report !== report.staticCompileReport || !staticEvidence.replayCommand?.includes('replay_windows_ml_static_compile.mjs') || !staticEvidence.cleanWorkspaceRequired || staticEvidence.compileTarget !== 'Compile' || staticEvidence.assemblyRetained) throw new Error(`${targetId}: static compile manifest contract drift`);
+  }
 
   const requiredReferenceUrls = [
     'https://learn.microsoft.com/en-us/windows/ai/new-windows-ml/overview',

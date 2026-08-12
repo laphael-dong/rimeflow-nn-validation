@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence } from './evidence_validation.mjs';
+import { compareWindowsMlStaticCompileEvidence, validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence, validateWindowsMlStaticCompileEvidence } from './evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -47,7 +47,9 @@ const conversion = await readJson('evidence/conversions/conversion-spikes.json')
 const windowsConversion = conversion.spikes.find((item) => item.platform === 'windows');
 const windowsManifest = await readJson('evidence/conversions/windows-ml-spike-manifest.json');
 const windowsReport = await readJson('evidence/reports/windows-ml-spike-report.json');
+const windowsStaticCompile = await readJson('evidence/reports/windows-ml-static-compile-report.json');
 await validateWindowsMlEvidence(root, windowsConversion, windowsManifest, windowsReport);
+await validateWindowsMlStaticCompileEvidence(root, windowsStaticCompile);
 
 const runtimeEvidence = (target, architecture, sourcePackage = 'Microsoft.WindowsAppSDK.ML') => ({
   schemaVersion: 1,
@@ -56,6 +58,12 @@ const runtimeEvidence = (target, architecture, sourcePackage = 'Microsoft.Window
   runtimeExecuted: true,
   runtimeIntrospectionComplete: true,
   windowsMlApiCalled: true,
+  failureStage: 'artifact-publication',
+  catalogRegistrationAttempted: true,
+  catalogRegistrationCompleted: true,
+  sessionCreated: true,
+  inferenceExecuted: true,
+  outputPublished: true,
   model: { sha256: '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad', noConversion: true },
   input: { count: 1, name: 'images', dtype: 'float32', shape: [1, 3, 640, 640], elementCount: 1228800, finiteCount: 1228800 },
   output: { count: 1, name: 'output0', dtype: 'float32', shape: [1, 84, 8400], elementCount: 705600, finiteCount: 705600 },
@@ -161,6 +169,31 @@ const publicationLeak = structuredClone(windowsManifest);
 publicationLeak.canonicalOnnx.path = 'release/models/yolov8n.onnx';
 publicationLeak.publicationExclusions = publicationLeak.publicationExclusions.filter((item) => !item.includes('release'));
 await expectFailure('Windows ML ONNX or build output added to release directory', () => validateWindowsMlEvidence(root, windowsConversion, publicationLeak, windowsReport));
+
+const missingAssembly = structuredClone(windowsStaticCompile);
+delete missingAssembly.targets['win-x64'].assembly;
+await expectFailure('Windows ML static compile missing assembly', () => validateWindowsMlStaticCompileEvidence(root, missingAssembly));
+const forgedAssembly = structuredClone(windowsStaticCompile);
+forgedAssembly.targets['win-x64'].assembly.sha256 = '0'.repeat(64);
+await expectFailure('Windows ML static compile forged assembly SHA', () => compareWindowsMlStaticCompileEvidence(forgedAssembly, windowsStaticCompile));
+const wrongRidAssembly = structuredClone(windowsStaticCompile);
+wrongRidAssembly.targets['win-arm64'].assembly.targetRidFromPath = 'win-x64';
+await expectFailure('Windows ML static compile wrong RID assembly', () => validateWindowsMlStaticCompileEvidence(root, wrongRidAssembly));
+const dirtyCompile = structuredClone(windowsStaticCompile);
+dirtyCompile.targets['win-x64'].cleanBefore.objAbsent = false;
+await expectFailure('Windows ML static compile reused obj', () => validateWindowsMlStaticCompileEvidence(root, dirtyCompile));
+const missingCoreCompile = structuredClone(windowsStaticCompile);
+missingCoreCompile.targets['win-x64'].compile.coreCompileExecuted = false;
+await expectFailure('Windows ML static compile skipped CoreCompile', () => validateWindowsMlStaticCompileEvidence(root, missingCoreCompile));
+const missingRoslyn = structuredClone(windowsStaticCompile);
+missingRoslyn.targets['win-x64'].compile.roslynCscExecuted = false;
+await expectFailure('Windows ML static compile skipped Roslyn Csc', () => validateWindowsMlStaticCompileEvidence(root, missingRoslyn));
+const missingProgram = structuredClone(windowsStaticCompile);
+missingProgram.targets['win-arm64'].compile.programCsCompiled = false;
+await expectFailure('Windows ML static compile omitted Program.cs', () => validateWindowsMlStaticCompileEvidence(root, missingProgram));
+const manifestBypass = structuredClone(windowsStaticCompile);
+manifestBypass.targets['win-x64'].compile.command += ' -property:ManifestTool=/bin/true app.manifest';
+await expectFailure('Windows ML static compile manifest tool bypass', () => validateWindowsMlStaticCompileEvidence(root, manifestBypass));
 
 const coremlManifest = await readJson('evidence/conversions/coreml-artifact-manifest.json');
 const coremlReplay = await readJson('evidence/reports/coreml-conversion-report.json');
@@ -271,4 +304,4 @@ mindsporeTrackedDrift.trackedEvidence.goldenReport.sha256After = '3'.repeat(64);
 mindsporeTrackedDrift.trackedEvidence.goldenReport.unchanged = true;
 await expectFailure('MindSpore non-record tracked report drift', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeTrackedDrift));
 
-console.log(JSON.stringify({ ok: true, filesystemGuardTests: 7, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Windows ML blocked x64/ARM64 harness contract', 'Windows ML valid partial x64 runtime claim', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite record evidence', 'MindSpore Lite non-record artifact preservation evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Linux ORT success claimed as Windows ML', 'Windows runtime verified without runner execution', 'x64 runtime evidence claimed as ARM64', 'Windows architectures merged into one verified flag', 'Windows ML model SHA drift', 'Windows ML I/O shape drift', 'Windows ML dtype drift', 'Windows ML provider introspection drift', 'ordinary CPU ORT claimed as Windows ML provider', 'Windows ML floating package version', 'Windows ML missing exact SDK version', 'Windows ML missing exact .NET runtime version', 'Windows ML runtime SDK introspection drift', 'Windows ML verification without runtime introspection', 'Windows ML supported without real x64 and ARM64 runners', 'Windows ML ONNX or build output added to release directory', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication', 'MindSpore non-record replay changed fixed artifact', 'MindSpore missing artifact exact identity overclaim', 'MindSpore non-record replay created fixed artifact', 'MindSpore replay digest impersonates recorded artifact identity', 'MindSpore non-record tracked report drift'] }));
+console.log(JSON.stringify({ ok: true, filesystemGuardTests: 7, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Windows ML blocked x64/ARM64 harness contract', 'Windows ML clean static compile report', 'Windows ML valid partial x64 runtime claim', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite record evidence', 'MindSpore Lite non-record artifact preservation evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Linux ORT success claimed as Windows ML', 'Windows runtime verified without runner execution', 'x64 runtime evidence claimed as ARM64', 'Windows architectures merged into one verified flag', 'Windows ML model SHA drift', 'Windows ML I/O shape drift', 'Windows ML dtype drift', 'Windows ML provider introspection drift', 'ordinary CPU ORT claimed as Windows ML provider', 'Windows ML floating package version', 'Windows ML missing exact SDK version', 'Windows ML missing exact .NET runtime version', 'Windows ML runtime SDK introspection drift', 'Windows ML verification without runtime introspection', 'Windows ML supported without real x64 and ARM64 runners', 'Windows ML ONNX or build output added to release directory', 'Windows ML static compile missing assembly', 'Windows ML static compile forged assembly SHA', 'Windows ML static compile wrong RID assembly', 'Windows ML static compile reused obj', 'Windows ML static compile skipped CoreCompile', 'Windows ML static compile skipped Roslyn Csc', 'Windows ML static compile omitted Program.cs', 'Windows ML static compile manifest tool bypass', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication', 'MindSpore non-record replay changed fixed artifact', 'MindSpore missing artifact exact identity overclaim', 'MindSpore non-record replay created fixed artifact', 'MindSpore replay digest impersonates recorded artifact identity', 'MindSpore non-record tracked report drift'] }));

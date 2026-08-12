@@ -124,13 +124,18 @@
     },
     {
       "path": "evidence/conversions/windows-ml-spike-manifest.json",
-      "bytes": 7732,
-      "sha256": "6b4987932dfa72ca66735fe6bfef0ce75eab78db51cd7f9751e41f4fa3aed8d6"
+      "bytes": 9322,
+      "sha256": "e242c0e86d7ff6c4a28185f4dd594a48a3b29a03308f30a2f3ba68737473624a"
     },
     {
       "path": "evidence/reports/windows-ml-spike-report.json",
-      "bytes": 11134,
-      "sha256": "6e8e116e1ebe3029d8daccbd3716926e80ee11bbdebc3ddf94f56cfd8a8ac62b"
+      "bytes": 11756,
+      "sha256": "5664ac74dfd7a235d1b8308eb91d55983d8f6cf015d7312def7ae3bd2f5b8f5b"
+    },
+    {
+      "path": "evidence/reports/windows-ml-static-compile-report.json",
+      "bytes": 5625,
+      "sha256": "054bf967c14e9dd24d297c04e1adbc26a7fbce3ad245d07dcfe23c97ea468cb8"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -223,14 +228,44 @@
       "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
     },
     {
+      "path": "evidence/scripts/evidence_validation.mjs",
+      "bytes": 50202,
+      "sha256": "7c6f67ce33506e4a554e00e068be5b0556db47d05d00e6b6869443a430782a42"
+    },
+    {
+      "path": "evidence/scripts/replay_windows_ml_static_compile.mjs",
+      "bytes": 6851,
+      "sha256": "4d7139783adcf2f2d9503ae099c3c92fa6f4c57c467b09233df7008e9380e101"
+    },
+    {
+      "path": "evidence/scripts/test_validator_negative.mjs",
+      "bytes": 24004,
+      "sha256": "4d0cc44f47c75a153dd7bad84f99d63ff40946d8595f1a093a263aa442666719"
+    },
+    {
+      "path": "evidence/scripts/test_windows_ml_runner_guards.mjs",
+      "bytes": 1350,
+      "sha256": "da3e09deafed024939c1dfeca6a910b39db5a70a1bcaae38534e4d3a8e014965"
+    },
+    {
+      "path": "evidence/scripts/validate_evidence.mjs",
+      "bytes": 21923,
+      "sha256": "01702420056cfa16aefec0e0e14fc8dac935e2c19d5aeb1f7272105cad327616"
+    },
+    {
       "path": "evidence/tooling/windows-ml-runner/Program.cs",
-      "bytes": 20370,
-      "sha256": "908242e7679eb5ff9f190e385b1d36e64bb13fbe0eb224e108b966aaf516326f"
+      "bytes": 25810,
+      "sha256": "6b09fc3a1644fbbf0da2e26813b6ab2fabfefc93aca0de0bf05f0efefece76b0"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner/RunnerSupport.cs",
+      "bytes": 7466,
+      "sha256": "2579aa9406b5be54b19c2b3c0ffd3972c631c3b35d9edb1f0f1bcb3acf7f9d08"
     },
     {
       "path": "evidence/tooling/windows-ml-runner/README.md",
-      "bytes": 3383,
-      "sha256": "9a97669f0e0325649d8172e9eb065b79ddaf31e8dd6b99f26dbdf89ee49934ee"
+      "bytes": 5327,
+      "sha256": "4c706e3547ee4f0e39c9f8ad04f873527a277fcb87b081b10f1669e5d47c3d4f"
     },
     {
       "path": "evidence/tooling/windows-ml-runner/WindowsMlSpike.csproj",
@@ -246,6 +281,16 @@
       "path": "evidence/tooling/windows-ml-runner/packages.lock.json",
       "bytes": 4271,
       "sha256": "4277499d381910ed0e268967b2949572ca24932aea27044dbce76113a128b255"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner-guards/Program.cs",
+      "bytes": 7347,
+      "sha256": "35de7366d30a61685f75ea4a561debca65a8578c1a20b1ca10ca4e3845f3dc0a"
+    },
+    {
+      "path": "evidence/tooling/windows-ml-runner-guards/WindowsMlRunnerGuards.csproj",
+      "bytes": 273,
+      "sha256": "6062542916ae12459b83378e62fc7309901b2ecc9b732a512c43baf4c52a9dbc"
     },
     {
       "path": "evidence/tooling/mindspore-host-runner/main.cpp",

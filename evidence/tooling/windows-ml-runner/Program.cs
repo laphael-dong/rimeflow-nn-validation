@@ -18,36 +18,48 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        var state = new RunState();
+        var context = new RunContext();
         string? reportPath = FindOption(args, "--report");
         try
         {
             Options options = Options.Parse(args);
             reportPath = options.Report;
-            await RunAsync(options);
+            await RunAsync(options, state, context);
             return 0;
         }
         catch (Exception error)
         {
             if (!string.IsNullOrWhiteSpace(reportPath))
             {
-                WriteJson(reportPath, new
+                try
                 {
-                    schemaVersion = 1,
-                    state = "failed",
-                    runtimeExecuted = false,
-                    runtimeIntrospectionComplete = false,
-                    windowsMlApiCalled = false,
-                    error = new { type = error.GetType().FullName, message = error.Message },
-                    host = HostSnapshot(),
-                });
+                    string failureReportPath = File.Exists(reportPath) ? $"{Path.GetFullPath(reportPath)}.failed-{Guid.NewGuid():N}.json" : Path.GetFullPath(reportPath);
+                    context.ReportStagingPath = AtomicArtifacts.CreateStagingPath(failureReportPath);
+                    AtomicArtifacts.WriteJsonStaging(context.ReportStagingPath, FailureReport(state, error), JsonOptions);
+                    AtomicArtifacts.PublishFailureReportIfAbsent(context.ReportStagingPath, failureReportPath);
+                    context.ReportStagingPath = null;
+                    Console.Error.WriteLine($"Failure report: {failureReportPath}");
+                }
+                catch (Exception reportError)
+                {
+                    Console.Error.WriteLine($"Failure report publication failed without replacing the final report: {reportError}");
+                }
             }
             Console.Error.WriteLine(error);
             return 1;
         }
+        finally
+        {
+            AtomicArtifacts.CleanupProfile(context.ProfilePath, context.ProfilePrefix);
+            DeleteStaging(context.OutputStagingPath);
+            DeleteStaging(context.ReportStagingPath);
+        }
     }
 
-    private static async Task RunAsync(Options options)
+    private static async Task RunAsync(Options options, RunState state, RunContext context)
     {
+        state.FailureStage = FailureStage.PlatformValidation;
         if (!OperatingSystem.IsWindows())
         {
             throw new PlatformNotSupportedException("Windows ML spike runner must execute on Windows, not Linux ORT.");
@@ -61,12 +73,14 @@ internal static class Program
             _ => throw new PlatformNotSupportedException($"Unsupported runner architecture: {architecture}"),
         };
 
+        state.FailureStage = FailureStage.ModelIdentity;
         string modelSha256 = Sha256File(options.Model);
         if (!modelSha256.Equals(options.ExpectedModelSha256, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidDataException($"Model SHA-256 mismatch: expected {options.ExpectedModelSha256}, got {modelSha256}");
         }
 
+        state.FailureStage = FailureStage.InputValidation;
         float[] inputValues = ReadFloat32LittleEndian(options.Input, ExpectedInputElements);
         int inputFiniteCount = inputValues.Count(float.IsFinite);
         if (inputFiniteCount != ExpectedInputElements)
@@ -74,8 +88,13 @@ internal static class Program
             throw new InvalidDataException("Input contains a non-finite FP32 value.");
         }
 
+        state.BeginCatalogApiCall();
         var catalog = ExecutionProviderCatalog.GetDefault();
+        state.BeginCatalogRegistration();
         await catalog.RegisterCertifiedAsync();
+        state.CompleteCatalogRegistration();
+
+        state.FailureStage = FailureStage.DeviceSelection;
         OrtEnv ortEnv = OrtEnv.Instance();
         IReadOnlyList<OrtEpDevice> availableDevices = ortEnv.GetEpDevices();
         if (availableDevices.Count == 0)
@@ -88,17 +107,20 @@ internal static class Program
             .ThenBy(device => device.EpName, StringComparer.Ordinal)
             .First();
 
-        string profilePrefix = Path.Combine(Path.GetTempPath(), $"rimeflow-winml-{Environment.ProcessId}-");
-        string? profilePath = null;
+        context.ProfilePrefix = Path.Combine(Path.GetTempPath(), $"rimeflow-winml-{Environment.ProcessId}-{Guid.NewGuid():N}-");
         using var sessionOptions = new SessionOptions
         {
-            ProfileOutputPathPrefix = profilePrefix,
+            ProfileOutputPathPrefix = context.ProfilePrefix,
             EnableProfiling = true,
             GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL,
         };
         sessionOptions.AppendExecutionProvider(ortEnv, [selectedDevice], new Dictionary<string, string>());
 
+        state.FailureStage = FailureStage.SessionCreation;
         using var session = new InferenceSession(options.Model, sessionOptions);
+        state.MarkSessionCreated();
+
+        state.FailureStage = FailureStage.MetadataValidation;
         ValidateMetadata(session);
         NodeMetadata inputMetadata = session.InputMetadata["images"];
         NodeMetadata outputMetadata = session.OutputMetadata["output0"];
@@ -107,9 +129,13 @@ internal static class Program
         string runtimeInputDtype = DtypeName(inputMetadata.ElementDataType);
         string runtimeOutputDtype = DtypeName(outputMetadata.ElementDataType);
 
+        state.FailureStage = FailureStage.Inference;
         var inputTensor = new DenseTensor<float>(inputValues, ExpectedInputShape);
         NamedOnnxValue input = NamedOnnxValue.CreateFromTensor("images", inputTensor);
         using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run([input]);
+        state.MarkInferenceExecuted();
+
+        state.FailureStage = FailureStage.OutputValidation;
         if (results.Count != 1)
         {
             throw new InvalidDataException($"Expected one runtime output, got {results.Count}.");
@@ -127,49 +153,93 @@ internal static class Program
             throw new InvalidDataException($"Output element/finite count mismatch: {outputValues.Length}/{outputFiniteCount}.");
         }
 
+        state.FailureStage = FailureStage.ProviderIntrospection;
         IReadOnlyList<OrtEpDevice?> inputEpDevices = session.GetEpDeviceForInputs();
         if (inputEpDevices.Count != 1 || inputEpDevices[0] is null)
         {
             throw new InvalidDataException("Session did not expose the actual EP device for images.");
         }
 
-        profilePath = session.EndProfiling();
-        string[] profileProviders = ReadProfileProviders(profilePath);
+        context.ProfilePath = session.EndProfiling();
+        string[] profileProviders = ReadProfileProviders(context.ProfilePath);
         if (profileProviders.Length == 0)
         {
             throw new InvalidDataException("ORT profiling did not expose any node execution provider.");
         }
 
-        WriteFloat32LittleEndian(options.Output, outputValues);
-        var loadedModules = LoadedWindowsMlModules();
-        if (!loadedModules.Any(item => item.Name.Equals("onnxruntime.dll", StringComparison.OrdinalIgnoreCase)) ||
-            !loadedModules.Any(item => item.Name.Equals("Microsoft.Windows.AI.MachineLearning.dll", StringComparison.OrdinalIgnoreCase)))
+        ModuleSnapshot[] loadedModules = [];
+        state.RunStage(FailureStage.ModuleIdentity, () =>
         {
-            throw new InvalidOperationException("Actual loaded Windows ML/ONNX Runtime modules could not be identified.");
-        }
+            loadedModules = LoadedWindowsMlModules();
+            if (!loadedModules.Any(item => item.Name.Equals("onnxruntime.dll", StringComparison.OrdinalIgnoreCase)) ||
+                !loadedModules.Any(item => item.Name.Equals("Microsoft.Windows.AI.MachineLearning.dll", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("Actual loaded Windows ML/ONNX Runtime modules could not be identified.");
+            }
+        });
 
-        var dependencies = DependencyContextPackages();
-        if (!dependencies.TryGetValue("Microsoft.WindowsAppSDK.ML", out string? packageVersion) || packageVersion != "2.1.74")
+        Dictionary<string, string> dependencies = [];
+        string? packageVersion = null;
+        string? runtimePackageVersion = null;
+        state.RunStage(FailureStage.DependencyIdentity, () =>
         {
-            throw new InvalidOperationException("Runtime dependency context does not contain Microsoft.WindowsAppSDK.ML/2.1.74.");
-        }
-        if (!dependencies.TryGetValue("Microsoft.Windows.AI.MachineLearning", out string? runtimePackageVersion) || runtimePackageVersion != "2.1.74")
-        {
-            throw new InvalidOperationException("Runtime dependency context does not contain Microsoft.Windows.AI.MachineLearning/2.1.74.");
-        }
-        string dotnetSdkVersion = InstalledDotNetSdkVersion();
+            dependencies = DependencyContextPackages();
+            if (!dependencies.TryGetValue("Microsoft.WindowsAppSDK.ML", out packageVersion) || packageVersion != "2.1.74")
+            {
+                throw new InvalidOperationException("Runtime dependency context does not contain Microsoft.WindowsAppSDK.ML/2.1.74.");
+            }
+            if (!dependencies.TryGetValue("Microsoft.Windows.AI.MachineLearning", out runtimePackageVersion) || runtimePackageVersion != "2.1.74")
+            {
+                throw new InvalidOperationException("Runtime dependency context does not contain Microsoft.Windows.AI.MachineLearning/2.1.74.");
+            }
+        });
 
-        WriteJson(options.Report, new
+        string dotnetSdkVersion = "";
+        state.RunStage(FailureStage.SdkRuntimeIdentity, () =>
+        {
+            dotnetSdkVersion = InstalledDotNetSdkVersion();
+            if (Environment.Version.ToString() != "8.0.29")
+            {
+                throw new InvalidOperationException($"Expected .NET runtime 8.0.29, got {Environment.Version}.");
+            }
+        });
+        state.RuntimeIntrospectionComplete = true;
+
+        state.FailureStage = FailureStage.ArtifactPublication;
+        context.OutputStagingPath = AtomicArtifacts.CreateStagingPath(options.Output);
+        context.ReportStagingPath = AtomicArtifacts.CreateStagingPath(options.Report);
+        WriteFloat32LittleEndian(context.OutputStagingPath, outputValues);
+        string outputSha256 = Sha256File(context.OutputStagingPath);
+        long outputBytes = new FileInfo(context.OutputStagingPath).Length;
+        var successState = new
+        {
+            failureStage = RunState.StageName(state.FailureStage),
+            windowsMlApiCalled = state.WindowsMlApiCalled,
+            catalogRegistrationAttempted = state.CatalogRegistrationAttempted,
+            catalogRegistrationCompleted = state.CatalogRegistrationCompleted,
+            sessionCreated = state.SessionCreated,
+            inferenceExecuted = state.InferenceExecuted,
+            runtimeIntrospectionComplete = state.RuntimeIntrospectionComplete,
+            outputPublished = true,
+        };
+        var successReport = new
         {
             schemaVersion = 1,
             state = "runtime-verified",
             target,
             runtimeExecuted = true,
-            runtimeIntrospectionComplete = true,
-            windowsMlApiCalled = true,
+            failureStage = RunState.StageName(state.FailureStage),
+            windowsMlApiCalled = state.WindowsMlApiCalled,
+            catalogRegistrationAttempted = state.CatalogRegistrationAttempted,
+            catalogRegistrationCompleted = state.CatalogRegistrationCompleted,
+            sessionCreated = state.SessionCreated,
+            inferenceExecuted = state.InferenceExecuted,
+            runtimeIntrospectionComplete = state.RuntimeIntrospectionComplete,
+            outputPublished = true,
+            stages = successState,
             model = new { path = Path.GetFullPath(options.Model), bytes = new FileInfo(options.Model).Length, sha256 = modelSha256, noConversion = true },
             input = new { name = session.InputMetadata.Keys.Single(), count = session.InputMetadata.Count, shape = runtimeInputShape, layout = "NCHW", dtype = runtimeInputDtype, elementCount = inputValues.Length, finiteCount = inputFiniteCount, byteOrder = "little-endian" },
-            output = new { name = session.OutputMetadata.Keys.Single(), count = session.OutputMetadata.Count, shape = runtimeOutputShape, layout = "N_ATTRIBUTES_ANCHORS", dtype = runtimeOutputDtype, elementCount = outputValues.Length, finiteCount = outputFiniteCount, byteOrder = "little-endian", path = Path.GetFullPath(options.Output), bytes = new FileInfo(options.Output).Length, sha256 = Sha256File(options.Output) },
+            output = new { name = session.OutputMetadata.Keys.Single(), count = session.OutputMetadata.Count, shape = runtimeOutputShape, layout = "N_ATTRIBUTES_ANCHORS", dtype = runtimeOutputDtype, elementCount = outputValues.Length, finiteCount = outputFiniteCount, byteOrder = "little-endian", path = Path.GetFullPath(options.Output), bytes = outputBytes, sha256 = outputSha256 },
             execution = new
             {
                 availableDevices = availableDevices.Select(DeviceSnapshot).ToArray(),
@@ -205,12 +275,45 @@ internal static class Program
                 platformSpecificImplementationAdded = false,
                 rawGoldenCommand = $"cargo run --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml -- {options.Output} 768 900 .evidence/windows-ml/decoded/{target}-single-target.json",
             },
-        });
+        };
+        AtomicArtifacts.WriteJsonStaging(context.ReportStagingPath, successReport, JsonOptions);
+        AtomicArtifacts.PublishPair(context.OutputStagingPath, Path.GetFullPath(options.Output), context.ReportStagingPath, Path.GetFullPath(options.Report));
+        context.OutputStagingPath = null;
+        context.ReportStagingPath = null;
+        state.OutputPublished = true;
+    }
 
-        if (profilePath is not null && File.Exists(profilePath))
-        {
-            File.Delete(profilePath);
-        }
+    private static object FailureReport(RunState state, Exception error) => new
+    {
+        schemaVersion = 1,
+        state = "failed",
+        runtimeExecuted = state.WindowsMlApiCalled,
+        failureStage = RunState.StageName(state.FailureStage),
+        windowsMlApiCalled = state.WindowsMlApiCalled,
+        catalogRegistrationAttempted = state.CatalogRegistrationAttempted,
+        catalogRegistrationCompleted = state.CatalogRegistrationCompleted,
+        sessionCreated = state.SessionCreated,
+        inferenceExecuted = state.InferenceExecuted,
+        runtimeIntrospectionComplete = state.RuntimeIntrospectionComplete,
+        outputPublished = false,
+        stages = state.Snapshot(),
+        error = new { type = error.GetType().FullName, message = error.Message },
+        host = HostSnapshot(),
+    };
+
+    private static void DeleteStaging(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        try { if (File.Exists(path)) File.Delete(path); }
+        catch { }
+    }
+
+    private sealed class RunContext
+    {
+        public string? ProfilePrefix { get; set; }
+        public string? ProfilePath { get; set; }
+        public string? OutputStagingPath { get; set; }
+        public string? ReportStagingPath { get; set; }
     }
 
     private static void ValidateMetadata(InferenceSession session)
@@ -370,12 +473,6 @@ internal static class Program
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
-    private static void WriteJson(string path, object value)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-        File.WriteAllText(path, JsonSerializer.Serialize(value, JsonOptions) + Environment.NewLine);
-    }
-
     private static string? FindOption(string[] args, string name)
     {
         int index = Array.IndexOf(args, name);
@@ -405,7 +502,15 @@ internal static class Program
             {
                 throw new ArgumentException("Unexpected option.");
             }
-            return new Options(Required("--model"), Required("--input"), Required("--output"), Required("--report"), expectedSha);
+            string model = Path.GetFullPath(Required("--model"));
+            string input = Path.GetFullPath(Required("--input"));
+            string output = Path.GetFullPath(Required("--output"));
+            string report = Path.GetFullPath(Required("--report"));
+            if (new[] { model, input, output, report }.Distinct(StringComparer.OrdinalIgnoreCase).Count() != 4)
+            {
+                throw new ArgumentException("--model, --input, --output, and --report must resolve to distinct paths.");
+            }
+            return new Options(model, input, output, report, expectedSha);
         }
     }
 }

@@ -32,7 +32,13 @@
       ]
     },
     "ordinaryOrtPackageReferenced": false,
-    "windowsMlApiRequired": true
+    "windowsMlApiRequired": true,
+    "lifecycle": {
+      "failureStages": ["argument-validation", "platform-validation", "model-identity", "input-validation", "catalog-registration", "device-selection", "session-creation", "metadata-validation", "inference", "output-validation", "provider-introspection", "module-identity", "dependency-identity", "sdk-runtime-identity", "artifact-publication"],
+      "stageFields": ["failureStage", "windowsMlApiCalled", "catalogRegistrationAttempted", "catalogRegistrationCompleted", "sessionCreated", "inferenceExecuted", "runtimeIntrospectionComplete", "outputPublished"],
+      "publication": "output and success report use same-filesystem staging plus atomic replace with pair rollback; failures never replace existing output/report",
+      "profileCleanup": "outer finally removes the returned profile and every file matching the unique profile prefix"
+    }
   },
   "ioContract": {
     "inputs": [
@@ -112,6 +118,13 @@
         "publishExecuted": false,
         "buildVerified": false
       },
+      "staticCompileEvidence": {
+        "report": "evidence/reports/windows-ml-static-compile-report.json",
+        "replayCommand": "node evidence/scripts/replay_windows_ml_static_compile.mjs --report evidence/reports/windows-ml-static-compile-report.json",
+        "cleanWorkspaceRequired": true,
+        "compileTarget": "Compile",
+        "assemblyRetained": false
+      },
       "runtimeExecuted": false,
       "runtimeVerified": false,
       "hostInferenceVerified": false,
@@ -119,7 +132,7 @@
       "supported": false,
       "buildCommands": [
         "Push-Location evidence/tooling/windows-ml-runner",
-        "dotnet restore WindowsMlSpike.csproj --locked-mode --runtime win-x64",
+        "dotnet restore WindowsMlSpike.csproj --locked-mode",
         "dotnet publish WindowsMlSpike.csproj --configuration Release --runtime win-x64 --no-restore --self-contained false --output ../../../.evidence/windows-ml/build/win-x64",
         "Pop-Location"
       ],
@@ -141,6 +154,13 @@
         "publishExecuted": false,
         "buildVerified": false
       },
+      "staticCompileEvidence": {
+        "report": "evidence/reports/windows-ml-static-compile-report.json",
+        "replayCommand": "node evidence/scripts/replay_windows_ml_static_compile.mjs --report evidence/reports/windows-ml-static-compile-report.json",
+        "cleanWorkspaceRequired": true,
+        "compileTarget": "Compile",
+        "assemblyRetained": false
+      },
       "runtimeExecuted": false,
       "runtimeVerified": false,
       "hostInferenceVerified": false,
@@ -148,7 +168,7 @@
       "supported": false,
       "buildCommands": [
         "Push-Location evidence/tooling/windows-ml-runner",
-        "dotnet restore WindowsMlSpike.csproj --locked-mode --runtime win-arm64",
+        "dotnet restore WindowsMlSpike.csproj --locked-mode",
         "dotnet publish WindowsMlSpike.csproj --configuration Release --runtime win-arm64 --no-restore --self-contained false --output ../../../.evidence/windows-ml/build/win-arm64",
         "Pop-Location"
       ],
