@@ -1,0 +1,277 @@
+{
+  "artifact": {
+    "bytes": 12851098,
+    "format": "ONNX",
+    "noConversion": true,
+    "path": "models/yolov8n.onnx",
+    "sameCanonicalFileLoaded": true,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+  },
+  "ioContract": {
+    "inputs": [
+      {
+        "dtype": "float32",
+        "elementCount": 1228800,
+        "name": "images",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "outputLayout": "N_ATTRIBUTES_ANCHORS",
+    "outputs": [
+      {
+        "dtype": "float32",
+        "elementCount": 705600,
+        "name": "output0",
+        "shape": [
+          1,
+          84,
+          8400
+        ]
+      }
+    ]
+  },
+  "ownership": {
+    "nms": "operator",
+    "postprocessing": "src/postprocess.rs through evidence/tooling/raw-golden",
+    "preprocessing": "runtime caller owns letterbox, RGB, NCHW and /255; canonical ONNX unchanged"
+  },
+  "provider": {
+    "configured": [
+      "OpenVINOExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "deviceType": "CPU",
+    "fallbackVisible": true,
+    "requested": "OpenVINOExecutionProvider"
+  },
+  "runtime": {
+    "buildInfo": "ORT Build Info: git-branch=rel-1.24.1, git-commit-id=b5963e82c8, build type=Release",
+    "device": "CPU-OPENVINO_CPU",
+    "libraries": [
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
+        "bytes": 2000856,
+        "componentVersion": "1.24.1",
+        "mappedByProcess": true,
+        "name": "libonnxruntime_providers_openvino.so",
+        "path": "$VENV/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
+        "sha256": "b19cae6eb713f35427a8427f141ffc8fc2471ae0532f57e52d84fa9a66799c30"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
+        "bytes": 15776,
+        "componentVersion": "1.24.1",
+        "mappedByProcess": true,
+        "name": "libonnxruntime_providers_shared.so",
+        "path": "$VENV/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
+        "sha256": "5e02c1ff90e7d71365264dbb6767c00f04a8b57a96cddbc0085c61fa1393250d"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino.so.2541",
+        "bytes": 25284089,
+        "componentVersion": "2025.4.1",
+        "mappedByProcess": true,
+        "name": "libopenvino.so.2541",
+        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino.so.2541",
+        "sha256": "ac9634b715a242a61644c77bc38f17508fe73f517e418027e2410f4bee004943"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so",
+        "bytes": 389321,
+        "componentVersion": "2025.4.1",
+        "mappedByProcess": true,
+        "name": "libopenvino_c.so",
+        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_c.so",
+        "sha256": "e515e35253414797438772767dbc4be3a4c8e8940f2fa31954bd711d514e782e"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
+        "bytes": 67008289,
+        "componentVersion": "2025.4.1",
+        "mappedByProcess": true,
+        "name": "libopenvino_intel_cpu_plugin.so",
+        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
+        "sha256": "034df890550ae9199fe5f8608c0df8fd0fe355f303bad56bea10bae14c14c3cb"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
+        "bytes": 7006249,
+        "componentVersion": "2025.4.1",
+        "mappedByProcess": true,
+        "name": "libopenvino_onnx_frontend.so.2541",
+        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
+        "sha256": "f426710881d8c1a01d5ed6d7eaa076d923b19983d3ab3a18bb19d25dba7d8923"
+      },
+      {
+        "actualPath": "/home/raffael/algo/github/rimeflow-yolov8n/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
+        "bytes": 33766592,
+        "componentVersion": "1.24.1",
+        "mappedByProcess": true,
+        "name": "onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
+        "path": "$VENV/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "00793442cbfc4b8e6c6909ddcc8146ac7476f5e25c2712a4250d2dd294de42b7"
+      }
+    ],
+    "numpy": "2.5.2",
+    "onnxruntimeOpenvino": "1.24.1",
+    "openvino": {
+      "availableDevices": [
+        "CPU"
+      ],
+      "requestedDevice": "CPU",
+      "runtime": {
+        "buildNumber": "2025.4.1-0-test",
+        "description": "OpenVINO Runtime"
+      },
+      "versions": [
+        {
+          "buildNumber": "2025.4.1-0-test",
+          "description": "openvino_intel_cpu_plugin",
+          "device": "CPU"
+        }
+      ]
+    },
+    "pip": "24.0",
+    "python": "3.12.3"
+  },
+  "schemaVersion": 1,
+  "status": {
+    "adapterImplemented": false,
+    "artifactVerified": true,
+    "hostInferenceVerified": true,
+    "packagingVerified": false,
+    "performanceVerified": false,
+    "state": "host-inference-verified",
+    "supported": false,
+    "targetPlatformClosed": false,
+    "task14Complete": false
+  },
+  "toolchain": {
+    "environmentCreationCommand": [
+      "python3",
+      "-m",
+      "venv",
+      ".evidence/openvino/venv"
+    ],
+    "install": {
+      "command": [
+        "$OPENVINO_VENV/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--no-index",
+        "--find-links",
+        "$REPO/.evidence/openvino/wheels",
+        "--require-hashes",
+        "--only-binary=:all:",
+        "-r",
+        "$REPO/evidence/tooling/openvino-requirements.lock"
+      ],
+      "endedAt": "2026-08-12T04:02:58.850152Z",
+      "exitCode": 0,
+      "startedAt": "2026-08-12T04:02:58.567437Z",
+      "stderr": "",
+      "stdout": "Looking in links: $REPO/.evidence/openvino/wheels\nRequirement already satisfied: flatbuffers==25.12.19 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 4)) (25.12.19)\nRequirement already satisfied: mpmath==1.3.0 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 5)) (1.3.0)\nRequirement already satisfied: numpy==2.5.2 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 6)) (2.5.2)\nRequirement already satisfied: onnxruntime-openvino==1.24.1 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 7)) (1.24.1)\nRequirement already satisfied: packaging==26.3 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 8)) (26.3)\nRequirement already satisfied: protobuf==7.35.1 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 9)) (7.35.1)\nRequirement already satisfied: sympy==1.14.0 in $OPENVINO_VENV/lib/python3.12/site-packages (from -r $REPO/evidence/tooling/openvino-requirements.lock (line 10)) (1.14.0)\n"
+    },
+    "lock": {
+      "bytes": 872,
+      "path": "evidence/tooling/openvino-requirements.lock",
+      "sha256": "3e16f87dd96579b5771691fd35056ab3cd125d526815aebc41a7141fbc01f603"
+    },
+    "pipCheck": {
+      "command": [
+        "$OPENVINO_VENV/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "endedAt": "2026-08-12T04:02:59.066058Z",
+      "exitCode": 0,
+      "startedAt": "2026-08-12T04:02:58.850198Z",
+      "stderr": "",
+      "stdout": "No broken requirements found.\n"
+    },
+    "pythonVersionCommand": {
+      "command": [
+        "$OPENVINO_VENV/bin/python",
+        "--version"
+      ],
+      "endedAt": "2026-08-12T04:03:03.910063Z",
+      "exitCode": 0,
+      "startedAt": "2026-08-12T04:03:03.908505Z",
+      "stderr": "",
+      "stdout": "Python 3.12.3\n"
+    },
+    "wheels": [
+      {
+        "filename": "flatbuffers-25.12.19-py2.py3-none-any.whl",
+        "license": "Apache-2.0",
+        "name": "flatbuffers",
+        "sha256": "7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4",
+        "source": "https://files.pythonhosted.org/packages/e8/2d/d2a548598be01649e2d46231d151a6c56d10b964d94043a335ae56ea2d92/flatbuffers-25.12.19-py2.py3-none-any.whl",
+        "version": "25.12.19"
+      },
+      {
+        "filename": "mpmath-1.3.0-py3-none-any.whl",
+        "license": "BSD-3-Clause",
+        "name": "mpmath",
+        "sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c",
+        "source": "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl",
+        "version": "1.3.0"
+      },
+      {
+        "filename": "numpy-2.5.2-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "license": "BSD-3-Clause and bundled notices",
+        "name": "numpy",
+        "sha256": "3cdec01fa790a186d430433fdd4d4ffb70eed6f0eeb4bf05c8dbe2dce0a9bcb8",
+        "source": "https://files.pythonhosted.org/packages/3a/5f/62d28cf019460c7f1394105b4d49d9911a9c444cb77ab0bd95a204c5a6de/numpy-2.5.2-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "version": "2.5.2"
+      },
+      {
+        "filename": "onnxruntime_openvino-1.24.1-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "license": "MIT; bundled OpenVINO and third-party notices apply",
+        "name": "onnxruntime-openvino",
+        "sha256": "d617fac2f59a6ab5ea59a788c3e1592240a129642519aaeaa774761dfe35150e",
+        "source": "https://files.pythonhosted.org/packages/50/cf/17ba72de2df0fcba349937d2788f154397bbc2d1a2d67772a97e26f6bc5f/onnxruntime_openvino-1.24.1-cp312-cp312-manylinux_2_28_x86_64.whl",
+        "version": "1.24.1"
+      },
+      {
+        "filename": "packaging-26.3-py3-none-any.whl",
+        "license": "Apache-2.0 OR BSD-2-Clause",
+        "name": "packaging",
+        "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+        "source": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+        "version": "26.3"
+      },
+      {
+        "filename": "protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl",
+        "license": "BSD-3-Clause",
+        "name": "protobuf",
+        "sha256": "74758715c53d7158fb76caf4f0cfdacc5329a4b1bb994f865d6cf302d413a1c4",
+        "source": "https://files.pythonhosted.org/packages/e4/be/5b3cfe508bfab6761414ff944e3366eb13be4fd71efcd69450f89ba39f43/protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl",
+        "version": "7.35.1"
+      },
+      {
+        "filename": "sympy-1.14.0-py3-none-any.whl",
+        "license": "BSD-3-Clause",
+        "name": "sympy",
+        "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5",
+        "source": "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl",
+        "version": "1.14.0"
+      }
+    ]
+  },
+  "usageScope": {
+    "cache": "ignored .evidence/openvino only",
+    "licenseAndRedistribution": "ONNX Runtime wheel is MIT and includes third-party notices; bundled OpenVINO runtime is Apache-2.0 with bundled notices. Preserve notices when redistributing. This spike does not redistribute the runtime or model.",
+    "modelLicenseMetadata": "AGPL-3.0 License (https://ultralytics.com/license)",
+    "productPackaging": "excluded",
+    "rawTensorPublication": "prohibited",
+    "runtimePublication": "prohibited"
+  }
+}

@@ -5,6 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ortNative from '../tooling/web/node_modules/onnxruntime-node/dist/index.js';
 import { preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
+import { summarizeOpenvinoForConversion } from './openvino_evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const modelPath = resolve(root, 'models/yolov8n.onnx');
@@ -261,6 +262,21 @@ if (process.argv.includes('--mindspore-only')) {
   const bytes = Buffer.from(stable(previous));
   await writeFile(reportPath, bytes);
   console.log(JSON.stringify({ mode: 'mindspore-only', sha256: sha256(bytes) }));
+  process.exit(0);
+}
+
+if (process.argv.includes('--openvino-only')) {
+  const previous = JSON.parse(await readFile(reportPath, 'utf8'));
+  const manifest = JSON.parse(await readFile(resolve(root, 'evidence/conversions/openvino-ep-manifest.json'), 'utf8'));
+  const openvinoReport = JSON.parse(await readFile(resolve(root, 'evidence/reports/openvino-ep-report.json'), 'utf8'));
+  if (!previous.spikes.some((item) => item.platform === 'linux-x86_64-openvino')) throw new Error('conversion-spikes.json 缺少 Linux x86_64 OpenVINO 条目');
+  const otherBefore = stable(previous.spikes.filter((item) => item.platform !== 'linux-x86_64-openvino'));
+  previous.spikes = previous.spikes.map((item) => item.platform === 'linux-x86_64-openvino' ? summarizeOpenvinoForConversion(manifest, openvinoReport) : item);
+  const otherAfter = stable(previous.spikes.filter((item) => item.platform !== 'linux-x86_64-openvino'));
+  if (otherBefore !== otherAfter) throw new Error('OpenVINO-only 更新改变了其他平台证据');
+  const bytes = Buffer.from(stable(previous));
+  await writeFile(reportPath, bytes);
+  console.log(JSON.stringify({ mode: 'openvino-only', sha256: sha256(bytes) }));
   process.exit(0);
 }
 

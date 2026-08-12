@@ -11,10 +11,13 @@ const repositoryHeadAtReplay = git(['rev-parse', 'HEAD']);
 const litertOnly = process.argv.includes('--litert-only');
 const coremlOnly = process.argv.includes('--coreml-only');
 const mindsporeOnly = process.argv.includes('--mindspore-only');
-if ([litertOnly, coremlOnly, mindsporeOnly].filter(Boolean).length > 1) throw new Error('一次只能选择一个 scoped replay 模式');
-const scopedOnly = litertOnly || coremlOnly || mindsporeOnly;
+const openvinoOnly = process.argv.includes('--openvino-only');
+if ([litertOnly, coremlOnly, mindsporeOnly, openvinoOnly].filter(Boolean).length > 1) throw new Error('一次只能选择一个 scoped replay 模式');
+const scopedOnly = litertOnly || coremlOnly || mindsporeOnly || openvinoOnly;
 const previousReplay = scopedOnly
-  ? JSON.parse(await readFile(outputPath, 'utf8'))
+  ? JSON.parse(openvinoOnly
+    ? execFileSync('git', ['show', 'HEAD:evidence/replay/task1-replay.json'], { cwd: root, encoding: 'utf8' })
+    : await readFile(outputPath, 'utf8'))
   : null;
 const outputs = [
   'evidence/model/model-contract.json',
@@ -29,14 +32,17 @@ const outputs = [
   'evidence/conversions/coreml-artifact-manifest.json',
   'evidence/conversions/litert-artifact-manifest.json',
   'evidence/conversions/mindspore-artifact-manifest.json',
+  'evidence/conversions/openvino-ep-manifest.json',
   'evidence/reports/coreml-conversion-report.json',
   'evidence/reports/litert-conversion-report.json',
   'evidence/reports/litert-golden-report.json',
   'evidence/reports/mindspore-conversion-report.json',
   'evidence/reports/mindspore-golden-report.json',
+  'evidence/reports/openvino-ep-report.json',
   'evidence/tooling/coreml-requirements.lock',
   'evidence/tooling/litert-requirements.lock',
   'evidence/tooling/mindspore-python-addons.lock',
+  'evidence/tooling/openvino-requirements.lock',
 ];
 const commonInputs = ['models/yolov8n.onnx', 'evidence/fixtures/manifest.json'];
 const steps = [];
@@ -55,16 +61,22 @@ if (scopedOnly) {
     outputPaths: outputs,
   }));
 }
-steps.push(await runRepeatedStep({
-  root,
-  id: 'production-raw-golden',
-  command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml',
-  executable: 'cargo',
-  args: ['test', '--offline', '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml'],
-  inputPaths: ['evidence/fixtures/raw/overlap-nms.json', 'src/postprocess.rs'],
-  outputPaths: [],
-}));
-const conversionMode = coremlOnly ? '--coreml-only' : mindsporeOnly ? '--mindspore-only' : '--litert-only';
+if (openvinoOnly) {
+  const previousRawGolden = previousReplay.steps.find((step) => step.id === 'production-raw-golden');
+  if (!previousRawGolden) throw new Error('历史 task1 replay 缺少 production-raw-golden');
+  steps.push(previousRawGolden);
+} else {
+  steps.push(await runRepeatedStep({
+    root,
+    id: 'production-raw-golden',
+    command: 'cargo test --offline --manifest-path evidence/tooling/raw-golden/Cargo.toml',
+    executable: 'cargo',
+    args: ['test', '--offline', '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml'],
+    inputPaths: ['evidence/fixtures/raw/overlap-nms.json', 'src/postprocess.rs'],
+    outputPaths: [],
+  }));
+}
+const conversionMode = coremlOnly ? '--coreml-only' : mindsporeOnly ? '--mindspore-only' : openvinoOnly ? '--openvino-only' : '--litert-only';
 const conversionInputs = coremlOnly
   ? [
       'evidence/conversions/conversion-spikes.json',
@@ -80,23 +92,35 @@ const conversionInputs = coremlOnly
         'evidence/reports/mindspore-conversion-report.json',
         'evidence/reports/mindspore-golden-report.json',
       ]
-      : [
+      : openvinoOnly
+        ? [
+          'evidence/conversions/conversion-spikes.json',
+          'evidence/conversions/openvino-ep-manifest.json',
+          'evidence/reports/openvino-ep-report.json',
+        ]
+        : [
       'evidence/conversions/conversion-spikes.json',
       'evidence/conversions/litert-artifact-manifest.json',
       'evidence/reports/handoff-model-audit.json',
       'evidence/reports/litert-conversion-report.json',
       'evidence/reports/litert-golden-report.json',
     ];
-steps.push(await runRepeatedStep({
-  root,
-  id: 'conversion-report-regeneration',
-  command: `node evidence/scripts/run_conversion_spikes.mjs ${conversionMode}`,
-  executable: 'node',
-  args: ['evidence/scripts/run_conversion_spikes.mjs', conversionMode],
-  inputPaths: conversionInputs,
-  outputPaths: ['evidence/conversions/conversion-spikes.json'],
-}));
-if (coremlOnly || mindsporeOnly) {
+if (openvinoOnly) {
+  const previousConversion = previousReplay.steps.find((step) => step.id === 'conversion-report-regeneration');
+  if (!previousConversion) throw new Error('历史 task1 replay 缺少 conversion-report-regeneration');
+  steps.push(previousConversion);
+} else {
+  steps.push(await runRepeatedStep({
+    root,
+    id: 'conversion-report-regeneration',
+    command: `node evidence/scripts/run_conversion_spikes.mjs ${conversionMode}`,
+    executable: 'node',
+    args: ['evidence/scripts/run_conversion_spikes.mjs', conversionMode],
+    inputPaths: conversionInputs,
+    outputPaths: ['evidence/conversions/conversion-spikes.json'],
+  }));
+}
+if (coremlOnly || mindsporeOnly || openvinoOnly) {
   const previousLitert = previousReplay.steps.find((step) => step.id === 'android-litert-conversion-and-host-golden');
   if (!previousLitert) throw new Error('历史 task1 replay 缺少 LiteRT replay');
   steps.push(previousLitert);
@@ -149,7 +173,7 @@ if (coremlOnly || mindsporeOnly) {
   });
 }
 
-if (litertOnly || mindsporeOnly) {
+if (litertOnly || mindsporeOnly || openvinoOnly) {
   const previousCoreml = previousReplay.steps.find((step) => step.id === 'apple-coreml-conversion-and-spec-inspection');
   if (previousCoreml) steps.push(previousCoreml);
 } else {
@@ -210,7 +234,7 @@ if (litertOnly || mindsporeOnly) {
   });
 }
 
-if (litertOnly || coremlOnly) {
+if (litertOnly || coremlOnly || openvinoOnly) {
   const previousMindspore = previousReplay.steps.find((step) => step.id === 'harmonyos-mindspore-conversion-and-host-golden');
   if (!previousMindspore) throw new Error('历史 task1 replay 缺少 MindSpore replay');
   steps.push(previousMindspore);
@@ -273,10 +297,49 @@ if (litertOnly || coremlOnly) {
     },
   });
 }
+if (openvinoOnly) {
+  const replay = JSON.parse(await readFile(resolve(root, '.evidence/openvino/replay-final/openvino-replay.json'), 'utf8'));
+  const openvinoCommand = '$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final';
+  steps.push({
+    id: 'linux-x86_64-openvino-provider-host-golden',
+    command: openvinoCommand,
+    executed: true,
+    blockedReason: null,
+    mode: replay.mode,
+    recordDigest: replay.recordDigest,
+    trackedEvidence: replay.trackedEvidence,
+    rounds: replay.rounds.map((round) => ({
+      run: round.round,
+      actualCommand: openvinoCommand,
+      startedAt: round.startedAt,
+      endedAt: round.endedAt,
+      exitCode: round.exitCode,
+      signal: null,
+      repositoryHead: repositoryHeadAtReplay,
+      runnerId: runnerIdentity().id,
+      availableProviders: round.availableProviders,
+      sessionProviders: round.sessionProviders,
+      executionPlan: round.profile.executionPlan,
+      profileNodeCounts: round.profile.uniqueNodeCounts,
+      hostFixtureCount: round.fixtures.length,
+      runsPerFixture: round.fixtures[0].runs.length,
+      outputDigests: round.fixtures.map((fixture) => ({ id: fixture.id, sha256: fixture.runs[0].raw.sha256 })),
+    })),
+    repeatComparison: {
+      runs: replay.rounds.length,
+      allExitCodesZero: replay.rounds.every((round) => round.exitCode === 0),
+      deterministicOutputDigestsEqual: replay.rounds[0].fixtures.every((fixture, index) => fixture.runs[0].raw.sha256 === replay.rounds[1].fixtures[index].runs[0].raw.sha256),
+      trackedEvidenceUnchanged: Object.values(replay.trackedEvidence).every((item) => item.unchanged),
+    },
+  });
+} else if (scopedOnly) {
+  const previousOpenvino = previousReplay.steps.find((step) => step.id === 'linux-x86_64-openvino-provider-host-golden');
+  if (previousOpenvino) steps.push(previousOpenvino);
+}
 steps.push(blockedStep(
   'delegated-platform-spikes',
-  'Windows ML/Linux accelerated provider platform commands and real Apple/Android/HarmonyOS runtime commands',
-  'MindSpore Lite 已完成 Linux host artifact/inference/golden，但缺 HarmonyOS 真机；Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 与加速 Linux provider 仍缺完整平台证据。',
+  'Windows ML、Linux CUDA/TensorRT 与真实 Apple/Android/HarmonyOS runtime commands',
+  'Linux x86_64 OpenVINO host inference 已验证；CUDA/TensorRT 未处理。MindSpore Lite 缺 HarmonyOS 真机，Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 缺真实 runner。',
 ));
 const artifacts = [];
 for (const path of outputs) {
@@ -293,7 +356,7 @@ const manifest = {
     fixtureSourceCommit: '42ef8a125df038dcca49f6216f446fe9112946c1',
   },
   runner: runnerIdentity(),
-  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', coremltools: '9.0', litertRuntime: '2.1.6', litertTorch: '0.9.3', mindsporeLite: '2.7.0' },
+  tools: { node: toolVersion(root, 'node', ['--version']), bun: toolVersion(root, 'bun', ['--version']), cargo: toolVersion(root, 'cargo', ['--version']), onnxruntimeWeb: '1.27.0', onnxruntimeOpenvino: '1.24.1', openvinoRuntime: '2025.4.1', coremltools: '9.0', litertRuntime: '2.1.6', litertTorch: '0.9.3', mindsporeLite: '2.7.0' },
   immutableLogEvidence: { kind: 'embedded-in-manifest', path: 'evidence/replay/task1-replay.json', ciJobUrl: process.env.CI_JOB_URL ?? null },
   steps,
   outputs: artifacts,

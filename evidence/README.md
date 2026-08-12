@@ -110,6 +110,31 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 ## 状态判定
 
+Linux x86_64 OpenVINO provider spike 使用官方 `onnxruntime-openvino==1.24.1` CPython 3.12 manylinux wheel；该 wheel 内置 OpenVINO Runtime `2025.4.1`。完整传递依赖、每个 wheel 的 SHA-256 与精确版本固定在 `evidence/tooling/openvino-requirements.lock`，官方 PyPI 下载 URL、许可证字段、ORT build commit、实际映射的 ORT/OpenVINO shared library bytes/SHA、host/CPU/kernel/glibc、OpenVINO CPU device/plugin introspection 则记录在 `evidence/conversions/openvino-ep-manifest.json`。本 spike 不做模型转换，只读取唯一 `models/yolov8n.onnx`；runtime、wheel、cache、profile 和 raw tensor 仅进入 ignored `.evidence/openvino/`，不进入 Git、RimeCut、产品包或发布目录。
+
+建立并执行 record：
+
+```sh
+RIMEFLOW_OPENVINO_VENV=.evidence/openvino/venv node evidence/scripts/prepare_openvino_tooling.mjs
+.evidence/openvino/venv/bin/python evidence/scripts/run_openvino_replay.py \
+  --workspace .evidence/openvino/record \
+  --record
+node evidence/scripts/run_conversion_spikes.mjs --openvino-only
+```
+
+只有 `--record` 在两轮、每轮五个 fixture 各两次 OpenVINO inference、真实 ORT profile、冻结 raw/decoded 比较、生产 Rust decode/NMS 与确定性全部通过后，才原子更新 tracked manifest/report。session 明确按 `OpenVINOExecutionProvider`、`CPUExecutionProvider` 顺序创建，并指定 OpenVINO `device_type=CPU`。record 的每轮 profile 包含 10 次 `OpenVINOExecutionProvider` execution event，唯一图节点统计为 OpenVINO 1、CPU 0，所以该模型/host/run 的 `executionPlan=full`；若以后 profile 出现 CPU 节点必须报告 `partitioned`，无 OpenVINO 节点则保持 `blocked`。
+
+独立普通 replay 使用第二个 hash-locked venv，且不得修改 tracked evidence：
+
+```sh
+RIMEFLOW_OPENVINO_VENV=.evidence/openvino/replay-venv node evidence/scripts/prepare_openvino_tooling.mjs
+.evidence/openvino/replay-venv/bin/python evidence/scripts/run_openvino_replay.py \
+  --workspace .evidence/openvino/replay
+node evidence/scripts/test_openvino_replay_guards.mjs
+```
+
+普通 replay 只写 ignored workspace，并在执行前后比较 tracked manifest/report 的 bytes/SHA；record 与 replay 的语义 digest 必须一致。五个图片 fixture 都通过 runtime metadata、Shape/dtype/元素数、全有限值、同轮重复、两轮 replay、冻结 raw tolerance、class/confidence/bbox/IoU 以及生产 `src/postprocess.rs` decode/NMS。OpenVINO 专用 decode/NMS 未增加，NMS 仍由 operator 负责。该结果只将 Linux x86_64 OpenVINO 子项提升到 `host-inference-verified`；adapter、性能、打包和任务 1.4 全平台闭环均未完成，因此 `supported=false`、`task14Complete=false`，OpenSpec 1.4 仍不勾选。
+
 Apple 已通过官方 `.pt`/Ultralytics/Core ML 路径生成 ML Program `.mlpackage` 并由 coremltools spec API 完成真实结构检查。输入由 ONNX FLOAT MultiArray 语义变为 Core ML RGB Image feature `image`/index 0/640×640，ML Program 函数张量仍为 NCHW FLOAT32 `[1,3,640,640]`；模型图融合 RGB image conversion 和 `1/255` 缩放，不融合 letterbox resize/padding。输出为 `var_911`/index 0/FLOAT32 `[1,84,8400]`，仍是 attributes-first；真实 stride blob 为 6400 个 8、1600 个 16、400 个 32，bbox 直接乘 stride 后作为 640×640 输入像素单位 `xywh` 输出。129 个外置 blob constant 和全部浮点 op 输出均为 FLOAT32，图中不存在 FLOAT16 或 NMS op。Linux 只能保存/解析 `.mlpackage`，不能调用 Core ML runtime，因此 macOS/iOS Load/Run、golden、包加载和性能仍未验证，Apple 仅为 `artifact-spec-verified`，`supported=false`。
 
 Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。HarmonyOS MindSpore Lite 已达到 Linux host `host-inference-verified`，但没有 HarmonyOS 真机证据。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。

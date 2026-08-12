@@ -878,59 +878,56 @@
       "conclusion": "cpu provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。"
     },
     {
-      "platform": "linux-x86_64-openvino",
-      "format": "onnx",
-      "state": "blocked",
-      "tool": {
-        "name": "onnxruntime-node",
-        "version": "1.24.3"
-      },
-      "attempt": {
-        "command": [
-          "onnxruntime-node@1.24.3",
-          "InferenceSession.create+run",
-          "--execution-provider=openvino"
-        ],
-        "runtimeVersion": "1.24.3",
-        "requestedProvider": "openvino",
-        "configuredProviders": [
-          "openvino"
-        ],
-        "bundledBackends": [
-          {
-            "name": "cpu",
-            "bundled": true
-          },
-          {
-            "name": "webgpu",
-            "bundled": true
-          },
-          {
-            "name": "cuda",
-            "bundled": false
-          },
-          {
-            "name": "tensorrt",
-            "bundled": false
-          }
-        ],
-        "fixtureId": "single-target",
-        "canonicalInputSha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
-        "exitCode": 1,
-        "inferenceExecuted": false,
-        "error": "Error: no available backend found. ERR: [openvino] backend not found."
-      },
       "artifact": {
+        "bytes": 12851098,
+        "format": "ONNX",
+        "noConversion": true,
         "path": "models/yolov8n.onnx",
+        "sameCanonicalFileLoaded": true,
         "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
       },
+      "artifactVerified": true,
+      "attempt": {
+        "availableProviders": [
+          "OpenVINOExecutionProvider",
+          "CPUExecutionProvider"
+        ],
+        "command": [
+          "$OPENVINO_VENV/bin/python",
+          "evidence/scripts/run_openvino_replay.py",
+          "--workspace",
+          ".evidence/openvino/record",
+          "--record"
+        ],
+        "executionPlan": "full",
+        "goldenPassed": true,
+        "inferenceExecuted": true,
+        "profileNodeCounts": {
+          "CPUExecutionProvider": 0,
+          "OpenVINOExecutionProvider": 1,
+          "unknown": 0
+        },
+        "sessionProviders": [
+          "OpenVINOExecutionProvider",
+          "CPUExecutionProvider"
+        ]
+      },
+      "conclusion": "官方 onnxruntime-openvino wheel 在 Linux x86_64 host 上实际执行 OpenVINO 图节点并通过五 fixture 冻结 golden；尚无 adapter、性能、打包和任务 1.4 全平台闭环。",
+      "format": "onnx",
+      "hostInferenceVerified": true,
       "ioChanges": "none",
-      "quantization": "none",
+      "license": "ONNX Runtime wheel is MIT and includes third-party notices; bundled OpenVINO runtime is Apache-2.0 with bundled notices. Preserve notices when redistributing. This spike does not redistribute the runtime or model.",
       "nmsResponsibility": "operator",
-      "failedOperator": "provider/session initialization before graph execution",
-      "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
-      "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "openvino provider 未能进入固定输入 inference，保持 blocked。"
+      "platform": "linux-x86_64-openvino",
+      "quantization": "none / float32",
+      "state": "host-inference-verified",
+      "supported": false,
+      "task14Complete": false,
+      "tool": {
+        "name": "onnxruntime-openvino",
+        "openvinoVersion": "2025.4.1-0-test",
+        "version": "1.24.1"
+      }
     },
     {
       "platform": "linux-x86_64-cuda",

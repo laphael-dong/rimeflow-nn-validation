@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "repository": "rimeflow-yolov8n",
   "repositoryHeadAtReplay": {
-    "commit": "5621fbc996eb576aa37ba997f5eb22039bb20496",
+    "commit": "b2c79e9e79b15588a8f41a90e1be4bb78e5f2c19",
     "kind": "evidence-input-head",
     "finalEvidenceCommitRecordedByGit": true
   },
@@ -46,6 +46,8 @@
       "stderr": ""
     },
     "onnxruntimeWeb": "1.27.0",
+    "onnxruntimeOpenvino": "1.24.1",
+    "openvinoRuntime": "2025.4.1",
     "coremltools": "9.0",
     "litertRuntime": "2.1.6",
     "litertTorch": "0.9.3",
@@ -1445,10 +1447,154 @@
       }
     },
     {
+      "id": "linux-x86_64-openvino-provider-host-golden",
+      "command": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
+      "executed": true,
+      "blockedReason": null,
+      "mode": "replay",
+      "recordDigest": "1fc4619a93ec92017c33f53db2392018e4e3584fa342fa2bf3a0581d3fdf14f5",
+      "trackedEvidence": {
+        "manifest": {
+          "after": {
+            "available": true,
+            "bytes": 12174,
+            "path": "evidence/conversions/openvino-ep-manifest.json",
+            "sha256": "573a0a2cd5515fbfaad6d5b194043321f9bf92bcc68bb684cc0d057966462441"
+          },
+          "before": {
+            "available": true,
+            "bytes": 12174,
+            "path": "evidence/conversions/openvino-ep-manifest.json",
+            "sha256": "573a0a2cd5515fbfaad6d5b194043321f9bf92bcc68bb684cc0d057966462441"
+          },
+          "unchanged": true
+        },
+        "report": {
+          "after": {
+            "available": true,
+            "bytes": 92805,
+            "path": "evidence/reports/openvino-ep-report.json",
+            "sha256": "0f7118c4309663198bcb0f9341a6b1ad9f0d80e69e3127b9158d452d829ca9b8"
+          },
+          "before": {
+            "available": true,
+            "bytes": 92805,
+            "path": "evidence/reports/openvino-ep-report.json",
+            "sha256": "0f7118c4309663198bcb0f9341a6b1ad9f0d80e69e3127b9158d452d829ca9b8"
+          },
+          "unchanged": true
+        }
+      },
+      "rounds": [
+        {
+          "run": 1,
+          "actualCommand": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
+          "startedAt": "2026-08-12T04:03:06.618852Z",
+          "endedAt": "2026-08-12T04:03:07.130752Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "b2c79e9e79b15588a8f41a90e1be4bb78e5f2c19",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "availableProviders": [
+            "OpenVINOExecutionProvider",
+            "CPUExecutionProvider"
+          ],
+          "sessionProviders": [
+            "OpenVINOExecutionProvider",
+            "CPUExecutionProvider"
+          ],
+          "executionPlan": "full",
+          "profileNodeCounts": {
+            "CPUExecutionProvider": 0,
+            "OpenVINOExecutionProvider": 1,
+            "unknown": 0
+          },
+          "hostFixtureCount": 5,
+          "runsPerFixture": 2,
+          "outputDigests": [
+            {
+              "id": "no-detection",
+              "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d"
+            },
+            {
+              "id": "single-target",
+              "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf"
+            },
+            {
+              "id": "multi-class",
+              "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1"
+            },
+            {
+              "id": "boundary-box",
+              "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127"
+            },
+            {
+              "id": "extreme-aspect",
+              "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9"
+            }
+          ]
+        },
+        {
+          "run": 2,
+          "actualCommand": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
+          "startedAt": "2026-08-12T04:03:09.072499Z",
+          "endedAt": "2026-08-12T04:03:09.525381Z",
+          "exitCode": 0,
+          "signal": null,
+          "repositoryHead": "b2c79e9e79b15588a8f41a90e1be4bb78e5f2c19",
+          "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+          "availableProviders": [
+            "OpenVINOExecutionProvider",
+            "CPUExecutionProvider"
+          ],
+          "sessionProviders": [
+            "OpenVINOExecutionProvider",
+            "CPUExecutionProvider"
+          ],
+          "executionPlan": "full",
+          "profileNodeCounts": {
+            "CPUExecutionProvider": 0,
+            "OpenVINOExecutionProvider": 1,
+            "unknown": 0
+          },
+          "hostFixtureCount": 5,
+          "runsPerFixture": 2,
+          "outputDigests": [
+            {
+              "id": "no-detection",
+              "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d"
+            },
+            {
+              "id": "single-target",
+              "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf"
+            },
+            {
+              "id": "multi-class",
+              "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1"
+            },
+            {
+              "id": "boundary-box",
+              "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127"
+            },
+            {
+              "id": "extreme-aspect",
+              "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9"
+            }
+          ]
+        }
+      ],
+      "repeatComparison": {
+        "runs": 2,
+        "allExitCodesZero": true,
+        "deterministicOutputDigestsEqual": true,
+        "trackedEvidenceUnchanged": true
+      }
+    },
+    {
       "id": "delegated-platform-spikes",
-      "command": "Windows ML/Linux accelerated provider platform commands and real Apple/Android/HarmonyOS runtime commands",
+      "command": "Windows ML、Linux CUDA/TensorRT 与真实 Apple/Android/HarmonyOS runtime commands",
       "executed": false,
-      "blockedReason": "MindSpore Lite 已完成 Linux host artifact/inference/golden，但缺 HarmonyOS 真机；Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 与加速 Linux provider 仍缺完整平台证据。",
+      "blockedReason": "Linux x86_64 OpenVINO host inference 已验证；CUDA/TensorRT 未处理。MindSpore Lite 缺 HarmonyOS 真机，Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 缺真实 runner。",
       "rounds": [],
       "repeatComparison": null
     }
@@ -1471,8 +1617,8 @@
     },
     {
       "path": "evidence/golden/manifest.json",
-      "bytes": 10669,
-      "sha256": "fe5eec1e3e1fb00f31c617559d87eb6dc5f26faa490d272416e83ca7b5b79c8a"
+      "bytes": 11927,
+      "sha256": "d669f3c46d219cbc4151bf63f7099e196c26309866c6195903c13d917d0cedd5"
     },
     {
       "path": "evidence/golden/web-reference.json",
@@ -1496,8 +1642,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 41350,
-      "sha256": "c07e3aa2dad5cd785c42ac9ef5991657221742289eb9c10dc745962b5ff66e6d"
+      "bytes": 41485,
+      "sha256": "80dcae7cb6e45f4a6a4ef496da8e98254d85380225c84512ba85338f3687242b"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -1513,6 +1659,11 @@
       "path": "evidence/conversions/mindspore-artifact-manifest.json",
       "bytes": 20475,
       "sha256": "8c24d4038290accf9a3f319f209c1a9d969370b5cdd1e21b860bf5f4e1c62511"
+    },
+    {
+      "path": "evidence/conversions/openvino-ep-manifest.json",
+      "bytes": 12174,
+      "sha256": "573a0a2cd5515fbfaad6d5b194043321f9bf92bcc68bb684cc0d057966462441"
     },
     {
       "path": "evidence/reports/coreml-conversion-report.json",
@@ -1540,6 +1691,11 @@
       "sha256": "ec5e642369a04acf0dc5dc14f83af70a93c9fcfe042670e4d1bbd4c02f56c50c"
     },
     {
+      "path": "evidence/reports/openvino-ep-report.json",
+      "bytes": 92805,
+      "sha256": "0f7118c4309663198bcb0f9341a6b1ad9f0d80e69e3127b9158d452d829ca9b8"
+    },
+    {
       "path": "evidence/tooling/coreml-requirements.lock",
       "bytes": 4160,
       "sha256": "aeb99c606a6e301e99724eb4fb66dddb0f194558ef6783d2b8db9ab7b6e3e6e8"
@@ -1553,6 +1709,11 @@
       "path": "evidence/tooling/mindspore-python-addons.lock",
       "bytes": 633,
       "sha256": "5f338240181579282a2576e729041f013b2ba72da9dd5fc9e78b9d96315caaae"
+    },
+    {
+      "path": "evidence/tooling/openvino-requirements.lock",
+      "bytes": 872,
+      "sha256": "3e16f87dd96579b5771691fd35056ab3cd125d526815aebc41a7141fbc01f603"
     }
   ],
   "task1_7OwnershipReplayComplete": true,

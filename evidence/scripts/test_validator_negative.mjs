@@ -15,6 +15,9 @@ const expectFailure = async (name, operation) => {
   throw new Error(`negative validator case unexpectedly passed: ${name}`);
 };
 
+const openvinoGuards = spawnSync('node', ['evidence/scripts/test_openvino_replay_guards.mjs'], { cwd: root, encoding: 'utf8' });
+if (openvinoGuards.status !== 0) throw new Error(`OpenVINO replay guard tests failed:\n${openvinoGuards.stdout}\n${openvinoGuards.stderr}`);
+
 const coverage = await readJson('evidence/golden/coverage-matrix.json');
 const missingPath = structuredClone(coverage);
 missingPath.cases.find((item) => item.id === 'overlap-nms').decode.path = 'tests/task1_raw_golden.rs';
