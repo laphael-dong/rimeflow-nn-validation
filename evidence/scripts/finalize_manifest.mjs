@@ -50,6 +50,7 @@ const paths = [
   'evidence/scripts/evidence_validation.mjs',
   'evidence/scripts/openvino_evidence_validation.mjs',
   'evidence/scripts/openvino_durable_publication.py',
+  'evidence/scripts/prepare_openvino_rust_runner.mjs',
   'evidence/scripts/prepare_openvino_tooling.mjs',
   'evidence/scripts/run_openvino_replay.py',
   'evidence/scripts/run_conversion_spikes.mjs',

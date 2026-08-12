@@ -83,10 +83,49 @@ def execute(command: list[str], root: Path) -> dict[str, object]:
     }
 
 
+def build_trusted_rust_runner(root: Path) -> tuple[subprocess.Popen[str], Path, dict[str, object]]:
+    process = subprocess.Popen(
+        ["node", "evidence/scripts/prepare_openvino_rust_runner.mjs"],
+        cwd=root,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    line = process.stdout.readline() if process.stdout else ""
+    if not line:
+        stderr = process.stderr.read() if process.stderr else ""
+        process.wait()
+        raise RuntimeError(f"trusted production raw-golden build failed ({process.returncode}): {stderr}")
+    prepared = json.loads(line)
+    runner = Path(prepared["runner"])
+    if not runner.is_file() or not os.access(runner, os.X_OK) or runner.read_bytes()[:4] != b"\x7fELF":
+        stop_trusted_rust_runner(process)
+        raise RuntimeError("trusted production raw-golden runner response invalid")
+    return process, runner, prepared["provenance"]
+
+
+def stop_trusted_rust_runner(process: subprocess.Popen[str]) -> None:
+    if process.stdin:
+        process.stdin.close()
+    stderr = process.stderr.read() if process.stderr else ""
+    return_code = process.wait()
+    if return_code:
+        raise RuntimeError(f"trusted production Rust cleanup failed ({return_code}): {stderr}")
+
+
 def file_snapshot(path: Path) -> dict[str, object]:
     if not path.is_file():
-        return {"available": False, "bytes": None, "sha256": None}
-    return {"available": True, "bytes": path.stat().st_size, "sha256": sha256(path)}
+        return {"available": False, "bytes": None, "ctimeNs": None, "inode": None, "mtimeNs": None, "sha256": None}
+    metadata = path.stat()
+    return {
+        "available": True,
+        "bytes": metadata.st_size,
+        "ctimeNs": metadata.st_ctime_ns,
+        "inode": metadata.st_ino,
+        "mtimeNs": metadata.st_mtime_ns,
+        "sha256": sha256(path),
+    }
 
 
 def tracked_snapshot(root: Path, required: bool) -> dict[str, dict[str, object]]:
@@ -373,13 +412,8 @@ def main() -> int:
     pip_check = execute([sys.executable, "-m", "pip", "check"], root)
     if install["exitCode"] or pip_check["exitCode"]:
         raise RuntimeError("hash-locked OpenVINO environment verification failed")
-    rust_target = Path(tempfile.mkdtemp(prefix="rimeflow-openvino-record-rust-"))
-    atexit.register(shutil.rmtree, rust_target, ignore_errors=True)
-    rust_build = execute(["cargo", "build", "--offline", "--locked", "--target-dir", str(rust_target), "--manifest-path", "evidence/tooling/raw-golden/Cargo.toml"], root)
-    if rust_build["exitCode"]:
-        shutil.rmtree(rust_target, ignore_errors=True)
-        raise RuntimeError("production raw-golden harness locked build failed")
-    rust_runner = rust_target / "debug/rimeflow-raw-golden"
+    rust_process, rust_runner, production_postprocess = build_trusted_rust_runner(root)
+    atexit.register(stop_trusted_rust_runner, rust_process)
     fixture_manifest = json.loads((root / "evidence/fixtures/manifest.json").read_text())
     frozen = json.loads((root / "evidence/golden/web-reference.json").read_text())
     workspace.mkdir(parents=True, exist_ok=True)
@@ -434,6 +468,7 @@ def main() -> int:
                 decoded_path.parent.mkdir(parents=True, exist_ok=True)
                 output.astype("<f4", copy=False).tofile(raw_path)
                 production = execute([str(rust_runner), str(raw_path), str(entry["width"]), str(entry["height"]), str(decoded_path)], root)
+                production["command"][0] = production_postprocess["runner"]["logicalPath"]
                 if production["exitCode"]:
                     raise RuntimeError(f"{fixture_id}: production decode/NMS failed")
                 decoded = json.loads(decoded_path.read_text())
@@ -452,7 +487,7 @@ def main() -> int:
                     "decoded": decoded,
                     "decodedComparison": decoded_comparison,
                     "passed": passed,
-                    "productionPostprocess": production,
+                    "productionPostprocess": {**production, "runner": production_postprocess["runner"]},
                     "raw": {
                         **artifact(raw_path, str(raw_path.relative_to(root))),
                         "dtype": "float32",
@@ -511,7 +546,11 @@ def main() -> int:
         "modelAfter": model_after,
         "modelBefore": model_before,
         "noConversion": True,
-        "productionPostprocess": {"implementation": "src/postprocess.rs", "platformSpecificImplementationAdded": False},
+        "productionPostprocess": {
+            **production_postprocess,
+            "implementation": "src/postprocess.rs",
+            "platformSpecificImplementationAdded": False,
+        },
         "recordDigest": semantic_digest(rounds),
         "rounds": rounds,
         "schemaVersion": 1,
@@ -537,16 +576,18 @@ def main() -> int:
         after = tracked_snapshot(root, required=True)
         preservation = {}
         for key in TRACKED:
-            unchanged = before[key]["bytes"] == after[key]["bytes"] and before[key]["sha256"] == after[key]["sha256"]
+            unchanged = before[key] == after[key]
             preservation[key] = {"before": before[key], "after": after[key], "unchanged": unchanged}
             if not unchanged:
                 raise RuntimeError(f"ordinary OpenVINO replay changed tracked {key}")
-        replay = {"mode": "replay", "recordDigest": report["recordDigest"], "rounds": rounds, "schemaVersion": 1, "trackedEvidence": preservation}
+        if report["productionPostprocess"] != recorded_report["productionPostprocess"]:
+            raise RuntimeError("ordinary OpenVINO replay production postprocess provenance drift")
+        replay = {"mode": "replay", "productionPostprocess": report["productionPostprocess"], "recordDigest": report["recordDigest"], "rounds": rounds, "schemaVersion": 1, "trackedEvidence": preservation}
         replay_path = workspace / "openvino-replay.json"
         replay_path.write_bytes(stable_bytes(replay))
         result = {"mode": "replay", "recordDigest": report["recordDigest"], "report": str(replay_path), "trackedEvidence": preservation}
-    shutil.rmtree(rust_target, ignore_errors=True)
-    atexit.unregister(shutil.rmtree)
+    stop_trusted_rust_runner(rust_process)
+    atexit.unregister(stop_trusted_rust_runner)
     print(json.dumps(result, sort_keys=True))
     return 0
 

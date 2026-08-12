@@ -28,8 +28,132 @@
   },
   "noConversion": true,
   "productionPostprocess": {
+    "build": {
+      "argv": [
+        "cargo",
+        "build",
+        "--offline",
+        "--locked",
+        "--release",
+        "--manifest-path",
+        "$SOURCE_MIRROR/evidence/tooling/raw-golden/Cargo.toml",
+        "--target-dir",
+        "$CARGO_TARGET_DIR",
+        "--bin",
+        "rimeflow-raw-golden"
+      ],
+      "cargoVersion": "cargo 1.97.1 (c980f4866 2026-06-30)",
+      "clearedEnvironmentVariables": [
+        "RUSTC_WRAPPER",
+        "RUSTC_WORKSPACE_WRAPPER",
+        "RUSTFLAGS",
+        "CARGO_ENCODED_RUSTFLAGS",
+        "CARGO_BUILD_RUSTFLAGS",
+        "CARGO_BUILD_RUSTC_WRAPPER",
+        "CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER",
+        "CARGO_TARGET_DIR",
+        "CARGO_HOME",
+        "CARGO_CONFIG",
+        "RUSTC",
+        "RUSTDOC",
+        "RUSTUP_TOOLCHAIN",
+        "CARGO_BUILD_TARGET",
+        "CARGO_BUILD_JOBS",
+        "CARGO_ALIAS_*",
+        "CARGO_*CONFIG/TARGET/WRAPPER*",
+        "*RUSTFLAGS*",
+        "*RUSTC*WRAPPER*"
+      ],
+      "controlledEnvironment": {
+        "CARGO_HOME": "$FRESH_CARGO_HOME",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_RELEASE_STRIP": "symbols",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "SOURCE_DATE_EPOCH": "0"
+      },
+      "exitCode": 0,
+      "freshTarget": true,
+      "isolatedCargoHome": true,
+      "isolatedSourceMirror": true,
+      "locked": true,
+      "offline": true,
+      "rejectedEnvironmentVariables": [
+        "RUSTC_WRAPPER",
+        "RUSTC_WORKSPACE_WRAPPER",
+        "RUSTFLAGS",
+        "CARGO_ENCODED_RUSTFLAGS",
+        "CARGO_BUILD_RUSTFLAGS",
+        "CARGO_BUILD_RUSTC_WRAPPER",
+        "CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER",
+        "CARGO_TARGET_DIR",
+        "CARGO_HOME",
+        "CARGO_CONFIG",
+        "RUSTC",
+        "RUSTDOC",
+        "RUSTUP_TOOLCHAIN",
+        "CARGO_BUILD_TARGET",
+        "CARGO_BUILD_JOBS",
+        "CARGO_ALIAS_*",
+        "CARGO_*CONFIG/TARGET/WRAPPER*",
+        "*RUSTFLAGS*",
+        "*RUSTC*WRAPPER*"
+      ],
+      "releaseStrip": "symbols",
+      "repositoryRootCargoConfigParticipated": false,
+      "rustcVersion": "rustc 1.97.1 (8bab26f4f 2026-07-14)"
+    },
     "implementation": "src/postprocess.rs",
-    "platformSpecificImplementationAdded": false
+    "platformSpecificImplementationAdded": false,
+    "runner": {
+      "bytes": 418064,
+      "elf": {
+        "class": "ELF64",
+        "endianness": "little",
+        "machine": "x86_64",
+        "magic": "7f454c46",
+        "osAbi": 0
+      },
+      "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+      "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+    },
+    "sourceArtifacts": [
+      {
+        "bytes": 165,
+        "canonicalPath": "evidence/tooling/raw-golden/Cargo.toml",
+        "headBlobOid": "0d2e1bc9e3fc4d5ac5f5cf6a01cbf87868799fe4",
+        "path": "evidence/tooling/raw-golden/Cargo.toml",
+        "sha256": "8027af80bec76f757253743a1ef1414e31ce449ab1c8fa5391223b33a2378b0f"
+      },
+      {
+        "bytes": 2855,
+        "canonicalPath": "evidence/tooling/raw-golden/Cargo.lock",
+        "headBlobOid": "06c9be3b4e6173736804cde982a3985bc971d8e5",
+        "path": "evidence/tooling/raw-golden/Cargo.lock",
+        "sha256": "560c0ef10865895cd739c0971566564e727b83014ff4f1da3adbe561fa5581e6"
+      },
+      {
+        "bytes": 1770,
+        "canonicalPath": "evidence/tooling/raw-golden/src/main.rs",
+        "headBlobOid": "4eefa78a1bcbf333d5deb31b9e7de05f4980a0d4",
+        "path": "evidence/tooling/raw-golden/src/main.rs",
+        "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
+      },
+      {
+        "bytes": 4428,
+        "canonicalPath": "evidence/tooling/raw-golden/src/lib.rs",
+        "headBlobOid": "f02c07e8a36171ec298fac615457b242cc832653",
+        "path": "evidence/tooling/raw-golden/src/lib.rs",
+        "sha256": "90b7a373ee51547ef5543bd61f37a39c36471d70a0afc7e91917566711933e31"
+      },
+      {
+        "bytes": 2910,
+        "canonicalPath": "src/postprocess.rs",
+        "headBlobOid": "98d51d5cebef6057e4f471a8713d69394f62ba86",
+        "path": "src/postprocess.rs",
+        "sha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+      }
+    ]
   },
   "recordDigest": "84f799c553b8b9c478a295260f85342b01f10f9fd3244476bcfe63ec7745f9ee",
   "rounds": [
@@ -42,16 +166,16 @@
         "$OPENVINO_VENV/bin/python",
         "evidence/scripts/run_openvino_replay.py",
         "--workspace",
-        ".evidence/openvino/record-fix02-final",
+        ".evidence/openvino/record-fix03-final",
         "--record"
       ],
-      "endedAt": "2026-08-12T06:51:23.451118Z",
+      "endedAt": "2026-08-12T08:19:35.204053Z",
       "exitCode": 0,
       "fixtures": [
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/web-reference/no-detection/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/web-reference/no-detection/input.f32le",
             "sha256": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b"
           },
           "deterministic": true,
@@ -68,15 +192,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/no-detection-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/no-detection-1.f32le",
                   "640",
                   "640",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/no-detection-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/no-detection-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.065897Z",
+                "endedAt": "2026-08-12T08:19:34.869654Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.054291Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:34.865482Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -84,7 +220,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/no-detection-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/no-detection-1.f32le",
                 "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d",
                 "shape": [
                   1,
@@ -116,7 +252,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/no-detection/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/no-detection/raw.f32le",
                   "sha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c",
                   "shape": [
                     1,
@@ -140,15 +276,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/no-detection-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/no-detection-2.f32le",
                   "640",
                   "640",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/no-detection-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/no-detection-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.107523Z",
+                "endedAt": "2026-08-12T08:19:34.907125Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.096651Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:34.903949Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -156,7 +304,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/no-detection-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/no-detection-2.f32le",
                 "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d",
                 "shape": [
                   1,
@@ -188,7 +336,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/no-detection/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/no-detection/raw.f32le",
                   "sha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c",
                   "shape": [
                     1,
@@ -206,7 +354,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/web-reference/single-target/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/web-reference/single-target/input.f32le",
             "sha256": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe"
           },
           "deterministic": true,
@@ -242,15 +390,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/single-target-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/single-target-1.f32le",
                   "768",
                   "900",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/single-target-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/single-target-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.148783Z",
+                "endedAt": "2026-08-12T08:19:34.944817Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.138381Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:34.941635Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -258,7 +418,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/single-target-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/single-target-1.f32le",
                 "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf",
                 "shape": [
                   1,
@@ -290,7 +450,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/single-target/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/single-target/raw.f32le",
                   "sha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212",
                   "shape": [
                     1,
@@ -333,15 +493,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/single-target-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/single-target-2.f32le",
                   "768",
                   "900",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/single-target-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/single-target-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.186980Z",
+                "endedAt": "2026-08-12T08:19:34.977135Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.176681Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:34.973956Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -349,7 +521,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/single-target-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/single-target-2.f32le",
                 "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf",
                 "shape": [
                   1,
@@ -381,7 +553,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/single-target/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/single-target/raw.f32le",
                   "sha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212",
                   "shape": [
                     1,
@@ -399,7 +571,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/web-reference/multi-class/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/web-reference/multi-class/input.f32le",
             "sha256": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c"
           },
           "deterministic": true,
@@ -503,15 +675,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/multi-class-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/multi-class-1.f32le",
                   "810",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/multi-class-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/multi-class-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.233157Z",
+                "endedAt": "2026-08-12T08:19:35.011483Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.221596Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.008260Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -519,7 +703,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/multi-class-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/multi-class-1.f32le",
                 "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1",
                 "shape": [
                   1,
@@ -551,7 +735,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/multi-class/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/multi-class/raw.f32le",
                   "sha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0",
                   "shape": [
                     1,
@@ -662,15 +846,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/multi-class-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/multi-class-2.f32le",
                   "810",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/multi-class-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/multi-class-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.276170Z",
+                "endedAt": "2026-08-12T08:19:35.046257Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.265397Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.043122Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -678,7 +874,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/multi-class-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/multi-class-2.f32le",
                 "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1",
                 "shape": [
                   1,
@@ -710,7 +906,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/multi-class/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/multi-class/raw.f32le",
                   "sha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0",
                   "shape": [
                     1,
@@ -728,7 +924,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/web-reference/boundary-box/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/web-reference/boundary-box/input.f32le",
             "sha256": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0"
           },
           "deterministic": true,
@@ -832,15 +1028,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/boundary-box-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/boundary-box-1.f32le",
                   "809",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/boundary-box-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/boundary-box-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.316769Z",
+                "endedAt": "2026-08-12T08:19:35.081863Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.306597Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.078636Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -848,7 +1056,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/boundary-box-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/boundary-box-1.f32le",
                 "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127",
                 "shape": [
                   1,
@@ -880,7 +1088,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/boundary-box/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/boundary-box/raw.f32le",
                   "sha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5",
                   "shape": [
                     1,
@@ -991,15 +1199,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/boundary-box-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/boundary-box-2.f32le",
                   "809",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/boundary-box-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/boundary-box-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.353497Z",
+                "endedAt": "2026-08-12T08:19:35.114562Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.343218Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.111217Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1007,7 +1227,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/boundary-box-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/boundary-box-2.f32le",
                 "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127",
                 "shape": [
                   1,
@@ -1039,7 +1259,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/boundary-box/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/boundary-box/raw.f32le",
                   "sha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5",
                   "shape": [
                     1,
@@ -1057,7 +1277,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/web-reference/extreme-aspect/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/web-reference/extreme-aspect/input.f32le",
             "sha256": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf"
           },
           "deterministic": true,
@@ -1093,15 +1313,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/extreme-aspect-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/extreme-aspect-1.f32le",
                   "1280",
                   "128",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/extreme-aspect-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/extreme-aspect-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.395402Z",
+                "endedAt": "2026-08-12T08:19:35.155255Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.385085Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.150004Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1109,7 +1341,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/extreme-aspect-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/extreme-aspect-1.f32le",
                 "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9",
                 "shape": [
                   1,
@@ -1141,7 +1373,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/extreme-aspect/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/extreme-aspect/raw.f32le",
                   "sha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686",
                   "shape": [
                     1,
@@ -1184,15 +1416,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/raw/extreme-aspect-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/raw/extreme-aspect-2.f32le",
                   "1280",
                   "128",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-1/decoded/extreme-aspect-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-1/decoded/extreme-aspect-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:23.436290Z",
+                "endedAt": "2026-08-12T08:19:35.189242Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:23.426109Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:35.185455Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1200,7 +1444,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-1/raw/extreme-aspect-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-1/raw/extreme-aspect-2.f32le",
                 "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9",
                 "shape": [
                   1,
@@ -1232,7 +1476,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-1/web-reference/extreme-aspect/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-1/web-reference/extreme-aspect/raw.f32le",
                   "sha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686",
                   "shape": [
                     1,
@@ -1323,8 +1567,8 @@
             "provider": "OpenVINOExecutionProvider"
           }
         ],
-        "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-1/ort-profile_2026-08-12_14-51-22.json",
-        "sha256": "0bc284bf377671ed27c87b5b2316b1c899c6f6cd6ae14a0c21f721c94184d7ae",
+        "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/ort-profile_2026-08-12_16-19-34.json",
+        "sha256": "db0fe68e10345a08b02385cfa5384ac0a5fb4ff6ecc5349d7647ff950d3f980f",
         "uniqueNodeCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 1,
@@ -1340,16 +1584,16 @@
         "OpenVINOExecutionProvider",
         "CPUExecutionProvider"
       ],
-      "startedAt": "2026-08-12T06:51:22.869074Z",
+      "startedAt": "2026-08-12T08:19:34.644906Z",
       "webReference": {
         "command": [
           "node",
           "evidence/scripts/export_web_reference_tensors.mjs",
-          "$REPO/.evidence/openvino/record-fix02-final/round-1/web-reference"
+          "$REPO/.evidence/openvino/record-fix03-final/round-1/web-reference"
         ],
-        "endedAt": "2026-08-12T06:51:22.868779Z",
+        "endedAt": "2026-08-12T08:19:34.644695Z",
         "exitCode": 0,
-        "startedAt": "2026-08-12T06:51:20.959419Z",
+        "startedAt": "2026-08-12T08:19:32.588770Z",
         "stderr": "",
         "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n"
       }
@@ -1363,16 +1607,16 @@
         "$OPENVINO_VENV/bin/python",
         "evidence/scripts/run_openvino_replay.py",
         "--workspace",
-        ".evidence/openvino/record-fix02-final",
+        ".evidence/openvino/record-fix03-final",
         "--record"
       ],
-      "endedAt": "2026-08-12T06:51:26.073006Z",
+      "endedAt": "2026-08-12T08:19:37.682461Z",
       "exitCode": 0,
       "fixtures": [
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/web-reference/no-detection/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/web-reference/no-detection/input.f32le",
             "sha256": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b"
           },
           "deterministic": true,
@@ -1389,15 +1633,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/no-detection-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/no-detection-1.f32le",
                   "640",
                   "640",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/no-detection-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/no-detection-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.676720Z",
+                "endedAt": "2026-08-12T08:19:37.373462Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.662434Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.370241Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1405,7 +1661,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/no-detection-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/no-detection-1.f32le",
                 "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d",
                 "shape": [
                   1,
@@ -1437,7 +1693,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/no-detection/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/no-detection/raw.f32le",
                   "sha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c",
                   "shape": [
                     1,
@@ -1461,15 +1717,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/no-detection-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/no-detection-2.f32le",
                   "640",
                   "640",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/no-detection-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/no-detection-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.731478Z",
+                "endedAt": "2026-08-12T08:19:37.407482Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.719645Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.404627Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1477,7 +1745,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/no-detection-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/no-detection-2.f32le",
                 "sha256": "e652be0e403ac26bff7970e1c7ae3fa00376672e9a9897125748ba4da587af3d",
                 "shape": [
                   1,
@@ -1509,7 +1777,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/no-detection/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/no-detection/raw.f32le",
                   "sha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c",
                   "shape": [
                     1,
@@ -1527,7 +1795,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/web-reference/single-target/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/web-reference/single-target/input.f32le",
             "sha256": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe"
           },
           "deterministic": true,
@@ -1563,15 +1831,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/single-target-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/single-target-1.f32le",
                   "768",
                   "900",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/single-target-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/single-target-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.773842Z",
+                "endedAt": "2026-08-12T08:19:37.440892Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.763237Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.437852Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1579,7 +1859,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/single-target-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/single-target-1.f32le",
                 "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf",
                 "shape": [
                   1,
@@ -1611,7 +1891,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/single-target/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/single-target/raw.f32le",
                   "sha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212",
                   "shape": [
                     1,
@@ -1654,15 +1934,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/single-target-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/single-target-2.f32le",
                   "768",
                   "900",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/single-target-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/single-target-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.813691Z",
+                "endedAt": "2026-08-12T08:19:37.472173Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.803055Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.468724Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1670,7 +1962,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/single-target-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/single-target-2.f32le",
                 "sha256": "073440c69593cf19669eb5cfc22df06fcdbf629e7ac305a28cf66242f7761adf",
                 "shape": [
                   1,
@@ -1702,7 +1994,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/single-target/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/single-target/raw.f32le",
                   "sha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212",
                   "shape": [
                     1,
@@ -1720,7 +2012,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/web-reference/multi-class/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/web-reference/multi-class/input.f32le",
             "sha256": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c"
           },
           "deterministic": true,
@@ -1824,15 +2116,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/multi-class-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/multi-class-1.f32le",
                   "810",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/multi-class-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/multi-class-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.854612Z",
+                "endedAt": "2026-08-12T08:19:37.506744Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.843792Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.502606Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1840,7 +2144,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/multi-class-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/multi-class-1.f32le",
                 "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1",
                 "shape": [
                   1,
@@ -1872,7 +2176,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/multi-class/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/multi-class/raw.f32le",
                   "sha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0",
                   "shape": [
                     1,
@@ -1983,15 +2287,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/multi-class-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/multi-class-2.f32le",
                   "810",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/multi-class-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/multi-class-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.897403Z",
+                "endedAt": "2026-08-12T08:19:37.537883Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.886860Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.533873Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -1999,7 +2315,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/multi-class-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/multi-class-2.f32le",
                 "sha256": "e97f377b9670a71b6bdfd6871d2a9061decffb6ab28c464836fd666a976eaab1",
                 "shape": [
                   1,
@@ -2031,7 +2347,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/multi-class/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/multi-class/raw.f32le",
                   "sha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0",
                   "shape": [
                     1,
@@ -2049,7 +2365,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/web-reference/boundary-box/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/web-reference/boundary-box/input.f32le",
             "sha256": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0"
           },
           "deterministic": true,
@@ -2153,15 +2469,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/boundary-box-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/boundary-box-1.f32le",
                   "809",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/boundary-box-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/boundary-box-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.938129Z",
+                "endedAt": "2026-08-12T08:19:37.572182Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.927884Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.567767Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -2169,7 +2497,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/boundary-box-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/boundary-box-1.f32le",
                 "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127",
                 "shape": [
                   1,
@@ -2201,7 +2529,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/boundary-box/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/boundary-box/raw.f32le",
                   "sha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5",
                   "shape": [
                     1,
@@ -2312,15 +2640,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/boundary-box-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/boundary-box-2.f32le",
                   "809",
                   "1080",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/boundary-box-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/boundary-box-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:25.976342Z",
+                "endedAt": "2026-08-12T08:19:37.604157Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:25.965879Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.599956Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -2328,7 +2668,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/boundary-box-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/boundary-box-2.f32le",
                 "sha256": "f088ae6f100b056be22fd9d5cf8e9c1240a8d8c062a27d7cf52b6028395e0127",
                 "shape": [
                   1,
@@ -2360,7 +2700,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/boundary-box/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/boundary-box/raw.f32le",
                   "sha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5",
                   "shape": [
                     1,
@@ -2378,7 +2718,7 @@
         {
           "canonicalInput": {
             "bytes": 4915200,
-            "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/web-reference/extreme-aspect/input.f32le",
+            "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/web-reference/extreme-aspect/input.f32le",
             "sha256": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf"
           },
           "deterministic": true,
@@ -2414,15 +2754,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/extreme-aspect-1.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/extreme-aspect-1.f32le",
                   "1280",
                   "128",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/extreme-aspect-1.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/extreme-aspect-1.json"
                 ],
-                "endedAt": "2026-08-12T06:51:26.019679Z",
+                "endedAt": "2026-08-12T08:19:37.638446Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:26.009260Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.634116Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -2430,7 +2782,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/extreme-aspect-1.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/extreme-aspect-1.f32le",
                 "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9",
                 "shape": [
                   1,
@@ -2462,7 +2814,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/extreme-aspect/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/extreme-aspect/raw.f32le",
                   "sha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686",
                   "shape": [
                     1,
@@ -2505,15 +2857,27 @@
               "passed": true,
               "productionPostprocess": {
                 "command": [
-                  "$TEMP_CARGO_TARGET/debug/rimeflow-raw-golden",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/raw/extreme-aspect-2.f32le",
+                  "fresh-target/release/rimeflow-raw-golden",
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/raw/extreme-aspect-2.f32le",
                   "1280",
                   "128",
-                  "$REPO/.evidence/openvino/record-fix02-final/round-2/decoded/extreme-aspect-2.json"
+                  "$REPO/.evidence/openvino/record-fix03-final/round-2/decoded/extreme-aspect-2.json"
                 ],
-                "endedAt": "2026-08-12T06:51:26.058190Z",
+                "endedAt": "2026-08-12T08:19:37.666923Z",
                 "exitCode": 0,
-                "startedAt": "2026-08-12T06:51:26.048168Z",
+                "runner": {
+                  "bytes": 418064,
+                  "elf": {
+                    "class": "ELF64",
+                    "endianness": "little",
+                    "machine": "x86_64",
+                    "magic": "7f454c46",
+                    "osAbi": 0
+                  },
+                  "logicalPath": "fresh-target/release/rimeflow-raw-golden",
+                  "sha256": "3bd487e985bd98ef155290e54b0928836cc380740d63ffa93035063ec3467439"
+                },
+                "startedAt": "2026-08-12T08:19:37.663835Z",
                 "stderr": "",
                 "stdout": ""
               },
@@ -2521,7 +2885,7 @@
                 "bytes": 2822400,
                 "dtype": "float32",
                 "elementCount": 705600,
-                "path": ".evidence/openvino/record-fix02-final/round-2/raw/extreme-aspect-2.f32le",
+                "path": ".evidence/openvino/record-fix03-final/round-2/raw/extreme-aspect-2.f32le",
                 "sha256": "c59301ccfd7267ea1461e38f08e9e2c4b1d2108ee02f1c5ea2a175a20a6d10a9",
                 "shape": [
                   1,
@@ -2553,7 +2917,7 @@
                   "bytes": 2822400,
                   "dtype": "float32",
                   "elementCount": 705600,
-                  "path": ".evidence/openvino/record-fix02-final/round-2/web-reference/extreme-aspect/raw.f32le",
+                  "path": ".evidence/openvino/record-fix03-final/round-2/web-reference/extreme-aspect/raw.f32le",
                   "sha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686",
                   "shape": [
                     1,
@@ -2595,7 +2959,7 @@
         }
       ],
       "profile": {
-        "bytes": 12969,
+        "bytes": 12967,
         "executionEventCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 10,
@@ -2644,8 +3008,8 @@
             "provider": "OpenVINOExecutionProvider"
           }
         ],
-        "path": "/tmp/rimeflow-task14-openvino-fix02/.evidence/openvino/record-fix02-final/round-2/ort-profile_2026-08-12_14-51-25.json",
-        "sha256": "9d9cc9ebfd833e435ccd48dc13d70dd2bc278b3cdd6e8c0738e09c5014810862",
+        "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/ort-profile_2026-08-12_16-19-37.json",
+        "sha256": "190f45d1172bc77f236d0c24f3bb15ddc2b363b8e6efaedb82e8487febb5fe0a",
         "uniqueNodeCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 1,
@@ -2661,16 +3025,16 @@
         "OpenVINOExecutionProvider",
         "CPUExecutionProvider"
       ],
-      "startedAt": "2026-08-12T06:51:25.460793Z",
+      "startedAt": "2026-08-12T08:19:37.211591Z",
       "webReference": {
         "command": [
           "node",
           "evidence/scripts/export_web_reference_tensors.mjs",
-          "$REPO/.evidence/openvino/record-fix02-final/round-2/web-reference"
+          "$REPO/.evidence/openvino/record-fix03-final/round-2/web-reference"
         ],
-        "endedAt": "2026-08-12T06:51:25.460470Z",
+        "endedAt": "2026-08-12T08:19:37.211264Z",
         "exitCode": 0,
-        "startedAt": "2026-08-12T06:51:23.457714Z",
+        "startedAt": "2026-08-12T08:19:35.209631Z",
         "stderr": "",
         "stdout": "{\"fixtureCount\":5,\"fixtures\":[{\"id\":\"no-detection\",\"image\":{\"width\":640,\"height\":640},\"input\":{\"bytes\":4915200,\"sha256\":\"06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":1,\"padXNormalized\":0,\"padYNormalized\":0,\"padXPixels\":0,\"padYPixels\":0}},{\"id\":\"single-target\",\"image\":{\"width\":768,\"height\":900},\"input\":{\"bytes\":4915200,\"sha256\":\"7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.71111111,\"padXNormalized\":0.07333333,\"padYNormalized\":0,\"padXPixels\":46.93333333,\"padYPixels\":0}},{\"id\":\"multi-class\",\"image\":{\"width\":810,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.125,\"padYNormalized\":0,\"padXPixels\":80,\"padYPixels\":0}},{\"id\":\"boundary-box\",\"image\":{\"width\":809,\"height\":1080},\"input\":{\"bytes\":4915200,\"sha256\":\"bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.59259259,\"padXNormalized\":0.12546296,\"padYNormalized\":0,\"padXPixels\":80.2962963,\"padYPixels\":0}},{\"id\":\"extreme-aspect\",\"image\":{\"width\":1280,\"height\":128},\"input\":{\"bytes\":4915200,\"sha256\":\"ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf\",\"shape\":[1,3,640,640]},\"output\":{\"bytes\":2822400,\"sha256\":\"355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686\",\"shape\":[1,84,8400]},\"preprocessing\":{\"contract\":{\"kind\":\"letterbox\",\"targetSize\":[640,640],\"interpolation\":\"linear\",\"samplerAddressMode\":\"clamp-to-edge\",\"outputPixelCoordinate\":\"u=x/targetWidth; v=y/targetHeight\",\"sourceTexelCoordinate\":\"texel=normalizedCoordinate*sourceSize-0.5\",\"color\":{\"sourceChannels\":[\"R\",\"G\",\"B\",\"A\"],\"modelChannels\":[\"R\",\"G\",\"B\"],\"alpha\":\"ignored\"},\"valueRange\":{\"minimum\":0,\"maximum\":1,\"inclusive\":true},\"normalize\":{\"kind\":\"none\",\"mean\":null,\"standardDeviation\":null,\"scale\":null,\"offset\":null},\"letterbox\":{\"scaleRule\":\"min(targetWidth/sourceWidth,targetHeight/sourceHeight)\",\"scaledDimensionRounding\":\"none-continuous\",\"paddingRule\":\"symmetric-continuous\",\"padXRule\":\"(1-sourceWidth*scale/targetWidth)/2\",\"padYRule\":\"(1-sourceHeight*scale/targetHeight)/2\",\"insideRule\":\"0<=u<=1 && 0<=v<=1\",\"fillRgb\":[0.447,0.447,0.447]}},\"scale\":0.5,\"padXNormalized\":0,\"padYNormalized\":0.45,\"padXPixels\":0,\"padYPixels\":288}}],\"runtime\":{\"name\":\"onnxruntime-web\",\"version\":\"1.27.0\",\"requestedExecutionProviders\":[\"wasm\"],\"actualExecutionProvider\":\"wasm\",\"evidence\":\"session \u4ec5\u914d\u7f6e wasm provider \u4e14\u521d\u59cb\u5316/\u63a8\u7406\u6210\u529f\",\"threads\":1},\"sourceReferenceSha256\":\"114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68\"}\n"
       }

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "repository": "rimeflow-yolov8n",
   "repositoryHeadAtReplay": {
-    "commit": "9385aebba22906920fc0d298bace3ae4a47ecf52",
+    "commit": "b2e28a2c0819a9fa42ae18126d18e83149b0b751",
     "kind": "evidence-input-head",
     "finalEvidenceCommitRecordedByGit": true
   },
@@ -1457,30 +1457,42 @@
         "manifest": {
           "after": {
             "available": true,
-            "bytes": 12125,
+            "bytes": 12181,
+            "ctimeNs": 1786522777780171000,
+            "inode": 17602071,
+            "mtimeNs": 1786522777774936800,
             "path": "evidence/conversions/openvino-ep-manifest.json",
-            "sha256": "911a43b80f63c508496732e17b04d0bda803e0af84f68893d21aef1c915aa9c6"
+            "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
           },
           "before": {
             "available": true,
-            "bytes": 12125,
+            "bytes": 12181,
+            "ctimeNs": 1786522777780171000,
+            "inode": 17602071,
+            "mtimeNs": 1786522777774936800,
             "path": "evidence/conversions/openvino-ep-manifest.json",
-            "sha256": "911a43b80f63c508496732e17b04d0bda803e0af84f68893d21aef1c915aa9c6"
+            "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
           },
           "unchanged": true
         },
         "report": {
           "after": {
             "available": true,
-            "bytes": 118357,
+            "bytes": 132379,
+            "ctimeNs": 1786522777780995600,
+            "inode": 17602073,
+            "mtimeNs": 1786522777777657300,
             "path": "evidence/reports/openvino-ep-report.json",
-            "sha256": "07b7c75002d3f439a0a52d1f212b942feb4d4e98724ea67f29ec1ad20d914d7f"
+            "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
           },
           "before": {
             "available": true,
-            "bytes": 118357,
+            "bytes": 132379,
+            "ctimeNs": 1786522777780995600,
+            "inode": 17602073,
+            "mtimeNs": 1786522777777657300,
             "path": "evidence/reports/openvino-ep-report.json",
-            "sha256": "07b7c75002d3f439a0a52d1f212b942feb4d4e98724ea67f29ec1ad20d914d7f"
+            "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
           },
           "unchanged": true
         }
@@ -1489,11 +1501,11 @@
         {
           "run": 1,
           "actualCommand": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
-          "startedAt": "2026-08-12T06:51:57.316468Z",
-          "endedAt": "2026-08-12T06:51:57.857369Z",
+          "startedAt": "2026-08-12T08:19:42.887455Z",
+          "endedAt": "2026-08-12T08:19:43.377355Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "9385aebba22906920fc0d298bace3ae4a47ecf52",
+          "repositoryHead": "b2e28a2c0819a9fa42ae18126d18e83149b0b751",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "availableProviders": [
             "OpenVINOExecutionProvider",
@@ -1537,11 +1549,11 @@
         {
           "run": 2,
           "actualCommand": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
-          "startedAt": "2026-08-12T06:51:59.777434Z",
-          "endedAt": "2026-08-12T06:52:00.279636Z",
+          "startedAt": "2026-08-12T08:19:45.353088Z",
+          "endedAt": "2026-08-12T08:19:45.812269Z",
           "exitCode": 0,
           "signal": null,
-          "repositoryHead": "9385aebba22906920fc0d298bace3ae4a47ecf52",
+          "repositoryHead": "b2e28a2c0819a9fa42ae18126d18e83149b0b751",
           "runnerId": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
           "availableProviders": [
             "OpenVINOExecutionProvider",
@@ -1617,8 +1629,8 @@
     },
     {
       "path": "evidence/golden/manifest.json",
-      "bytes": 13168,
-      "sha256": "54cb4f2d90952496df076878df064975ab66615b69269f66797002106076af6b"
+      "bytes": 13351,
+      "sha256": "a236df3eea6d288af62566cbee558305a7c92c7dc21859957ebbd4642b0c628a"
     },
     {
       "path": "evidence/golden/web-reference.json",
@@ -1643,7 +1655,7 @@
     {
       "path": "evidence/conversions/conversion-spikes.json",
       "bytes": 41497,
-      "sha256": "7c432f7aef50c552b2efa311ab332db7572040ae674446292547cdfaa503d719"
+      "sha256": "10607785add654ef22c5ea54d1404f60174fc3dadfd0d8753c7841ca4ccbe43e"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -1662,8 +1674,8 @@
     },
     {
       "path": "evidence/conversions/openvino-ep-manifest.json",
-      "bytes": 12125,
-      "sha256": "911a43b80f63c508496732e17b04d0bda803e0af84f68893d21aef1c915aa9c6"
+      "bytes": 12181,
+      "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
     },
     {
       "path": "evidence/reports/coreml-conversion-report.json",
@@ -1692,8 +1704,8 @@
     },
     {
       "path": "evidence/reports/openvino-ep-report.json",
-      "bytes": 118357,
-      "sha256": "07b7c75002d3f439a0a52d1f212b942feb4d4e98724ea67f29ec1ad20d914d7f"
+      "bytes": 132379,
+      "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
     },
     {
       "path": "evidence/tooling/coreml-requirements.lock",

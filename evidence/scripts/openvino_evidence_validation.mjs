@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { copyFile, lstat, mkdir, mkdtemp, opendir, readFile, realpath, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises';
+import { tmpdir, userInfo } from 'node:os';
+import { basename, dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const MODEL_SHA = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad';
@@ -43,40 +43,250 @@ export async function verifyRustSourceIdentity(root) {
     const head = checkedSpawn('git', ['rev-parse', `HEAD:${relative}`], { cwd: repository }, `${relative} HEAD blob`).stdout.trim();
     const worktree = checkedSpawn('git', ['hash-object', '--', relative], { cwd: repository }, `${relative} worktree blob`).stdout.trim();
     if (!/^[0-9a-f]{40,64}$/.test(head) || worktree !== head) fail(`production Rust source differs from HEAD: ${relative}`);
-    identities.push({ bytes: bytes.length, canonicalPath, gitBlob: head, path: relative, sha256: sha256(bytes) });
+    identities.push({ bytes: bytes.length, canonicalPath: relative, headBlobOid: head, path: relative, sha256: sha256(bytes) });
   }
   return identities;
+}
+
+export const FORBIDDEN_RUST_BUILD_ENVIRONMENT = [
+  'RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER', 'RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS',
+  'CARGO_BUILD_RUSTFLAGS', 'CARGO_BUILD_RUSTC_WRAPPER', 'CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER',
+  'CARGO_TARGET_DIR', 'CARGO_HOME', 'CARGO_CONFIG', 'RUSTC', 'RUSTDOC', 'RUSTUP_TOOLCHAIN',
+  'CARGO_BUILD_TARGET', 'CARGO_BUILD_JOBS',
+];
+
+function isForbiddenBuildEnvironment(name) {
+  return FORBIDDEN_RUST_BUILD_ENVIRONMENT.includes(name)
+    || /^CARGO_ALIAS_/i.test(name)
+    || /RUSTFLAGS/i.test(name)
+    || /RUSTC.*WRAPPER/i.test(name)
+    || /^CARGO.*(?:CONFIG|TARGET|WRAPPER)$/i.test(name);
+}
+
+function rejectBuildEnvironment(environment) {
+  const injected = Object.keys(environment).filter(isForbiddenBuildEnvironment).sort();
+  if (injected.length) fail(`forbidden Cargo/Rust build environment: ${injected.join(', ')}`);
+}
+
+function stableBuildCommand() {
+  return [
+    'cargo', 'build', '--offline', '--locked', '--release',
+    '--manifest-path', '$SOURCE_MIRROR/evidence/tooling/raw-golden/Cargo.toml',
+    '--target-dir', '$CARGO_TARGET_DIR', '--bin', 'rimeflow-raw-golden',
+  ];
+}
+
+async function verifyRawGoldenInventory(repository) {
+  const packageRoot = join(repository, 'evidence/tooling/raw-golden');
+  const allowed = new Set(RUST_SOURCES.filter((path) => path.startsWith('evidence/tooling/raw-golden/')));
+  const discovered = [];
+  async function visit(directory) {
+    const handle = await opendir(directory);
+    for await (const entry of handle) {
+      if (entry.name === 'target' && directory === packageRoot) continue;
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) await visit(path);
+      else discovered.push(path.slice(repository.length + 1));
+    }
+  }
+  await visit(packageRoot);
+  const unexpected = discovered.filter((path) => !allowed.has(path)).sort();
+  if (unexpected.length) fail(`unapproved raw-golden source/config/build input: ${unexpected.join(', ')}`);
+}
+
+async function copyTrustedRustMirror(repository, mirror, sourceArtifacts) {
+  await verifyRawGoldenInventory(repository);
+  const copied = [];
+  for (const source of sourceArtifacts) {
+    const destination = join(mirror, source.path);
+    await mkdir(dirname(destination), { recursive: true });
+    await copyFile(join(repository, source.path), destination);
+    const bytes = await readFile(destination);
+    const identity = { bytes: bytes.length, canonicalPath: source.canonicalPath, headBlobOid: source.headBlobOid, path: source.path, sha256: sha256(bytes) };
+    if (!same(identity, source)) fail(`trusted Rust mirror copy identity drift: ${source.path}`);
+    copied.push(identity);
+  }
+  // The package imports production postprocess by a fixed relative path. A mirror
+  // has no root .cargo config, build.rs, or unlisted source available to Cargo.
+  for (const forbidden of ['.cargo', 'build.rs', 'evidence/tooling/raw-golden/build.rs', 'evidence/tooling/raw-golden/.cargo']) {
+    if (await lstat(join(mirror, forbidden)).catch(() => null)) fail(`trusted Rust mirror unexpectedly contains ${forbidden}`);
+  }
+  const manifest = await readFile(join(mirror, 'evidence/tooling/raw-golden/Cargo.toml'), 'utf8');
+  if (/^build\s*=/m.test(manifest)) fail('raw-golden Cargo.toml declares an unapproved build script');
+  return copied;
+}
+
+async function secureCargoEnvironment(temporary, callerEnvironment) {
+  rejectBuildEnvironment(callerEnvironment);
+  const home = userInfo().homedir;
+  const toolchain = join(home, '.rustup', 'toolchains', 'stable-x86_64-unknown-linux-gnu', 'bin');
+  const cargoBin = join(toolchain, 'cargo');
+  const rustcBin = join(toolchain, 'rustc');
+  const [cargo, rustc] = await Promise.all([realpath(cargoBin), realpath(rustcBin)]).catch(() => fail('trusted Cargo/Rustc tools unavailable'));
+  if (!cargo.startsWith(`${toolchain}/`) || !rustc.startsWith(`${toolchain}/`)) fail('trusted Cargo/Rustc path outside pinned toolchain');
+  const cargoHome = join(temporary, 'cargo-home');
+  await mkdir(cargoHome, { recursive: true });
+  const registry = join(home, '.cargo', 'registry');
+  if (!(await stat(registry).catch(() => null))?.isDirectory()) fail('offline Cargo registry unavailable');
+  const handle = await opendir(cargoHome);
+  const first = await handle.read();
+  await handle.close();
+  if (first !== null) fail('temporary CARGO_HOME was not initially empty');
+  await symlink(registry, join(cargoHome, 'registry'), 'dir');
+  return {
+    cargo,
+    rustc,
+    environment: {
+      CARGO_HOME: cargoHome,
+      CARGO_INCREMENTAL: '0',
+      CARGO_PROFILE_RELEASE_STRIP: 'symbols',
+      HOME: home,
+      LANG: 'C',
+      LC_ALL: 'C',
+      PATH: `${toolchain}:/usr/local/bin:/usr/bin:/bin`,
+      RUSTUP_HOME: join(home, '.rustup'),
+      SOURCE_DATE_EPOCH: '0',
+    },
+  };
+}
+
+function elfIdentity(bytes) {
+  if (bytes.length < 20 || bytes[0] !== 0x7f || bytes.subarray(1, 4).toString() !== 'ELF') fail('trusted production Rust runner is not ELF');
+  const machine = bytes.readUInt16LE(18);
+  return {
+    class: bytes[4] === 2 ? 'ELF64' : bytes[4] === 1 ? 'ELF32' : 'unknown',
+    endianness: bytes[5] === 1 ? 'little' : bytes[5] === 2 ? 'big' : 'unknown',
+    machine: machine === 62 ? 'x86_64' : `elf-machine-${machine}`,
+    magic: bytes.subarray(0, 4).toString('hex'),
+    osAbi: bytes[7],
+  };
+}
+
+function runnerIdentity(bytes, sourceArtifacts, build) {
+  return {
+    build: {
+      argv: stableBuildCommand(),
+      cargoVersion: build.cargoVersion,
+      clearedEnvironmentVariables: build.clearedEnvironmentVariables,
+      controlledEnvironment: build.controlledEnvironment,
+      exitCode: 0,
+      freshTarget: true,
+      isolatedCargoHome: true,
+      isolatedSourceMirror: true,
+      locked: true,
+      offline: true,
+      releaseStrip: 'symbols',
+      rejectedEnvironmentVariables: build.rejectedEnvironmentVariables,
+      repositoryRootCargoConfigParticipated: false,
+      rustcVersion: build.rustcVersion,
+    },
+    runner: {
+      bytes: bytes.length,
+      elf: elfIdentity(bytes),
+      logicalPath: 'fresh-target/release/rimeflow-raw-golden',
+      sha256: sha256(bytes),
+    },
+    sourceArtifacts,
+  };
 }
 
 export async function buildTrustedRustRunner(root, options = {}) {
   const repository = await realpath(root);
   const sourceIdentity = await verifyRustSourceIdentity(repository);
   const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-rust-'));
-  const target = join(temporary, 'target');
+  const stableView = join(tmpdir(), 'rimeflow-openvino-rust-compiler-view-v1');
+  let stableViewCreated = false;
+  const cleanup = async () => {
+    if (stableViewCreated && await realpath(stableView).catch(() => null) === temporary) await unlink(stableView).catch(() => {});
+    await rm(temporary, { recursive: true, force: true });
+  };
   try {
-    const cargo = options.cargo ?? 'cargo';
+    await writeFile(join(temporary, 'owner-pid'), `${process.pid}\n`);
+    for (let attempt = 0; !stableViewCreated && attempt < 500; attempt += 1) {
+      try {
+        await symlink(temporary, stableView, 'dir');
+        stableViewCreated = true;
+      } catch (error) {
+        if (error.code !== 'EEXIST') throw error;
+        const destination = await realpath(stableView).catch(() => null);
+        const owner = destination ? Number.parseInt(await readFile(join(destination, 'owner-pid'), 'utf8').catch(() => ''), 10) : NaN;
+        let active = false;
+        if (Number.isInteger(owner)) {
+          try { process.kill(owner, 0); active = true; } catch {}
+        }
+        if (!active && await realpath(stableView).catch(() => null) === destination) await unlink(stableView).catch(() => {});
+        else await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+      }
+    }
+    if (!stableViewCreated) fail('another trusted Rust build did not release the stable compiler view');
+    const target = join(stableView, 'target');
+    const mirror = join(stableView, 'mirror');
+    await mkdir(mirror);
+    const copiedIdentity = await copyTrustedRustMirror(repository, mirror, sourceIdentity);
+    const sourceIdentityAfterCopy = await verifyRustSourceIdentity(repository);
+    if (!same(sourceIdentityAfterCopy, sourceIdentity)) fail('production Rust source changed while creating trusted mirror');
+    const secure = await secureCargoEnvironment(stableView, options.environment ?? process.env);
+    const actualArguments = [
+      'build', '--offline', '--locked', '--release', '--manifest-path',
+      join(mirror, 'evidence/tooling/raw-golden/Cargo.toml'), '--target-dir', target,
+      '--bin', 'rimeflow-raw-golden',
+    ];
     const result = spawnSync(
-      cargo,
-      ['build', '--offline', '--locked', '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml'],
-      { cwd: repository, encoding: 'utf8', env: { ...process.env, ...options.env, CARGO_TARGET_DIR: target } },
+      secure.cargo,
+      actualArguments,
+      { cwd: mirror, encoding: 'utf8', env: secure.environment },
     );
     if (result.error || result.status !== 0) {
       fail(`trusted production Rust build failed (${result.status ?? 'spawn'}): ${result.error?.message ?? ''}\n${result.stdout ?? ''}\n${result.stderr ?? ''}`);
     }
-    const runner = join(target, 'debug', process.platform === 'win32' ? 'rimeflow-raw-golden.exe' : 'rimeflow-raw-golden');
+    const runner = join(target, 'release', process.platform === 'win32' ? 'rimeflow-raw-golden.exe' : 'rimeflow-raw-golden');
     const runnerStat = await stat(runner).catch(() => null);
     if (!runnerStat?.isFile() || (runnerStat.mode & 0o111) === 0) fail('trusted production Rust runner missing or not executable');
+    const runnerBytes = await readFile(runner);
+    const cargoVersion = checkedSpawn(secure.cargo, ['--version'], { cwd: mirror, env: secure.environment }, 'trusted Cargo version').stdout.trim();
+    const rustcVersion = checkedSpawn(secure.rustc, ['--version'], { cwd: mirror, env: secure.environment }, 'trusted Rustc version').stdout.trim();
+    const provenance = runnerIdentity(runnerBytes, copiedIdentity, {
+      cargoVersion,
+      clearedEnvironmentVariables: [...FORBIDDEN_RUST_BUILD_ENVIRONMENT, 'CARGO_ALIAS_*', 'CARGO_*CONFIG/TARGET/WRAPPER*', '*RUSTFLAGS*', '*RUSTC*WRAPPER*'],
+      controlledEnvironment: {
+        CARGO_HOME: '$FRESH_CARGO_HOME',
+        CARGO_INCREMENTAL: '0',
+        CARGO_PROFILE_RELEASE_STRIP: 'symbols',
+        LANG: 'C',
+        LC_ALL: 'C',
+        SOURCE_DATE_EPOCH: '0',
+      },
+      rejectedEnvironmentVariables: [...FORBIDDEN_RUST_BUILD_ENVIRONMENT, 'CARGO_ALIAS_*', 'CARGO_*CONFIG/TARGET/WRAPPER*', '*RUSTFLAGS*', '*RUSTC*WRAPPER*'],
+      rustcVersion,
+    });
     return {
-      cleanup: async () => rm(temporary, { recursive: true, force: true }),
+      cleanup,
       runner,
+      provenance,
       sourceIdentity,
       target,
       temporary,
     };
   } catch (error) {
-    await rm(temporary, { recursive: true, force: true });
+    await cleanup();
     throw error;
   }
+}
+
+function verifyRecordedProductionPostprocess(recorded, trusted, label) {
+  if (!recorded || typeof recorded !== 'object') fail(`${label} production postprocess provenance missing`);
+  if (recorded.implementation !== 'src/postprocess.rs' || recorded.platformSpecificImplementationAdded) fail(`${label} production postprocess ownership`);
+  const expected = { ...trusted.provenance, implementation: 'src/postprocess.rs', platformSpecificImplementationAdded: false };
+  if (!same(recorded, expected)) fail(`${label} production postprocess provenance drift`);
+}
+
+export function assertRecordedProductionPostprocess(recorded, provenance, label = 'record') {
+  verifyRecordedProductionPostprocess(recorded, { provenance }, label);
+}
+
+function verifyFixtureRunner(recorded, trusted, label) {
+  if (!recorded || recorded.exitCode !== 0 || !same(recorded.runner, trusted.provenance.runner)) fail(`${label} fixture runner provenance`);
+  if (!Array.isArray(recorded.command) || recorded.command[0] !== trusted.provenance.runner.logicalPath) fail(`${label} fixture runner command`);
 }
 
 export function recoverOpenvinoPublication(root, options = {}) {
@@ -282,7 +492,7 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
   if (manifest.toolchain.wheels.length !== 7 || manifest.toolchain.wheels.some((wheel) => !wheel.source.startsWith('https://files.pythonhosted.org/') || !/^[0-9a-f]{64}$/.test(wheel.sha256) || !wheel.license)) fail('wheel source/hash/license metadata');
   if (manifest.runtime.onnxruntimeOpenvino !== '1.24.1' || manifest.runtime.openvino.runtime.buildNumber !== '2025.4.1-0-test' || manifest.runtime.numpy !== '2.5.2' || manifest.runtime.python !== '3.12.3' || manifest.runtime.pip !== '24.0') fail('runtime exact versions');
   if (!manifest.runtime.buildInfo.includes('git-commit-id=b5963e82c8') || manifest.runtime.device !== 'CPU-OPENVINO_CPU' || !manifest.runtime.openvino.availableDevices.includes('CPU') || manifest.runtime.openvino.requestedDevice !== 'CPU') fail('runtime build/device introspection');
-  const capi = resolve(root, '.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi');
+  const capi = await realpath(resolve(root, '.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi'));
   const requiredLibraries = new Set(['libonnxruntime_providers_openvino.so', 'libonnxruntime_providers_shared.so', 'libopenvino.so.2541', 'libopenvino_c.so', 'libopenvino_intel_cpu_plugin.so', 'libopenvino_onnx_frontend.so.2541', 'onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so']);
   if (manifest.runtime.libraries.length !== requiredLibraries.size) fail('loaded library count');
   for (const library of manifest.runtime.libraries) {
@@ -297,11 +507,11 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
   if (manifest.provider.requested !== 'OpenVINOExecutionProvider' || manifest.provider.configured[0] !== 'OpenVINOExecutionProvider' || !manifest.provider.fallbackVisible) fail('provider request/fallback declaration');
   if (report.mode !== 'record' || report.rounds.length !== 2 || report.executionPlan !== 'full' || !same(report.tolerances, frozen.tolerances)) fail('record/tolerance/execution plan');
   if (report.status.state !== 'host-inference-verified' || !report.status.artifactVerified || !report.status.hostInferenceVerified || report.status.supported || report.status.task14Complete || report.status.adapterImplemented || report.status.packagingVerified || report.status.performanceVerified || report.status.targetPlatformClosed) fail('status closure semantics');
-  if (report.productionPostprocess.implementation !== 'src/postprocess.rs' || report.productionPostprocess.platformSpecificImplementationAdded) fail('single production postprocess');
   const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-validator-'));
   let trustedRust;
   try {
     trustedRust = await buildTrustedRustRunner(root);
+    verifyRecordedProductionPostprocess(report.productionPostprocess, trustedRust, 'record');
     for (const round of report.rounds) {
       if (!round.availableProviders.includes('OpenVINOExecutionProvider') || round.sessionProviders[0] !== 'OpenVINOExecutionProvider' || !same(round.inputs, [INPUT]) || !same(round.outputs, [OUTPUT])) fail(`round ${round.round} provider/I/O`);
       const profilePath = resolve(round.profile.path);
@@ -314,7 +524,10 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
         const frozenFixture = frozen.fixtures.find((candidate) => candidate.id === item.id);
         if (!fixture || !frozenFixture || item.runs.length !== 2 || !item.deterministic || item.runs[0].raw.sha256 !== item.runs[1].raw.sha256 || !same(item.runs[0].decoded, item.runs[1].decoded)) fail(`round ${round.round} ${item.id} determinism`);
-        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
+        for (const run of item.runs) {
+          verifyFixtureRunner(run.productionPostprocess, trustedRust, `round ${round.round} ${item.id}/${run.repeat}`);
+          await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
+        }
       }
     }
     for (let index = 0; index < report.rounds[0].fixtures.length; index += 1) {
@@ -332,9 +545,11 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
 export async function validateOpenvinoReplayEvidence(root, replay, manifest, report) {
   if (replay.schemaVersion !== 1 || replay.mode !== 'replay' || replay.recordDigest !== report.recordDigest || replay.rounds.length !== 2) fail('ordinary replay identity');
   for (const [key, path] of Object.entries({ manifest: 'evidence/conversions/openvino-ep-manifest.json', report: 'evidence/reports/openvino-ep-report.json' })) {
-    const current = await readFile(resolve(root, path));
+    const absolute = resolve(root, path);
+    const [current, metadata] = await Promise.all([readFile(absolute), stat(absolute, { bigint: true })]);
     const preservation = replay.trackedEvidence[key];
-    if (!preservation?.unchanged || preservation.before.path !== path || preservation.after.path !== path || preservation.before.bytes !== current.length || preservation.after.bytes !== current.length || preservation.before.sha256 !== sha256(current) || preservation.after.sha256 !== sha256(current)) fail(`ordinary replay changed tracked ${key}`);
+    const currentIdentity = { available: true, bytes: current.length, ctimeNs: Number(metadata.ctimeNs), inode: Number(metadata.ino), mtimeNs: Number(metadata.mtimeNs), path, sha256: sha256(current) };
+    if (!preservation?.unchanged || !same(preservation.before, currentIdentity) || !same(preservation.after, currentIdentity)) fail(`ordinary replay changed tracked ${key}`);
   }
   const frozen = JSON.parse(await readFile(resolve(root, 'evidence/golden/web-reference.json'), 'utf8'));
   const fixtures = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
@@ -343,6 +558,8 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
   let trustedRust;
   try {
     trustedRust = await buildTrustedRustRunner(root);
+    verifyRecordedProductionPostprocess(report.productionPostprocess, trustedRust, 'ordinary replay record');
+    if (!same(replay.productionPostprocess, report.productionPostprocess)) fail('ordinary replay production postprocess provenance drift');
     for (const round of replay.rounds) {
       const profileBytes = await readFile(resolve(round.profile.path));
       if (profileBytes.length !== round.profile.bytes || sha256(profileBytes) !== round.profile.sha256) fail(`ordinary replay round ${round.round} profile identity`);
@@ -353,7 +570,10 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
         const frozenFixture = frozen.fixtures.find((candidate) => candidate.id === item.id);
         if (!fixture || !frozenFixture || item.runs.length !== 2 || !item.deterministic) fail(`ordinary replay round ${round.round} ${item.id} structure`);
-        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
+        for (const run of item.runs) {
+          verifyFixtureRunner(run.productionPostprocess, trustedRust, `ordinary replay round ${round.round} ${item.id}/${run.repeat}`);
+          await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
+        }
       }
     }
   } finally {

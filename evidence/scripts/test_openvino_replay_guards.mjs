@@ -72,6 +72,35 @@ cases.push(await rejected('supported without adapter/package/performance/target 
   evidence.status.supported = true;
 }));
 
+const provenanceCases = [
+  ['production source artifact is missing', (value) => { value.sourceArtifacts.pop(); }],
+  ['production source canonical logical path drift', (value) => { value.sourceArtifacts[0].canonicalPath = '/tmp/injected'; }],
+  ['production source bytes drift', (value) => { value.sourceArtifacts[0].bytes += 1; }],
+  ['production source SHA drift', (value) => { value.sourceArtifacts[0].sha256 = '0'.repeat(64); }],
+  ['production source HEAD blob drift', (value) => { value.sourceArtifacts[0].headBlobOid = '0'.repeat(40); }],
+  ['production runner SHA drift', (value) => { value.runner.sha256 = '1'.repeat(64); }],
+  ['production runner bytes drift', (value) => { value.runner.bytes += 1; }],
+  ['production runner ELF identity drift', (value) => { value.runner.elf.magic = '00000000'; }],
+  ['production build omits offline argv', (value) => { value.build.argv = value.build.argv.filter((item) => item !== '--offline'); }],
+  ['production build offline claim is false', (value) => { value.build.offline = false; }],
+  ['production build omits locked argv', (value) => { value.build.argv = value.build.argv.filter((item) => item !== '--locked'); }],
+  ['production build locked claim is false', (value) => { value.build.locked = false; }],
+  ['production build target is not fresh', (value) => { value.build.freshTarget = false; }],
+  ['production build source mirror is not isolated', (value) => { value.build.isolatedSourceMirror = false; }],
+  ['production build Cargo home is not isolated', (value) => { value.build.isolatedCargoHome = false; }],
+  ['production build root Cargo config participates', (value) => { value.build.repositoryRootCargoConfigParticipated = true; }],
+  ['production build cleared environment list drift', (value) => { value.build.clearedEnvironmentVariables.pop(); }],
+  ['production build rejected environment list drift', (value) => { value.build.rejectedEnvironmentVariables.pop(); }],
+  ['production build controlled environment drift', (value) => { value.build.controlledEnvironment.CARGO_INCREMENTAL = '1'; }],
+  ['production Cargo version drift', (value) => { value.build.cargoVersion = 'cargo 0.0.0'; }],
+  ['production Rustc version drift', (value) => { value.build.rustcVersion = 'rustc 0.0.0'; }],
+  ['production fixture runner SHA drift', (_value, evidence) => { evidence.rounds[0].fixtures[0].runs[0].productionPostprocess.runner.sha256 = '2'.repeat(64); }],
+  ['production fixture logical command drift', (_value, evidence) => { evidence.rounds[0].fixtures[0].runs[0].productionPostprocess.command[0] = '/tmp/fake-runner'; }],
+];
+for (const [name, mutate] of provenanceCases) {
+  cases.push(await rejected(name, async (_candidate, evidence) => mutate(evidence.productionPostprocess, evidence)));
+}
+
 const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-negative-'));
 try {
   cases.push(await rejected('profile file has no OpenVINO node', async (_candidate, evidence) => {
@@ -196,6 +225,6 @@ if (!transactionResult.ok || transactionResult.filesystemCases.length !== 22) th
 const rustIdentity = spawnSync('node', ['evidence/scripts/test_openvino_rust_identity_guards.mjs'], { cwd: root, encoding: 'utf8' });
 if (rustIdentity.status !== 0) throw new Error(`OpenVINO Rust source/binary identity guards failed: ${rustIdentity.stdout}\n${rustIdentity.stderr}`);
 const rustIdentityResult = JSON.parse(rustIdentity.stdout);
-if (!rustIdentityResult.ok || rustIdentityResult.cases.length !== 9 || rustIdentityResult.sourceCount !== 5) throw new Error('OpenVINO Rust source/binary guard coverage drift');
+if (!rustIdentityResult.ok || rustIdentityResult.cases.length < 34 || rustIdentityResult.environmentCases !== 15 || rustIdentityResult.sourceCount !== 5) throw new Error('OpenVINO Rust source/binary guard coverage drift');
 
 console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'], rustIdentityCases: rustIdentityResult.cases }));
