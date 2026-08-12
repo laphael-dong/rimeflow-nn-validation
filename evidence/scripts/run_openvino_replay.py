@@ -96,22 +96,124 @@ def tracked_snapshot(root: Path, required: bool) -> dict[str, dict[str, object]]
     return result
 
 
-def publish(payloads: dict[Path, bytes]) -> None:
-    staged = {}
+def fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
     try:
-        for target, payload in payloads.items():
-            target.parent.mkdir(parents=True, exist_ok=True)
-            descriptor, temporary = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.recording-")
-            with os.fdopen(descriptor, "wb") as stream:
-                stream.write(payload)
-                stream.flush()
-                os.fsync(stream.fileno())
-            staged[target] = Path(temporary)
-        for target, temporary in staged.items():
-            os.replace(temporary, target)
+        os.fsync(descriptor)
     finally:
-        for temporary in staged.values():
-            temporary.unlink(missing_ok=True)
+        os.close(descriptor)
+
+
+def write_durable_temporary(target: Path, payload: bytes, suffix: str) -> Path:
+    descriptor, temporary_name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.{suffix}-")
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return temporary
+
+
+def publish(
+    payloads: dict[Path, bytes],
+    *,
+    replace_target=os.replace,
+    stage_mutator=None,
+    sync_directory=fsync_directory,
+) -> None:
+    if len(payloads) != 2:
+        raise ValueError("OpenVINO record publication requires exactly two targets")
+    targets = list(payloads)
+    staged: dict[Path, Path] = {}
+    backups: dict[Path, Path | None] = {}
+    original: dict[Path, bytes | None] = {}
+    committed = False
+    original_error: BaseException | None = None
+    rollback_errors: list[BaseException] = []
+    try:
+        for target in targets:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            original[target] = target.read_bytes() if target.is_file() else None
+
+        for target in targets:
+            staged[target] = write_durable_temporary(target, payloads[target], "recording")
+            if stage_mutator is not None:
+                stage_mutator(target, staged[target])
+            staged_bytes = staged[target].read_bytes()
+            if staged_bytes != payloads[target] or hashlib.sha256(staged_bytes).digest() != hashlib.sha256(payloads[target]).digest():
+                raise RuntimeError(f"staging bytes/SHA-256 mismatch: {target}")
+
+        for target in targets:
+            previous = original[target]
+            backups[target] = None if previous is None else write_durable_temporary(target, previous, "backup")
+        for directory in {target.parent for target in targets}:
+            sync_directory(directory)
+
+        for target in targets:
+            replace_target(staged[target], target)
+            sync_directory(target.parent)
+
+        for target in targets:
+            published = target.read_bytes()
+            if published != payloads[target] or hashlib.sha256(published).digest() != hashlib.sha256(payloads[target]).digest():
+                raise RuntimeError(f"published bytes/SHA-256 mismatch: {target}")
+        for directory in {target.parent for target in targets}:
+            sync_directory(directory)
+        committed = True
+    except BaseException as error:
+        original_error = error
+        for target in reversed(targets):
+            try:
+                previous = original.get(target)
+                backup = backups.get(target)
+                if previous is None:
+                    target.unlink(missing_ok=True)
+                elif backup is not None and backup.exists():
+                    os.replace(backup, target)
+                    backups[target] = None
+                else:
+                    recovery = write_durable_temporary(target, previous, "recovery")
+                    os.replace(recovery, target)
+                sync_directory(target.parent)
+            except BaseException as rollback_error:
+                rollback_errors.append(rollback_error)
+        if rollback_errors:
+            raise ExceptionGroup("OpenVINO publication failed and rollback was incomplete", [original_error, *rollback_errors])
+        raise
+    finally:
+        cleanup_errors = []
+        for temporary in [*staged.values(), *(item for item in backups.values() if item is not None)]:
+            try:
+                temporary.unlink(missing_ok=True)
+            except BaseException as cleanup_error:
+                cleanup_errors.append(cleanup_error)
+        if committed:
+            for directory in {target.parent for target in targets}:
+                try:
+                    sync_directory(directory)
+                except BaseException as cleanup_error:
+                    cleanup_errors.append(cleanup_error)
+        if cleanup_errors and original_error is None:
+            recovery_errors = []
+            for target in reversed(targets):
+                try:
+                    previous = original[target]
+                    if previous is None:
+                        target.unlink(missing_ok=True)
+                    else:
+                        recovery = write_durable_temporary(target, previous, "recovery")
+                        os.replace(recovery, target)
+                    fsync_directory(target.parent)
+                except BaseException as recovery_error:
+                    recovery_errors.append(recovery_error)
+            committed = False
+            raise ExceptionGroup("OpenVINO publication cleanup failed", [*cleanup_errors, *recovery_errors])
+    if not committed:
+        raise RuntimeError("OpenVINO publication did not commit")
 
 
 def validate_workspace(root: Path, workspace: Path) -> None:
@@ -229,12 +331,30 @@ def loaded_libraries(capi: Path) -> list[dict[str, object]]:
 
 def compare_raw(actual: np.ndarray, expected: np.ndarray, tolerances: dict[str, object]) -> dict[str, object]:
     difference = np.abs(actual.astype(np.float64) - expected.astype(np.float64))
+    allowed = tolerances["rawTensorAbsolute"] + tolerances["rawTensorRelative"] * np.abs(expected.astype(np.float64))
+    maximum_index = int(np.argmax(difference))
+    attribute, anchor = np.unravel_index(maximum_index, OUTPUT_SHAPE)[1:]
+    near_zero_mask = np.abs(expected.astype(np.float64)) < 1e-6
     return {
-        "allClose": bool(np.allclose(actual, expected, atol=tolerances["rawTensorAbsolute"], rtol=tolerances["rawTensorRelative"])),
+        "allClose": bool(np.all(difference <= allowed)),
         "elementCount": int(actual.size),
         "finiteCount": int(np.isfinite(actual).sum()),
         "maxAbsoluteDifference": float(difference.max()),
+        "maxAbsoluteDifferenceLocation": {
+            "actual": float(actual.flat[maximum_index]),
+            "anchor": int(anchor),
+            "attribute": int(attribute),
+            "flatIndex": maximum_index,
+            "reference": float(expected.flat[maximum_index]),
+            "tolerance": float(allowed.flat[maximum_index]),
+        },
         "meanAbsoluteDifference": float(difference.mean()),
+        "nearZero": {
+            "elementCount": int(near_zero_mask.sum()),
+            "maxAbsoluteDifference": float(difference[near_zero_mask].max()) if near_zero_mask.any() else None,
+            "mismatchCount": int(np.count_nonzero(difference[near_zero_mask] > allowed[near_zero_mask])),
+            "referenceAbsoluteThreshold": 1e-6,
+        },
         "referenceSha256Float32Le": tensor_sha256(expected),
         "sha256Float32Le": tensor_sha256(actual),
     }
@@ -300,12 +420,17 @@ def io_metadata(items: list[object]) -> list[dict[str, object]]:
 
 
 def semantic_digest(rounds: list[dict[str, object]]) -> str:
+    def semantic_raw(comparison: dict[str, object]) -> dict[str, object]:
+        value = json.loads(json.dumps(comparison))
+        value["reference"].pop("path", None)
+        return value
+
     core = []
     for round_data in rounds:
         core.append({
             "availableProviders": round_data["availableProviders"],
             "executionPlan": round_data["profile"]["executionPlan"],
-            "fixtures": [{"id": item["id"], "runs": [{"decoded": run["decoded"], "raw": run["rawComparison"]} for run in item["runs"]]} for item in round_data["fixtures"]],
+            "fixtures": [{"id": item["id"], "runs": [{"decoded": run["decoded"], "raw": semantic_raw(run["rawComparison"])} for run in item["runs"]]} for item in round_data["fixtures"]],
             "inputs": round_data["inputs"],
             "outputs": round_data["outputs"],
             "profileCounts": round_data["profile"]["executionEventCounts"],
@@ -420,7 +545,26 @@ def main() -> int:
                 passed = raw_comparison["allClose"] and raw_comparison["finiteCount"] == 705_600 and decoded_comparison["passed"]
                 if not passed:
                     raise RuntimeError(f"{fixture_id}: frozen golden failed")
-                runs.append({"decoded": decoded, "decodedComparison": decoded_comparison, "passed": passed, "productionPostprocess": production, "raw": artifact(raw_path, f".evidence/openvino/{args.workspace.name}/round-{round_number}/raw/{fixture_id}-{repeat}.f32le"), "rawComparison": raw_comparison, "repeat": repeat})
+                reference = {
+                    **artifact(reference_path, str(reference_path.relative_to(root))),
+                    "dtype": "float32",
+                    "elementCount": 705_600,
+                    "shape": OUTPUT_SHAPE,
+                }
+                runs.append({
+                    "decoded": decoded,
+                    "decodedComparison": decoded_comparison,
+                    "passed": passed,
+                    "productionPostprocess": production,
+                    "raw": {
+                        **artifact(raw_path, str(raw_path.relative_to(root))),
+                        "dtype": "float32",
+                        "elementCount": 705_600,
+                        "shape": OUTPUT_SHAPE,
+                    },
+                    "rawComparison": {**raw_comparison, "reference": reference},
+                    "repeat": repeat,
+                })
             deterministic = runs[0]["raw"]["sha256"] == runs[1]["raw"]["sha256"] and runs[0]["decoded"] == runs[1]["decoded"]
             if not deterministic:
                 raise RuntimeError(f"{fixture_id}: same-round determinism failed")

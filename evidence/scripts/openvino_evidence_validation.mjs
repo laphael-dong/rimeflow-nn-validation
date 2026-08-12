@@ -15,6 +15,133 @@ const canonical = (value) => {
 };
 const same = (left, right) => JSON.stringify(canonical(left)) === JSON.stringify(canonical(right));
 const fail = (message) => { throw new Error(`OpenVINO evidence: ${message}`); };
+const nearlyEqual = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= Number.EPSILON * Math.max(1, Math.abs(left), Math.abs(right)) * 8;
+
+function readFloat32Le(bytes, label) {
+  if (bytes.length !== OUTPUT.elementCount * 4) fail(`${label} byte length`);
+  const values = new Float64Array(OUTPUT.elementCount);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  for (let index = 0; index < values.length; index += 1) values[index] = view.getFloat32(index * 4, true);
+  return values;
+}
+
+function rawFacts(actualBytes, referenceBytes, tolerances) {
+  const actual = readFloat32Le(actualBytes, 'raw');
+  const reference = readFloat32Le(referenceBytes, 'reference raw');
+  let actualFiniteCount = 0;
+  let referenceFiniteCount = 0;
+  let allClose = true;
+  let differenceSum = 0;
+  let maxAbsoluteDifference = -1;
+  let maxIndex = -1;
+  let nearZeroElementCount = 0;
+  let nearZeroMaxAbsoluteDifference = null;
+  let nearZeroMismatchCount = 0;
+  for (let index = 0; index < OUTPUT.elementCount; index += 1) {
+    const candidate = actual[index];
+    const expected = reference[index];
+    if (Number.isFinite(candidate)) actualFiniteCount += 1;
+    if (Number.isFinite(expected)) referenceFiniteCount += 1;
+    if (!Number.isFinite(candidate) || !Number.isFinite(expected)) {
+      allClose = false;
+      continue;
+    }
+    const difference = Math.abs(candidate - expected);
+    const tolerance = tolerances.rawTensorAbsolute + tolerances.rawTensorRelative * Math.abs(expected);
+    differenceSum += difference;
+    if (difference > maxAbsoluteDifference) {
+      maxAbsoluteDifference = difference;
+      maxIndex = index;
+    }
+    if (difference > tolerance) allClose = false;
+    if (Math.abs(expected) < 1e-6) {
+      nearZeroElementCount += 1;
+      nearZeroMaxAbsoluteDifference = nearZeroMaxAbsoluteDifference === null ? difference : Math.max(nearZeroMaxAbsoluteDifference, difference);
+      if (difference > tolerance) nearZeroMismatchCount += 1;
+    }
+  }
+  if (actualFiniteCount !== OUTPUT.elementCount || referenceFiniteCount !== OUTPUT.elementCount) allClose = false;
+  const attribute = Math.floor(maxIndex / OUTPUT.shape[2]) % OUTPUT.shape[1];
+  const anchor = maxIndex % OUTPUT.shape[2];
+  const maximumReference = reference[maxIndex];
+  return {
+    allClose,
+    elementCount: actual.length,
+    finiteCount: actualFiniteCount,
+    maxAbsoluteDifference,
+    maxAbsoluteDifferenceLocation: {
+      actual: actual[maxIndex],
+      anchor,
+      attribute,
+      flatIndex: maxIndex,
+      reference: maximumReference,
+      tolerance: tolerances.rawTensorAbsolute + tolerances.rawTensorRelative * Math.abs(maximumReference),
+    },
+    meanAbsoluteDifference: differenceSum / OUTPUT.elementCount,
+    nearZero: {
+      elementCount: nearZeroElementCount,
+      maxAbsoluteDifference: nearZeroMaxAbsoluteDifference,
+      mismatchCount: nearZeroMismatchCount,
+      referenceAbsoluteThreshold: 1e-6,
+    },
+    referenceFiniteCount,
+    referenceSha256Float32Le: sha256(referenceBytes),
+    sha256Float32Le: sha256(actualBytes),
+  };
+}
+
+function bboxIou(left, right) {
+  const x1 = Math.max(left[0], right[0]);
+  const y1 = Math.max(left[1], right[1]);
+  const x2 = Math.min(left[2], right[2]);
+  const y2 = Math.min(left[3], right[3]);
+  const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+  const union = (left[2] - left[0]) * (left[3] - left[1]) + (right[2] - right[0]) * (right[3] - right[1]) - intersection;
+  return union <= 0 ? 0 : intersection / union;
+}
+
+function decodedFacts(actual, expected, tolerances) {
+  const comparisons = [];
+  for (let index = 0; index < Math.min(actual.length, expected.length); index += 1) {
+    const candidate = actual[index];
+    const reference = expected[index];
+    const bboxIouValue = bboxIou(candidate.bbox, reference.bbox);
+    const bboxMaxAbsoluteDifference = Math.max(...candidate.bbox.map((value, coordinate) => Math.abs(value - reference.bbox[coordinate])));
+    const classEqual = candidate.classId === reference.classId;
+    const confidenceAbsoluteDifference = Math.abs(candidate.score - reference.score);
+    comparisons.push({
+      bboxIou: bboxIouValue,
+      bboxMaxAbsoluteDifference,
+      classEqual,
+      confidenceAbsoluteDifference,
+      passed: classEqual && confidenceAbsoluteDifference <= tolerances.confidenceAbsolute && bboxIouValue >= tolerances.boxIouMinimum && bboxMaxAbsoluteDifference <= tolerances.decodedBoxAbsolute,
+    });
+  }
+  return {
+    actualCount: actual.length,
+    comparisons,
+    expectedCount: expected.length,
+    passed: actual.length === expected.length && comparisons.every((item) => item.passed),
+  };
+}
+
+function compareNumericStructure(actual, reported, label) {
+  if (typeof actual === 'number' || typeof reported === 'number') {
+    if (typeof actual !== 'number' || typeof reported !== 'number' || !nearlyEqual(actual, reported)) fail(`${label} numeric mismatch`);
+    return;
+  }
+  if (Array.isArray(actual) || Array.isArray(reported)) {
+    if (!Array.isArray(actual) || !Array.isArray(reported) || actual.length !== reported.length) fail(`${label} array mismatch`);
+    actual.forEach((value, index) => compareNumericStructure(value, reported[index], `${label}[${index}]`));
+    return;
+  }
+  if (actual && typeof actual === 'object') {
+    if (!reported || typeof reported !== 'object' || !same(Object.keys(actual).sort(), Object.keys(reported).sort())) fail(`${label} fields mismatch`);
+    for (const [key, value] of Object.entries(actual)) compareNumericStructure(value, reported[key], `${label}.${key}`);
+    return;
+  }
+  if (actual !== reported) fail(`${label} mismatch`);
+}
 
 function profileFacts(events) {
   const counts = { OpenVINOExecutionProvider: 0, CPUExecutionProvider: 0, unknown: 0 };
@@ -33,13 +160,23 @@ function profileFacts(events) {
 
 async function validateRaw(root, raw, fixture, frozenFixture, tolerances, temporary) {
   const rawPath = resolve(root, raw.raw.path);
-  const bytes = await readFile(rawPath);
-  if (bytes.length !== 705600 * 4 || sha256(bytes) !== raw.raw.sha256) fail(`${fixture.id} raw file identity`);
-  const values = new Float32Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 4);
-  let finiteCount = 0;
-  for (const value of values) if (Number.isFinite(value)) finiteCount += 1;
-  if (finiteCount !== 705600 || raw.rawComparison.finiteCount !== finiteCount || raw.rawComparison.elementCount !== 705600) fail(`${fixture.id} raw non-finite/element count`);
-  if (!raw.rawComparison.allClose || !raw.passed) fail(`${fixture.id} raw frozen comparison`);
+  const actualBytes = await readFile(rawPath);
+  const referenceArtifact = raw.rawComparison.reference;
+  const referencePath = resolve(root, referenceArtifact.path);
+  const referenceBytes = await readFile(referencePath);
+  const expectedReferenceDigest = frozenFixture.runs[0].rawTensor.sha256Float32Le;
+  const expectedMetadata = { dtype: 'float32', elementCount: OUTPUT.elementCount, shape: OUTPUT.shape };
+  if (!same({ dtype: raw.raw.dtype, elementCount: raw.raw.elementCount, shape: raw.raw.shape }, expectedMetadata)) fail(`${fixture.id} raw metadata`);
+  if (!same({ dtype: referenceArtifact.dtype, elementCount: referenceArtifact.elementCount, shape: referenceArtifact.shape }, expectedMetadata)) fail(`${fixture.id} reference raw metadata`);
+  if (actualBytes.length !== raw.raw.bytes || sha256(actualBytes) !== raw.raw.sha256) fail(`${fixture.id} raw file identity`);
+  if (referenceBytes.length !== referenceArtifact.bytes || sha256(referenceBytes) !== referenceArtifact.sha256 || referenceArtifact.sha256 !== expectedReferenceDigest) fail(`${fixture.id} reference raw identity`);
+  const facts = rawFacts(actualBytes, referenceBytes, tolerances);
+  if (facts.referenceFiniteCount !== OUTPUT.elementCount || facts.finiteCount !== OUTPUT.elementCount) fail(`${fixture.id} raw/reference non-finite`);
+  const reportedFacts = { ...raw.rawComparison };
+  delete reportedFacts.reference;
+  delete facts.referenceFiniteCount;
+  compareNumericStructure(facts, reportedFacts, `${fixture.id} raw comparison`);
+  if (!facts.allClose || facts.nearZero.mismatchCount !== 0) fail(`${fixture.id} raw frozen comparison`);
   const decodedPath = join(temporary, `${fixture.id}-${raw.repeat}.json`);
   const rust = spawnSync(
     resolve(root, 'evidence/tooling/raw-golden/target/debug/rimeflow-raw-golden'),
@@ -49,10 +186,9 @@ async function validateRaw(root, raw, fixture, frozenFixture, tolerances, tempor
   if (rust.status !== 0) fail(`${fixture.id} production Rust decode failed: ${rust.stderr}`);
   const decoded = JSON.parse(await readFile(decodedPath, 'utf8'));
   if (!same(decoded, raw.decoded)) fail(`${fixture.id} report decoded output differs from real Rust harness`);
-  if (!raw.decodedComparison.passed || raw.decodedComparison.actualCount !== decoded.length || raw.decodedComparison.expectedCount !== frozenFixture.runs[0].decoded.length) fail(`${fixture.id} decoded frozen comparison`);
-  for (const comparison of raw.decodedComparison.comparisons) {
-    if (!comparison.classEqual || comparison.confidenceAbsoluteDifference > tolerances.confidenceAbsolute || comparison.bboxIou < tolerances.boxIouMinimum || comparison.bboxMaxAbsoluteDifference > tolerances.decodedBoxAbsolute) fail(`${fixture.id} decoded tolerance`);
-  }
+  const decodedComparison = decodedFacts(decoded, frozenFixture.runs[0].decoded, tolerances);
+  compareNumericStructure(decodedComparison, raw.decodedComparison, `${fixture.id} decoded comparison`);
+  if (!decodedComparison.passed || raw.passed !== (facts.allClose && decodedComparison.passed)) fail(`${fixture.id} decoded frozen comparison`);
 }
 
 export async function validateOpenvinoEvidence(root, manifest, report, frozen, fixtures) {
@@ -118,9 +254,26 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
     const preservation = replay.trackedEvidence[key];
     if (!preservation?.unchanged || preservation.before.path !== path || preservation.after.path !== path || preservation.before.bytes !== current.length || preservation.after.bytes !== current.length || preservation.before.sha256 !== sha256(current) || preservation.after.sha256 !== sha256(current)) fail(`ordinary replay changed tracked ${key}`);
   }
-  for (const round of replay.rounds) {
-    const facts = profileFacts(JSON.parse(await readFile(resolve(round.profile.path), 'utf8')));
-    if (facts.uniqueCounts.OpenVINOExecutionProvider < 1 || facts.executionPlan !== round.profile.executionPlan) fail(`ordinary replay round ${round.round} profile`);
+  const frozen = JSON.parse(await readFile(resolve(root, 'evidence/golden/web-reference.json'), 'utf8'));
+  const fixtures = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
+  if (!same(report.tolerances, frozen.tolerances)) fail('ordinary replay frozen tolerance drift');
+  const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-replay-validator-'));
+  try {
+    for (const round of replay.rounds) {
+      const profileBytes = await readFile(resolve(round.profile.path));
+      if (profileBytes.length !== round.profile.bytes || sha256(profileBytes) !== round.profile.sha256) fail(`ordinary replay round ${round.round} profile identity`);
+      const facts = profileFacts(JSON.parse(profileBytes));
+      if (!same(facts.counts, round.profile.executionEventCounts) || !same(facts.uniqueCounts, round.profile.uniqueNodeCounts) || facts.uniqueCounts.OpenVINOExecutionProvider < 1 || facts.executionPlan !== round.profile.executionPlan) fail(`ordinary replay round ${round.round} profile`);
+      if (!round.availableProviders.includes('OpenVINOExecutionProvider') || round.sessionProviders[0] !== 'OpenVINOExecutionProvider' || !same(round.inputs, [INPUT]) || !same(round.outputs, [OUTPUT]) || round.fixtures.length !== 5) fail(`ordinary replay round ${round.round} provider/I/O`);
+      for (const item of round.fixtures) {
+        const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
+        const frozenFixture = frozen.fixtures.find((candidate) => candidate.id === item.id);
+        if (!fixture || !frozenFixture || item.runs.length !== 2 || !item.deterministic) fail(`ordinary replay round ${round.round} ${item.id} structure`);
+        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary);
+      }
+    }
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
   }
   if (manifest.status.supported || manifest.status.task14Complete) fail('ordinary replay overclaimed completion');
   return { recordDigest: replay.recordDigest, trackedEvidenceUnchanged: true };

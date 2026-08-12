@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -13,14 +15,31 @@ const replay = await readJson('.evidence/openvino/replay-final/openvino-replay.j
 await validateOpenvinoEvidence(root, manifest, report, frozen, fixtures);
 await validateOpenvinoReplayEvidence(root, replay, manifest, report);
 
+const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
+
 async function rejected(name, mutate) {
   const copiedManifest = structuredClone(manifest);
   const copiedReport = structuredClone(report);
-  await mutate(copiedManifest, copiedReport);
+  const copiedFrozen = structuredClone(frozen);
+  await mutate(copiedManifest, copiedReport, copiedFrozen);
+  const caseDirectory = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-case-'));
   try {
-    await validateOpenvinoEvidence(root, copiedManifest, copiedReport, frozen, fixtures);
+    const manifestPath = join(caseDirectory, 'manifest.json');
+    const reportPath = join(caseDirectory, 'report.json');
+    const frozenPath = join(caseDirectory, 'frozen.json');
+    await Promise.all([
+      writeFile(manifestPath, JSON.stringify(copiedManifest)),
+      writeFile(reportPath, JSON.stringify(copiedReport)),
+      writeFile(frozenPath, JSON.stringify(copiedFrozen)),
+    ]);
+    const [filesystemManifest, filesystemReport, filesystemFrozen] = await Promise.all(
+      [manifestPath, reportPath, frozenPath].map(async (path) => JSON.parse(await readFile(path, 'utf8'))),
+    );
+    await validateOpenvinoEvidence(root, filesystemManifest, filesystemReport, filesystemFrozen, fixtures);
   } catch {
     return name;
+  } finally {
+    await rm(caseDirectory, { recursive: true, force: true });
   }
   throw new Error(`OpenVINO negative case unexpectedly passed: ${name}`);
 }
@@ -66,8 +85,7 @@ try {
     bytes.writeFloatLE(Number.NaN, 0);
     const raw = join(temporary, 'nan.f32le');
     await writeFile(raw, bytes);
-    const digest = (await import('node:crypto')).createHash('sha256').update(bytes).digest('hex');
-    Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { path: raw, sha256: digest });
+    Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { path: raw, sha256: digest(bytes) });
   }));
   cases.push(await rejected('raw tensor contains Infinity', async (_candidate, evidence) => {
     const source = resolve(root, evidence.rounds[0].fixtures[0].runs[0].raw.path);
@@ -75,8 +93,81 @@ try {
     bytes.writeFloatLE(Number.POSITIVE_INFINITY, 0);
     const raw = join(temporary, 'infinity.f32le');
     await writeFile(raw, bytes);
-    const digest = (await import('node:crypto')).createHash('sha256').update(bytes).digest('hex');
-    Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { path: raw, sha256: digest });
+    Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { path: raw, sha256: digest(bytes) });
+  }));
+  cases.push(await rejected('raw tensor byte length drift', async (_candidate, evidence) => {
+    const run = evidence.rounds[0].fixtures[0].runs[0];
+    const bytes = Buffer.from(await readFile(resolve(root, run.raw.path))).subarray(0, 1024);
+    const raw = join(temporary, 'truncated.f32le');
+    await writeFile(raw, bytes);
+    Object.assign(run.raw, { bytes: bytes.length, path: raw, sha256: digest(bytes) });
+  }));
+  cases.push(await rejected('raw tensor shape dtype and element count drift', async (_candidate, evidence) => {
+    Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { dtype: 'float16', elementCount: 1, shape: [1, 8400, 84] });
+  }));
+  cases.push(await rejected('finite raw value exceeds frozen tolerance despite forged pass flags', async (_candidate, evidence) => {
+    const run = evidence.rounds[0].fixtures[0].runs[0];
+    const bytes = Buffer.from(await readFile(resolve(root, run.raw.path)));
+    bytes.writeFloatLE(bytes.readFloatLE(0) + 1, 0);
+    const raw = join(temporary, 'finite-tamper.f32le');
+    await writeFile(raw, bytes);
+    Object.assign(run.raw, { path: raw, sha256: digest(bytes) });
+    Object.assign(run.rawComparison, { allClose: true, sha256Float32Le: digest(bytes) });
+    run.passed = true;
+  }));
+  cases.push(await rejected('synchronized finite raw tamper across every round and repeat', async (_candidate, evidence) => {
+    const first = evidence.rounds[0].fixtures[0].runs[0];
+    const bytes = Buffer.from(await readFile(resolve(root, first.raw.path)));
+    bytes.writeFloatLE(bytes.readFloatLE(0) + 1, 0);
+    const raw = join(temporary, 'finite-tamper-all-runs.f32le');
+    await writeFile(raw, bytes);
+    const rawDigest = digest(bytes);
+    for (const round of evidence.rounds) {
+      for (const run of round.fixtures[0].runs) {
+        Object.assign(run.raw, { path: raw, sha256: rawDigest });
+        Object.assign(run.rawComparison, { allClose: true, sha256Float32Le: rawDigest });
+        run.passed = true;
+      }
+    }
+  }));
+  cases.push(await rejected('reported maximum raw difference drift', async (_candidate, evidence) => {
+    evidence.rounds[0].fixtures[0].runs[0].rawComparison.maxAbsoluteDifference = 0;
+  }));
+  cases.push(await rejected('reported maximum raw location drift', async (_candidate, evidence) => {
+    evidence.rounds[0].fixtures[0].runs[0].rawComparison.maxAbsoluteDifferenceLocation.flatIndex += 1;
+  }));
+  cases.push(await rejected('reference raw digest drift', async (_candidate, evidence) => {
+    const comparison = evidence.rounds[0].fixtures[0].runs[0].rawComparison;
+    comparison.reference.sha256 = '3'.repeat(64);
+    comparison.referenceSha256Float32Le = '3'.repeat(64);
+  }));
+  cases.push(await rejected('raw comparison passes but decoded class differs', async (_candidate, evidence, frozenEvidence) => {
+    const frozenFixture = frozenEvidence.fixtures.find((item) => item.id === 'single-target');
+    frozenFixture.runs[0].decoded[0].classId += 1;
+    const run = evidence.rounds[0].fixtures.find((item) => item.id === 'single-target').runs[0];
+    run.rawComparison.allClose = true;
+    run.decodedComparison.comparisons[0].classEqual = true;
+    run.decodedComparison.comparisons[0].passed = true;
+    run.decodedComparison.passed = true;
+    run.passed = true;
+  }));
+  cases.push(await rejected('raw comparison passes but decoded confidence exceeds tolerance', async (_candidate, evidence, frozenEvidence) => {
+    const frozenFixture = frozenEvidence.fixtures.find((item) => item.id === 'single-target');
+    frozenFixture.runs[0].decoded[0].score += 0.01;
+    const run = evidence.rounds[0].fixtures.find((item) => item.id === 'single-target').runs[0];
+    run.rawComparison.allClose = true;
+    Object.assign(run.decodedComparison.comparisons[0], { confidenceAbsoluteDifference: 0, passed: true });
+    run.decodedComparison.passed = true;
+    run.passed = true;
+  }));
+  cases.push(await rejected('raw comparison passes but decoded bbox absolute and IoU exceed tolerance', async (_candidate, evidence, frozenEvidence) => {
+    const frozenFixture = frozenEvidence.fixtures.find((item) => item.id === 'single-target');
+    frozenFixture.runs[0].decoded[0].bbox[0] += 0.1;
+    const run = evidence.rounds[0].fixtures.find((item) => item.id === 'single-target').runs[0];
+    run.rawComparison.allClose = true;
+    Object.assign(run.decodedComparison.comparisons[0], { bboxIou: 1, bboxMaxAbsoluteDifference: 0, passed: true });
+    run.decodedComparison.passed = true;
+    run.passed = true;
   }));
   const replayDrift = structuredClone(replay);
   replayDrift.trackedEvidence.report.after.sha256 = '4'.repeat(64);
@@ -92,4 +183,13 @@ try {
   await rm(temporary, { recursive: true, force: true });
 }
 
-console.log(JSON.stringify({ ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'] }));
+const transaction = spawnSync(
+  resolve(root, '.evidence/openvino/venv/bin/python'),
+  ['evidence/scripts/test_openvino_publish_transaction.py'],
+  { cwd: root, encoding: 'utf8' },
+);
+if (transaction.status !== 0) throw new Error(`OpenVINO publication transaction tests failed: ${transaction.stderr}`);
+const transactionResult = JSON.parse(transaction.stdout);
+if (!transactionResult.ok || transactionResult.filesystemCases.length !== 8) throw new Error('OpenVINO publication transaction coverage drift');
+
+console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'] }));

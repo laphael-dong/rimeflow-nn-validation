@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 41485,
-      "sha256": "80dcae7cb6e45f4a6a4ef496da8e98254d85380225c84512ba85338f3687242b"
+      "bytes": 41497,
+      "sha256": "09664916559d080f70b85c4a916e9fbe4dbdd819fab107a213943ab1cf1108b3"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -130,7 +130,7 @@
     {
       "path": "evidence/conversions/openvino-ep-manifest.json",
       "bytes": 12174,
-      "sha256": "573a0a2cd5515fbfaad6d5b194043321f9bf92bcc68bb684cc0d057966462441"
+      "sha256": "100a8e6f10d53a0ff68d814379537d409ea9023d606867905dd903e074e1e02b"
     },
     {
       "path": "evidence/reports/windows-ml-spike-report.json",
@@ -144,8 +144,8 @@
     },
     {
       "path": "evidence/reports/openvino-ep-report.json",
-      "bytes": 92805,
-      "sha256": "0f7118c4309663198bcb0f9341a6b1ad9f0d80e69e3127b9158d452d829ca9b8"
+      "bytes": 118881,
+      "sha256": "07b81b013994d47c4e9a3f47984c65b1b7791bd74ad38a331fab883bb9e295fd"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -249,8 +249,8 @@
     },
     {
       "path": "evidence/scripts/openvino_evidence_validation.mjs",
-      "bytes": 13305,
-      "sha256": "51646d1f897845285f541fea450f5a28539f50ceceab8da9a3b4e6dd3814278c"
+      "bytes": 21405,
+      "sha256": "14dd3ca1ce9ef3ca5b3bd802250515f69176873607eab9a856b847e7bfa3fd4e"
     },
     {
       "path": "evidence/scripts/prepare_openvino_tooling.mjs",
@@ -259,13 +259,18 @@
     },
     {
       "path": "evidence/scripts/run_openvino_replay.py",
-      "bytes": 28687,
-      "sha256": "716faef73c1416356088e96f824290ee1cf323bf0477b39e0ea5208f19a3861d"
+      "bytes": 34794,
+      "sha256": "27f23d9654b0a40f83989c16f6a8825915eeaedc9e063063a48322761921318a"
+    },
+    {
+      "path": "evidence/scripts/test_openvino_publish_transaction.py",
+      "bytes": 5385,
+      "sha256": "f07d7aa79864f748e45cbbc7d76d97b5420b21dd6118368753a514dc0cbd6023"
     },
     {
       "path": "evidence/scripts/test_openvino_replay_guards.mjs",
-      "bytes": 5952,
-      "sha256": "a318bd69ea3d0eddbfbe87102100fa8795ca246494f5edf177de3cd429c1b06a"
+      "bytes": 11856,
+      "sha256": "883a81ed9c71a028f431bb6eaa0472ff3880377b0d8b83b0badf6b3b0a9e16bc"
     },
     {
       "path": "evidence/scripts/replay_windows_ml_static_compile.mjs",

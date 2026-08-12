@@ -48,6 +48,7 @@ const paths = [
   'evidence/scripts/openvino_evidence_validation.mjs',
   'evidence/scripts/prepare_openvino_tooling.mjs',
   'evidence/scripts/run_openvino_replay.py',
+  'evidence/scripts/test_openvino_publish_transaction.py',
   'evidence/scripts/test_openvino_replay_guards.mjs',
   'evidence/scripts/replay_windows_ml_static_compile.mjs',
   'evidence/scripts/test_validator_negative.mjs',
