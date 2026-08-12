@@ -896,7 +896,7 @@
           "$OPENVINO_VENV/bin/python",
           "evidence/scripts/run_openvino_replay.py",
           "--workspace",
-          ".evidence/openvino/record-fix01-final",
+          ".evidence/openvino/record-fix02-final",
           "--record"
         ],
         "executionPlan": "full",

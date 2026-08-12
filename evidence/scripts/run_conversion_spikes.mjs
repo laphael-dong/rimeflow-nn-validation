@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ortNative from '../tooling/web/node_modules/onnxruntime-node/dist/index.js';
 import { preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
-import { summarizeOpenvinoForConversion } from './openvino_evidence_validation.mjs';
+import { recoverOpenvinoPublication, summarizeOpenvinoForConversion } from './openvino_evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const modelPath = resolve(root, 'models/yolov8n.onnx');
@@ -266,6 +266,7 @@ if (process.argv.includes('--mindspore-only')) {
 }
 
 if (process.argv.includes('--openvino-only')) {
+  recoverOpenvinoPublication(root);
   const previous = JSON.parse(await readFile(reportPath, 'utf8'));
   const manifest = JSON.parse(await readFile(resolve(root, 'evidence/conversions/openvino-ep-manifest.json'), 'utf8'));
   const openvinoReport = JSON.parse(await readFile(resolve(root, 'evidence/reports/openvino-ep-report.json'), 'utf8'));

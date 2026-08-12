@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -7,6 +7,13 @@ import { spawnSync } from 'node:child_process';
 const MODEL_SHA = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad';
 const INPUT = { dtype: 'float32', elementCount: 1228800, name: 'images', shape: [1, 3, 640, 640] };
 const OUTPUT = { dtype: 'float32', elementCount: 705600, name: 'output0', shape: [1, 84, 8400] };
+const RUST_SOURCES = [
+  'evidence/tooling/raw-golden/Cargo.toml',
+  'evidence/tooling/raw-golden/Cargo.lock',
+  'evidence/tooling/raw-golden/src/main.rs',
+  'evidence/tooling/raw-golden/src/lib.rs',
+  'src/postprocess.rs',
+];
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const canonical = (value) => {
   if (Array.isArray(value)) return value.map(canonical);
@@ -16,6 +23,78 @@ const canonical = (value) => {
 const same = (left, right) => JSON.stringify(canonical(left)) === JSON.stringify(canonical(right));
 const fail = (message) => { throw new Error(`OpenVINO evidence: ${message}`); };
 const nearlyEqual = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= Number.EPSILON * Math.max(1, Math.abs(left), Math.abs(right)) * 8;
+
+function checkedSpawn(command, args, options, label) {
+  const result = spawnSync(command, args, { encoding: 'utf8', ...options });
+  if (result.error || result.status !== 0) {
+    fail(`${label} failed (${result.status ?? 'spawn'}): ${result.error?.message ?? ''}\n${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+  }
+  return result;
+}
+
+export async function verifyRustSourceIdentity(root) {
+  const repository = await realpath(root);
+  const identities = [];
+  for (const relative of RUST_SOURCES) {
+    const path = resolve(repository, relative);
+    const canonicalPath = await realpath(path);
+    if (canonicalPath !== path) fail(`production Rust source canonical path drift: ${relative}`);
+    const bytes = await readFile(path);
+    const head = checkedSpawn('git', ['rev-parse', `HEAD:${relative}`], { cwd: repository }, `${relative} HEAD blob`).stdout.trim();
+    const worktree = checkedSpawn('git', ['hash-object', '--', relative], { cwd: repository }, `${relative} worktree blob`).stdout.trim();
+    if (!/^[0-9a-f]{40,64}$/.test(head) || worktree !== head) fail(`production Rust source differs from HEAD: ${relative}`);
+    identities.push({ bytes: bytes.length, canonicalPath, gitBlob: head, path: relative, sha256: sha256(bytes) });
+  }
+  return identities;
+}
+
+export async function buildTrustedRustRunner(root, options = {}) {
+  const repository = await realpath(root);
+  const sourceIdentity = await verifyRustSourceIdentity(repository);
+  const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-rust-'));
+  const target = join(temporary, 'target');
+  try {
+    const cargo = options.cargo ?? 'cargo';
+    const result = spawnSync(
+      cargo,
+      ['build', '--offline', '--locked', '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml'],
+      { cwd: repository, encoding: 'utf8', env: { ...process.env, ...options.env, CARGO_TARGET_DIR: target } },
+    );
+    if (result.error || result.status !== 0) {
+      fail(`trusted production Rust build failed (${result.status ?? 'spawn'}): ${result.error?.message ?? ''}\n${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+    }
+    const runner = join(target, 'debug', process.platform === 'win32' ? 'rimeflow-raw-golden.exe' : 'rimeflow-raw-golden');
+    const runnerStat = await stat(runner).catch(() => null);
+    if (!runnerStat?.isFile() || (runnerStat.mode & 0o111) === 0) fail('trusted production Rust runner missing or not executable');
+    return {
+      cleanup: async () => rm(temporary, { recursive: true, force: true }),
+      runner,
+      sourceIdentity,
+      target,
+      temporary,
+    };
+  } catch (error) {
+    await rm(temporary, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+export function recoverOpenvinoPublication(root, options = {}) {
+  const result = spawnSync(
+    options.python ?? 'python3',
+    [
+      'evidence/scripts/openvino_durable_publication.py',
+      '--recover', resolve(root, '.evidence/openvino/transaction'),
+      '--target', resolve(root, 'evidence/conversions/openvino-ep-manifest.json'),
+      '--target', resolve(root, 'evidence/reports/openvino-ep-report.json'),
+    ],
+    { cwd: root, encoding: 'utf8' },
+  );
+  if (result.error || result.status !== 0) {
+    fail(`durable publication recovery failed (${result.status ?? 'spawn'}): ${result.error?.message ?? ''}\n${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+  }
+  return JSON.parse(result.stdout);
+}
 
 function readFloat32Le(bytes, label) {
   if (bytes.length !== OUTPUT.elementCount * 4) fail(`${label} byte length`);
@@ -158,7 +237,7 @@ function profileFacts(events) {
   return { counts, executionPlan, uniqueCounts };
 }
 
-async function validateRaw(root, raw, fixture, frozenFixture, tolerances, temporary) {
+async function validateRaw(root, raw, fixture, frozenFixture, tolerances, temporary, rustRunner) {
   const rawPath = resolve(root, raw.raw.path);
   const actualBytes = await readFile(rawPath);
   const referenceArtifact = raw.rawComparison.reference;
@@ -179,7 +258,7 @@ async function validateRaw(root, raw, fixture, frozenFixture, tolerances, tempor
   if (!facts.allClose || facts.nearZero.mismatchCount !== 0) fail(`${fixture.id} raw frozen comparison`);
   const decodedPath = join(temporary, `${fixture.id}-${raw.repeat}.json`);
   const rust = spawnSync(
-    resolve(root, 'evidence/tooling/raw-golden/target/debug/rimeflow-raw-golden'),
+    rustRunner,
     [rawPath, String(fixture.width), String(fixture.height), decodedPath],
     { cwd: root, encoding: 'utf8' },
   );
@@ -220,7 +299,9 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
   if (report.status.state !== 'host-inference-verified' || !report.status.artifactVerified || !report.status.hostInferenceVerified || report.status.supported || report.status.task14Complete || report.status.adapterImplemented || report.status.packagingVerified || report.status.performanceVerified || report.status.targetPlatformClosed) fail('status closure semantics');
   if (report.productionPostprocess.implementation !== 'src/postprocess.rs' || report.productionPostprocess.platformSpecificImplementationAdded) fail('single production postprocess');
   const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-validator-'));
+  let trustedRust;
   try {
+    trustedRust = await buildTrustedRustRunner(root);
     for (const round of report.rounds) {
       if (!round.availableProviders.includes('OpenVINOExecutionProvider') || round.sessionProviders[0] !== 'OpenVINOExecutionProvider' || !same(round.inputs, [INPUT]) || !same(round.outputs, [OUTPUT])) fail(`round ${round.round} provider/I/O`);
       const profilePath = resolve(round.profile.path);
@@ -233,7 +314,7 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
         const frozenFixture = frozen.fixtures.find((candidate) => candidate.id === item.id);
         if (!fixture || !frozenFixture || item.runs.length !== 2 || !item.deterministic || item.runs[0].raw.sha256 !== item.runs[1].raw.sha256 || !same(item.runs[0].decoded, item.runs[1].decoded)) fail(`round ${round.round} ${item.id} determinism`);
-        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary);
+        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
       }
     }
     for (let index = 0; index < report.rounds[0].fixtures.length; index += 1) {
@@ -242,6 +323,7 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
       if (left.id !== right.id || left.runs[0].raw.sha256 !== right.runs[0].raw.sha256 || !same(left.runs[0].decoded, right.runs[0].decoded)) fail(`${left.id} cross-round replay determinism`);
     }
   } finally {
+    await trustedRust?.cleanup();
     await rm(temporary, { recursive: true, force: true });
   }
   return { executionPlan: report.executionPlan, fixtureCount: 5, profileOpenvinoNodes: report.rounds[0].profile.uniqueNodeCounts.OpenVINOExecutionProvider, profileCpuNodes: report.rounds[0].profile.uniqueNodeCounts.CPUExecutionProvider };
@@ -258,7 +340,9 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
   const fixtures = JSON.parse(await readFile(resolve(root, 'evidence/fixtures/manifest.json'), 'utf8'));
   if (!same(report.tolerances, frozen.tolerances)) fail('ordinary replay frozen tolerance drift');
   const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-replay-validator-'));
+  let trustedRust;
   try {
+    trustedRust = await buildTrustedRustRunner(root);
     for (const round of replay.rounds) {
       const profileBytes = await readFile(resolve(round.profile.path));
       if (profileBytes.length !== round.profile.bytes || sha256(profileBytes) !== round.profile.sha256) fail(`ordinary replay round ${round.round} profile identity`);
@@ -269,10 +353,11 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
         const frozenFixture = frozen.fixtures.find((candidate) => candidate.id === item.id);
         if (!fixture || !frozenFixture || item.runs.length !== 2 || !item.deterministic) fail(`ordinary replay round ${round.round} ${item.id} structure`);
-        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary);
+        for (const run of item.runs) await validateRaw(root, run, fixture, frozenFixture, frozen.tolerances, temporary, trustedRust.runner);
       }
     }
   } finally {
+    await trustedRust?.cleanup();
     await rm(temporary, { recursive: true, force: true });
   }
   if (manifest.status.supported || manifest.status.task14Complete) fail('ordinary replay overclaimed completion');

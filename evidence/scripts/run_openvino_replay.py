@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """记录或重放 Linux x86_64 ONNX Runtime OpenVINO EP 真实推理证据。"""
 
+from __future__ import annotations
+
 import argparse
+import atexit
 import ctypes
 import hashlib
 import json
@@ -15,8 +18,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-import numpy as np
-import onnxruntime as ort
+from openvino_durable_publication import publish, recover
 
 
 MODEL_BYTES = 12_851_098
@@ -27,6 +29,7 @@ TRACKED = {
     "manifest": "evidence/conversions/openvino-ep-manifest.json",
     "report": "evidence/reports/openvino-ep-report.json",
 }
+TRANSACTION_DIRECTORY = ".evidence/openvino/transaction"
 WHEELS = [
     ("flatbuffers", "25.12.19", "flatbuffers-25.12.19-py2.py3-none-any.whl", "7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4", "Apache-2.0", "https://files.pythonhosted.org/packages/e8/2d/d2a548598be01649e2d46231d151a6c56d10b964d94043a335ae56ea2d92/flatbuffers-25.12.19-py2.py3-none-any.whl"),
     ("mpmath", "1.3.0", "mpmath-1.3.0-py3-none-any.whl", "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c", "BSD-3-Clause", "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl"),
@@ -65,6 +68,7 @@ def artifact(path: Path, logical_path: str | None = None) -> dict[str, object]:
 def execute(command: list[str], root: Path) -> dict[str, object]:
     def sanitize(value: str) -> str:
         normalized = value.replace(str(root), "$REPO")
+        normalized = re.sub(r"/tmp/rimeflow-openvino-record-rust-[^/\s]+", "$TEMP_CARGO_TARGET", normalized)
         return re.sub(r"(?:\$REPO/|\./)?\.evidence/openvino/[^/\s]*venv", "$OPENVINO_VENV", normalized)
 
     started = utc_now()
@@ -94,126 +98,6 @@ def tracked_snapshot(root: Path, required: bool) -> dict[str, dict[str, object]]
             raise RuntimeError(f"missing tracked OpenVINO evidence: {relative}")
         result[key] = item
     return result
-
-
-def fsync_directory(path: Path) -> None:
-    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-    try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
-
-
-def write_durable_temporary(target: Path, payload: bytes, suffix: str) -> Path:
-    descriptor, temporary_name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.{suffix}-")
-    temporary = Path(temporary_name)
-    try:
-        with os.fdopen(descriptor, "wb") as stream:
-            stream.write(payload)
-            stream.flush()
-            os.fsync(stream.fileno())
-    except BaseException:
-        temporary.unlink(missing_ok=True)
-        raise
-    return temporary
-
-
-def publish(
-    payloads: dict[Path, bytes],
-    *,
-    replace_target=os.replace,
-    stage_mutator=None,
-    sync_directory=fsync_directory,
-) -> None:
-    if len(payloads) != 2:
-        raise ValueError("OpenVINO record publication requires exactly two targets")
-    targets = list(payloads)
-    staged: dict[Path, Path] = {}
-    backups: dict[Path, Path | None] = {}
-    original: dict[Path, bytes | None] = {}
-    committed = False
-    original_error: BaseException | None = None
-    rollback_errors: list[BaseException] = []
-    try:
-        for target in targets:
-            target.parent.mkdir(parents=True, exist_ok=True)
-            original[target] = target.read_bytes() if target.is_file() else None
-
-        for target in targets:
-            staged[target] = write_durable_temporary(target, payloads[target], "recording")
-            if stage_mutator is not None:
-                stage_mutator(target, staged[target])
-            staged_bytes = staged[target].read_bytes()
-            if staged_bytes != payloads[target] or hashlib.sha256(staged_bytes).digest() != hashlib.sha256(payloads[target]).digest():
-                raise RuntimeError(f"staging bytes/SHA-256 mismatch: {target}")
-
-        for target in targets:
-            previous = original[target]
-            backups[target] = None if previous is None else write_durable_temporary(target, previous, "backup")
-        for directory in {target.parent for target in targets}:
-            sync_directory(directory)
-
-        for target in targets:
-            replace_target(staged[target], target)
-            sync_directory(target.parent)
-
-        for target in targets:
-            published = target.read_bytes()
-            if published != payloads[target] or hashlib.sha256(published).digest() != hashlib.sha256(payloads[target]).digest():
-                raise RuntimeError(f"published bytes/SHA-256 mismatch: {target}")
-        for directory in {target.parent for target in targets}:
-            sync_directory(directory)
-        committed = True
-    except BaseException as error:
-        original_error = error
-        for target in reversed(targets):
-            try:
-                previous = original.get(target)
-                backup = backups.get(target)
-                if previous is None:
-                    target.unlink(missing_ok=True)
-                elif backup is not None and backup.exists():
-                    os.replace(backup, target)
-                    backups[target] = None
-                else:
-                    recovery = write_durable_temporary(target, previous, "recovery")
-                    os.replace(recovery, target)
-                sync_directory(target.parent)
-            except BaseException as rollback_error:
-                rollback_errors.append(rollback_error)
-        if rollback_errors:
-            raise ExceptionGroup("OpenVINO publication failed and rollback was incomplete", [original_error, *rollback_errors])
-        raise
-    finally:
-        cleanup_errors = []
-        for temporary in [*staged.values(), *(item for item in backups.values() if item is not None)]:
-            try:
-                temporary.unlink(missing_ok=True)
-            except BaseException as cleanup_error:
-                cleanup_errors.append(cleanup_error)
-        if committed:
-            for directory in {target.parent for target in targets}:
-                try:
-                    sync_directory(directory)
-                except BaseException as cleanup_error:
-                    cleanup_errors.append(cleanup_error)
-        if cleanup_errors and original_error is None:
-            recovery_errors = []
-            for target in reversed(targets):
-                try:
-                    previous = original[target]
-                    if previous is None:
-                        target.unlink(missing_ok=True)
-                    else:
-                        recovery = write_durable_temporary(target, previous, "recovery")
-                        os.replace(recovery, target)
-                    fsync_directory(target.parent)
-                except BaseException as recovery_error:
-                    recovery_errors.append(recovery_error)
-            committed = False
-            raise ExceptionGroup("OpenVINO publication cleanup failed", [*cleanup_errors, *recovery_errors])
-    if not committed:
-        raise RuntimeError("OpenVINO publication did not commit")
 
 
 def validate_workspace(root: Path, workspace: Path) -> None:
@@ -450,11 +334,21 @@ def comparable_manifest(value: dict[str, object]) -> dict[str, object]:
 
 
 def main() -> int:
+    global np, ort
     parser = argparse.ArgumentParser()
     parser.add_argument("--workspace", default=".evidence/openvino/replay", type=Path)
     parser.add_argument("--record", action="store_true")
+    parser.add_argument("--recover-only", action="store_true")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
+    transaction_directory = root / TRANSACTION_DIRECTORY
+    tracked_targets = {root / relative for relative in TRACKED.values()}
+    recovery = recover(transaction_directory, expected_targets=tracked_targets)
+    if args.recover_only:
+        print(json.dumps({"mode": "recover-only", **recovery}, sort_keys=True))
+        return 0
+    import numpy as np
+    import onnxruntime as ort
     workspace = (root / args.workspace).resolve()
     validate_workspace(root, workspace)
     before = tracked_snapshot(root, required=not args.record)
@@ -479,10 +373,13 @@ def main() -> int:
     pip_check = execute([sys.executable, "-m", "pip", "check"], root)
     if install["exitCode"] or pip_check["exitCode"]:
         raise RuntimeError("hash-locked OpenVINO environment verification failed")
-    rust_build = execute(["cargo", "build", "--offline", "--manifest-path", "evidence/tooling/raw-golden/Cargo.toml"], root)
+    rust_target = Path(tempfile.mkdtemp(prefix="rimeflow-openvino-record-rust-"))
+    atexit.register(shutil.rmtree, rust_target, ignore_errors=True)
+    rust_build = execute(["cargo", "build", "--offline", "--locked", "--target-dir", str(rust_target), "--manifest-path", "evidence/tooling/raw-golden/Cargo.toml"], root)
     if rust_build["exitCode"]:
-        raise RuntimeError("production raw-golden harness build failed")
-    rust_runner = root / "evidence/tooling/raw-golden/target/debug/rimeflow-raw-golden"
+        shutil.rmtree(rust_target, ignore_errors=True)
+        raise RuntimeError("production raw-golden harness locked build failed")
+    rust_runner = rust_target / "debug/rimeflow-raw-golden"
     fixture_manifest = json.loads((root / "evidence/fixtures/manifest.json").read_text())
     frozen = json.loads((root / "evidence/golden/web-reference.json").read_text())
     workspace.mkdir(parents=True, exist_ok=True)
@@ -622,7 +519,7 @@ def main() -> int:
         "tolerances": frozen["tolerances"],
     }
     if args.record:
-        publish({root / TRACKED["manifest"]: stable_bytes(manifest), root / TRACKED["report"]: stable_bytes(report)})
+        publish({root / TRACKED["manifest"]: stable_bytes(manifest), root / TRACKED["report"]: stable_bytes(report)}, transaction_directory)
         tracked = tracked_snapshot(root, required=True)
         result = {"mode": "record", "recordDigest": report["recordDigest"], "trackedEvidence": tracked}
     else:
@@ -648,6 +545,8 @@ def main() -> int:
         replay_path = workspace / "openvino-replay.json"
         replay_path.write_bytes(stable_bytes(replay))
         result = {"mode": "replay", "recordDigest": report["recordDigest"], "report": str(replay_path), "trackedEvidence": preservation}
+    shutil.rmtree(rust_target, ignore_errors=True)
+    atexit.unregister(shutil.rmtree)
     print(json.dumps(result, sort_keys=True))
     return 0
 

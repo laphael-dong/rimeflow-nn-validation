@@ -3,9 +3,10 @@ import { spawnSync } from 'node:child_process';
 import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
+import { recoverOpenvinoPublication, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
+recoverOpenvinoPublication(root);
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
 const manifest = await readJson('evidence/conversions/openvino-ep-manifest.json');
 const report = await readJson('evidence/reports/openvino-ep-report.json');
@@ -190,6 +191,11 @@ const transaction = spawnSync(
 );
 if (transaction.status !== 0) throw new Error(`OpenVINO publication transaction tests failed: ${transaction.stderr}`);
 const transactionResult = JSON.parse(transaction.stdout);
-if (!transactionResult.ok || transactionResult.filesystemCases.length !== 8) throw new Error('OpenVINO publication transaction coverage drift');
+if (!transactionResult.ok || transactionResult.filesystemCases.length !== 22) throw new Error('OpenVINO publication transaction coverage drift');
 
-console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'] }));
+const rustIdentity = spawnSync('node', ['evidence/scripts/test_openvino_rust_identity_guards.mjs'], { cwd: root, encoding: 'utf8' });
+if (rustIdentity.status !== 0) throw new Error(`OpenVINO Rust source/binary identity guards failed: ${rustIdentity.stdout}\n${rustIdentity.stderr}`);
+const rustIdentityResult = JSON.parse(rustIdentity.stdout);
+if (!rustIdentityResult.ok || rustIdentityResult.cases.length !== 9 || rustIdentityResult.sourceCount !== 5) throw new Error('OpenVINO Rust source/binary guard coverage drift');
+
+console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'], rustIdentityCases: rustIdentityResult.cases }));

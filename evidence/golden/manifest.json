@@ -105,7 +105,7 @@
     {
       "path": "evidence/conversions/conversion-spikes.json",
       "bytes": 41497,
-      "sha256": "09664916559d080f70b85c4a916e9fbe4dbdd819fab107a213943ab1cf1108b3"
+      "sha256": "7c432f7aef50c552b2efa311ab332db7572040ae674446292547cdfaa503d719"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -129,8 +129,8 @@
     },
     {
       "path": "evidence/conversions/openvino-ep-manifest.json",
-      "bytes": 12174,
-      "sha256": "100a8e6f10d53a0ff68d814379537d409ea9023d606867905dd903e074e1e02b"
+      "bytes": 12125,
+      "sha256": "911a43b80f63c508496732e17b04d0bda803e0af84f68893d21aef1c915aa9c6"
     },
     {
       "path": "evidence/reports/windows-ml-spike-report.json",
@@ -144,8 +144,8 @@
     },
     {
       "path": "evidence/reports/openvino-ep-report.json",
-      "bytes": 118881,
-      "sha256": "07b81b013994d47c4e9a3f47984c65b1b7791bd74ad38a331fab883bb9e295fd"
+      "bytes": 118357,
+      "sha256": "07b7c75002d3f439a0a52d1f212b942feb4d4e98724ea67f29ec1ad20d914d7f"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -233,6 +233,16 @@
       "sha256": "3e16f87dd96579b5771691fd35056ab3cd125d526815aebc41a7141fbc01f603"
     },
     {
+      "path": "evidence/tooling/raw-golden/Cargo.toml",
+      "bytes": 165,
+      "sha256": "8027af80bec76f757253743a1ef1414e31ce449ab1c8fa5391223b33a2378b0f"
+    },
+    {
+      "path": "evidence/tooling/raw-golden/Cargo.lock",
+      "bytes": 2855,
+      "sha256": "560c0ef10865895cd739c0971566564e727b83014ff4f1da3adbe561fa5581e6"
+    },
+    {
       "path": "evidence/tooling/raw-golden/src/lib.rs",
       "bytes": 4428,
       "sha256": "90b7a373ee51547ef5543bd61f37a39c36471d70a0afc7e91917566711933e31"
@@ -243,14 +253,24 @@
       "sha256": "37b695ddc00a9573e41179eb27da08fed90f9c88cb784abd51c9bc69b5a4aa73"
     },
     {
+      "path": "src/postprocess.rs",
+      "bytes": 2910,
+      "sha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+    },
+    {
       "path": "evidence/scripts/evidence_validation.mjs",
       "bytes": 50202,
       "sha256": "7c6f67ce33506e4a554e00e068be5b0556db47d05d00e6b6869443a430782a42"
     },
     {
       "path": "evidence/scripts/openvino_evidence_validation.mjs",
-      "bytes": 21405,
-      "sha256": "14dd3ca1ce9ef3ca5b3bd802250515f69176873607eab9a856b847e7bfa3fd4e"
+      "bytes": 25249,
+      "sha256": "5f98e26799108fe1801e06bf4127b6c57c7f9145eac6943da2af50cced4525e5"
+    },
+    {
+      "path": "evidence/scripts/openvino_durable_publication.py",
+      "bytes": 14463,
+      "sha256": "d3a26af6d31b73330725e6e9eb0e7a93bbf0d9fb9fc5008d2f41b15216e9b83a"
     },
     {
       "path": "evidence/scripts/prepare_openvino_tooling.mjs",
@@ -259,18 +279,28 @@
     },
     {
       "path": "evidence/scripts/run_openvino_replay.py",
-      "bytes": 34794,
-      "sha256": "27f23d9654b0a40f83989c16f6a8825915eeaedc9e063063a48322761921318a"
+      "bytes": 30738,
+      "sha256": "bfc40cc53bf8567a304c8aec3da2973168b2f614740665b9e918ee6bd2c675b8"
+    },
+    {
+      "path": "evidence/scripts/run_conversion_spikes.mjs",
+      "bytes": 21875,
+      "sha256": "77ea7b3c440bb885b56ac91cf847186829b8e7872d8923bc8c1af91da758c143"
     },
     {
       "path": "evidence/scripts/test_openvino_publish_transaction.py",
-      "bytes": 5385,
-      "sha256": "f07d7aa79864f748e45cbbc7d76d97b5420b21dd6118368753a514dc0cbd6023"
+      "bytes": 12501,
+      "sha256": "e5eeb96bcf302f06e8e2faf167d864e57331434c1b9d790d12bf2537f4cead4e"
     },
     {
       "path": "evidence/scripts/test_openvino_replay_guards.mjs",
-      "bytes": 11856,
-      "sha256": "883a81ed9c71a028f431bb6eaa0472ff3880377b0d8b83b0badf6b3b0a9e16bc"
+      "bytes": 12487,
+      "sha256": "4f2ca722e16bfca64d80d1bb23e9d7858da0f33d2a6c0dacc69fbb271c539ecd"
+    },
+    {
+      "path": "evidence/scripts/test_openvino_rust_identity_guards.mjs",
+      "bytes": 5105,
+      "sha256": "aeae53bef2add6afd6b2837bc62e997d2006f5b7507be88b56e9544bb7298778"
     },
     {
       "path": "evidence/scripts/replay_windows_ml_static_compile.mjs",
@@ -289,8 +319,8 @@
     },
     {
       "path": "evidence/scripts/validate_evidence.mjs",
-      "bytes": 23057,
-      "sha256": "a5f0fd423635f1348bdfaeafab4f0b362460135612123b78b6d5bfbf9d5bdcdd"
+      "bytes": 23119,
+      "sha256": "ac5fadd9ae05a1cc6236d04297a92434902aa2ec7303c815bac87f200f548160"
     },
     {
       "path": "evidence/tooling/windows-ml-runner/Program.cs",
