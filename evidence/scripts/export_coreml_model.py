@@ -182,7 +182,7 @@ def inspect_spec(package: Path) -> dict[str, object]:
     normalized_spec = Model_pb2.Model()
     normalized_spec.CopyFrom(spec)
     volatile_metadata = {}
-    for key in ["date"]:
+    for key in ["date", "com.github.apple.coremltools.conversion_date"]:
         if key in normalized_spec.description.metadata.userDefined:
             volatile_metadata[key] = normalized_spec.description.metadata.userDefined[key]
             del normalized_spec.description.metadata.userDefined[key]

@@ -1,0 +1,607 @@
+{
+  "schemaVersion": 2,
+  "task": "T14-LNX-CUDA-01",
+  "mode": "recorded-blocked-host-replay",
+  "recorded": true,
+  "protectedPaths": [
+    "evidence/conversions/cuda-ep-spike-manifest.json",
+    "evidence/reports/cuda-ep-spike-report.json",
+    "evidence/reports/cuda-ep-replay-report.json",
+    "evidence/golden/manifest.json",
+    "evidence/replay/task1-replay.json",
+    "evidence/conversions/conversion-spikes.json"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "command": {
+        "command": [
+          "python3",
+          "evidence/scripts/run_cuda_ep.py",
+          "--workspace",
+          ".evidence/cuda/replay/round-1",
+          "--output",
+          ".evidence/cuda/replay/round-1/report.json"
+        ],
+        "startedAt": "2026-08-12T10:32:29.689Z",
+        "endedAt": "2026-08-12T10:32:29.994Z",
+        "exitCode": 21,
+        "stdout": "{\"state\": \"blocked\", \"failureStage\": \"nvidia-hardware-driver-preflight\", \"exitCode\": 21, \"report\": \".evidence/cuda/replay/round-1/report.json\"}\n",
+        "stderr": ""
+      },
+      "report": {
+        "availableProviders": [],
+        "buildVerified": false,
+        "commands": [
+          {
+            "command": [
+              "uname",
+              "-a"
+            ],
+            "endedAt": "2026-08-12T10:32:29.751711Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:29.750312Z",
+            "stderr": "",
+            "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n"
+          },
+          {
+            "command": [
+              "cat",
+              "/etc/os-release"
+            ],
+            "endedAt": "2026-08-12T10:32:29.752923Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:29.751981Z",
+            "stderr": "",
+            "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          {
+            "command": [
+              "bash",
+              "-lc",
+              "lspci -nn | grep -Ei 'VGA|3D controller'"
+            ],
+            "endedAt": "2026-08-12T10:32:29.893862Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:29.753187Z",
+            "stderr": "",
+            "stdout": "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)\n"
+          },
+          {
+            "command": [
+              "bash",
+              "-lc",
+              "ldconfig -p | grep -E 'lib(cuda|cudnn|cublas|cudart|onnxruntime_providers_cuda)'"
+            ],
+            "endedAt": "2026-08-12T10:32:29.902399Z",
+            "exitCode": 1,
+            "startedAt": "2026-08-12T10:32:29.894304Z",
+            "stderr": "",
+            "stdout": ""
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-c",
+              "import onnxruntime as ort; print(ort.__version__); print(ort.get_available_providers()); print(ort.__file__)"
+            ],
+            "endedAt": "2026-08-12T10:32:29.984785Z",
+            "exitCode": 1,
+            "startedAt": "2026-08-12T10:32:29.902490Z",
+            "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'onnxruntime'\n",
+            "stdout": ""
+          },
+          {
+            "command": [
+              "nvidia-smi",
+              "--query-gpu=name,uuid,driver_version,compute_cap",
+              "--format=csv,noheader"
+            ],
+            "endedAt": "2026-08-12T10:32:29.985414Z",
+            "exitCode": 127,
+            "startedAt": "2026-08-12T10:32:29.985410Z",
+            "stderr": "nvidia-smi: command not found\n",
+            "stdout": ""
+          }
+        ],
+        "endedAt": "2026-08-12T10:32:29.985419Z",
+        "failure": {
+          "message": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
+          "missing": [
+            "NVIDIA GPU",
+            "NVIDIA driver / nvidia-smi",
+            "onnxruntime-gpu",
+            "libonnxruntime_providers_cuda.so",
+            "libcuda.so",
+            "libcudart.so",
+            "libcudnn.so",
+            "libcublas.so"
+          ]
+        },
+        "failureStage": "nvidia-hardware-driver-preflight",
+        "fixtures": [],
+        "goldenExecuted": false,
+        "host": {
+          "architecture": "x86_64",
+          "displayControllers": [
+            "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)"
+          ],
+          "os": "Linux",
+          "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+          "python": "3.12.3"
+        },
+        "hostInferenceVerified": false,
+        "ioContract": {
+          "input": {
+            "dtype": "tensor(float)",
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ]
+          },
+          "output": {
+            "dtype": "tensor(float)",
+            "name": "output0",
+            "shape": [
+              1,
+              84,
+              8400
+            ]
+          }
+        },
+        "lockedPackages": {
+          "flatbuffers": "25.2.10",
+          "numpy": "2.2.3",
+          "nvidia-cublas-cu12": "12.8.4.1",
+          "nvidia-cuda-nvrtc-cu12": "12.8.93",
+          "nvidia-cuda-runtime-cu12": "12.8.90",
+          "nvidia-cudnn-cu12": "9.10.2.21",
+          "nvidia-cufft-cu12": "11.3.3.83",
+          "nvidia-curand-cu12": "10.3.9.90",
+          "nvidia-nvjitlink-cu12": "12.8.93",
+          "onnxruntime-gpu": "1.26.0",
+          "packaging": "24.2",
+          "protobuf": "5.29.3"
+        },
+        "model": {
+          "bytes": 12851098,
+          "converted": false,
+          "copied": false,
+          "path": "models/yolov8n.onnx",
+          "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+        },
+        "productionPostprocess": {
+          "cudaSpecificDecodeOrNms": false,
+          "implementation": "src/postprocess.rs",
+          "runner": "evidence/tooling/raw-golden"
+        },
+        "profile": {
+          "artifact": null,
+          "cpuNodeCount": 0,
+          "cudaNodeCount": 0,
+          "nodeProviderCounts": {}
+        },
+        "providerOptionsRequested": {
+          "arena_extend_strategy": "kNextPowerOfTwo",
+          "cudnn_conv_algo_search": "EXHAUSTIVE",
+          "cudnn_conv_use_max_workspace": "1",
+          "device_id": "0",
+          "do_copy_in_default_stream": "1"
+        },
+        "requestedProviders": [
+          "CUDAExecutionProvider"
+        ],
+        "runtimeExecuted": false,
+        "schemaVersion": 1,
+        "sessionProviderOptions": {},
+        "sessionProviders": [],
+        "sharedLibraries": {
+          "entries": {},
+          "mapsArtifact": null,
+          "requiredLoaded": {
+            "libcublas.so": false,
+            "libcuda.so": false,
+            "libcudart.so": false,
+            "libcudnn.so": false,
+            "libonnxruntime_providers_cuda.so": false
+          }
+        },
+        "startedAt": "2026-08-12T10:32:29.740161Z",
+        "state": "blocked",
+        "staticVerified": true,
+        "supported": false,
+        "task": "T14-LNX-CUDA-01",
+        "task14Complete": false,
+        "versions": {
+          "cudaRuntime": null,
+          "cudnn": null,
+          "nvidiaDriver": null,
+          "onnxruntime": null
+        }
+      },
+      "reportArtifact": {
+        "path": ".evidence/cuda/replay/round-1/report.json",
+        "bytes": 5689,
+        "sha256": "07e829a2a07ab1fe04d72e0dc9683f22ebf81cd6f64da0f808b8aa6174982a73"
+      },
+      "trackedBefore": {
+        "evidence/conversions/cuda-ep-spike-manifest.json": {
+          "exists": true,
+          "bytes": 3336,
+          "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-spike-report.json": {
+          "exists": true,
+          "bytes": 5353,
+          "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-replay-report.json": {
+          "exists": true,
+          "bytes": 22057,
+          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
+          "mtimeNs": "1786530146069903400"
+        },
+        "evidence/golden/manifest.json": {
+          "exists": true,
+          "bytes": 18318,
+          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
+          "mtimeNs": "1786530749646823700"
+        },
+        "evidence/replay/task1-replay.json": {
+          "exists": true,
+          "bytes": 310919,
+          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
+          "mtimeNs": "1786530749652823300"
+        },
+        "evidence/conversions/conversion-spikes.json": {
+          "exists": true,
+          "bytes": 44348,
+          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
+          "mtimeNs": "1786530749603826400"
+        }
+      },
+      "trackedAfter": {
+        "evidence/conversions/cuda-ep-spike-manifest.json": {
+          "exists": true,
+          "bytes": 3336,
+          "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-spike-report.json": {
+          "exists": true,
+          "bytes": 5353,
+          "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-replay-report.json": {
+          "exists": true,
+          "bytes": 22057,
+          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
+          "mtimeNs": "1786530146069903400"
+        },
+        "evidence/golden/manifest.json": {
+          "exists": true,
+          "bytes": 18318,
+          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
+          "mtimeNs": "1786530749646823700"
+        },
+        "evidence/replay/task1-replay.json": {
+          "exists": true,
+          "bytes": 310919,
+          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
+          "mtimeNs": "1786530749652823300"
+        },
+        "evidence/conversions/conversion-spikes.json": {
+          "exists": true,
+          "bytes": 44348,
+          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
+          "mtimeNs": "1786530749603826400"
+        }
+      }
+    },
+    {
+      "round": 2,
+      "command": {
+        "command": [
+          "python3",
+          "evidence/scripts/run_cuda_ep.py",
+          "--workspace",
+          ".evidence/cuda/replay/round-2",
+          "--output",
+          ".evidence/cuda/replay/round-2/report.json"
+        ],
+        "startedAt": "2026-08-12T10:32:29.996Z",
+        "endedAt": "2026-08-12T10:32:30.235Z",
+        "exitCode": 21,
+        "stdout": "{\"state\": \"blocked\", \"failureStage\": \"nvidia-hardware-driver-preflight\", \"exitCode\": 21, \"report\": \".evidence/cuda/replay/round-2/report.json\"}\n",
+        "stderr": ""
+      },
+      "report": {
+        "availableProviders": [],
+        "buildVerified": false,
+        "commands": [
+          {
+            "command": [
+              "uname",
+              "-a"
+            ],
+            "endedAt": "2026-08-12T10:32:30.059105Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:30.057684Z",
+            "stderr": "",
+            "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n"
+          },
+          {
+            "command": [
+              "cat",
+              "/etc/os-release"
+            ],
+            "endedAt": "2026-08-12T10:32:30.060249Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:30.059377Z",
+            "stderr": "",
+            "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          {
+            "command": [
+              "bash",
+              "-lc",
+              "lspci -nn | grep -Ei 'VGA|3D controller'"
+            ],
+            "endedAt": "2026-08-12T10:32:30.137645Z",
+            "exitCode": 0,
+            "startedAt": "2026-08-12T10:32:30.060494Z",
+            "stderr": "",
+            "stdout": "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)\n"
+          },
+          {
+            "command": [
+              "bash",
+              "-lc",
+              "ldconfig -p | grep -E 'lib(cuda|cudnn|cublas|cudart|onnxruntime_providers_cuda)'"
+            ],
+            "endedAt": "2026-08-12T10:32:30.146731Z",
+            "exitCode": 1,
+            "startedAt": "2026-08-12T10:32:30.138089Z",
+            "stderr": "",
+            "stdout": ""
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-c",
+              "import onnxruntime as ort; print(ort.__version__); print(ort.get_available_providers()); print(ort.__file__)"
+            ],
+            "endedAt": "2026-08-12T10:32:30.225843Z",
+            "exitCode": 1,
+            "startedAt": "2026-08-12T10:32:30.146845Z",
+            "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'onnxruntime'\n",
+            "stdout": ""
+          },
+          {
+            "command": [
+              "nvidia-smi",
+              "--query-gpu=name,uuid,driver_version,compute_cap",
+              "--format=csv,noheader"
+            ],
+            "endedAt": "2026-08-12T10:32:30.226449Z",
+            "exitCode": 127,
+            "startedAt": "2026-08-12T10:32:30.226445Z",
+            "stderr": "nvidia-smi: command not found\n",
+            "stdout": ""
+          }
+        ],
+        "endedAt": "2026-08-12T10:32:30.226455Z",
+        "failure": {
+          "message": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
+          "missing": [
+            "NVIDIA GPU",
+            "NVIDIA driver / nvidia-smi",
+            "onnxruntime-gpu",
+            "libonnxruntime_providers_cuda.so",
+            "libcuda.so",
+            "libcudart.so",
+            "libcudnn.so",
+            "libcublas.so"
+          ]
+        },
+        "failureStage": "nvidia-hardware-driver-preflight",
+        "fixtures": [],
+        "goldenExecuted": false,
+        "host": {
+          "architecture": "x86_64",
+          "displayControllers": [
+            "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)"
+          ],
+          "os": "Linux",
+          "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+          "python": "3.12.3"
+        },
+        "hostInferenceVerified": false,
+        "ioContract": {
+          "input": {
+            "dtype": "tensor(float)",
+            "name": "images",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ]
+          },
+          "output": {
+            "dtype": "tensor(float)",
+            "name": "output0",
+            "shape": [
+              1,
+              84,
+              8400
+            ]
+          }
+        },
+        "lockedPackages": {
+          "flatbuffers": "25.2.10",
+          "numpy": "2.2.3",
+          "nvidia-cublas-cu12": "12.8.4.1",
+          "nvidia-cuda-nvrtc-cu12": "12.8.93",
+          "nvidia-cuda-runtime-cu12": "12.8.90",
+          "nvidia-cudnn-cu12": "9.10.2.21",
+          "nvidia-cufft-cu12": "11.3.3.83",
+          "nvidia-curand-cu12": "10.3.9.90",
+          "nvidia-nvjitlink-cu12": "12.8.93",
+          "onnxruntime-gpu": "1.26.0",
+          "packaging": "24.2",
+          "protobuf": "5.29.3"
+        },
+        "model": {
+          "bytes": 12851098,
+          "converted": false,
+          "copied": false,
+          "path": "models/yolov8n.onnx",
+          "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+        },
+        "productionPostprocess": {
+          "cudaSpecificDecodeOrNms": false,
+          "implementation": "src/postprocess.rs",
+          "runner": "evidence/tooling/raw-golden"
+        },
+        "profile": {
+          "artifact": null,
+          "cpuNodeCount": 0,
+          "cudaNodeCount": 0,
+          "nodeProviderCounts": {}
+        },
+        "providerOptionsRequested": {
+          "arena_extend_strategy": "kNextPowerOfTwo",
+          "cudnn_conv_algo_search": "EXHAUSTIVE",
+          "cudnn_conv_use_max_workspace": "1",
+          "device_id": "0",
+          "do_copy_in_default_stream": "1"
+        },
+        "requestedProviders": [
+          "CUDAExecutionProvider"
+        ],
+        "runtimeExecuted": false,
+        "schemaVersion": 1,
+        "sessionProviderOptions": {},
+        "sessionProviders": [],
+        "sharedLibraries": {
+          "entries": {},
+          "mapsArtifact": null,
+          "requiredLoaded": {
+            "libcublas.so": false,
+            "libcuda.so": false,
+            "libcudart.so": false,
+            "libcudnn.so": false,
+            "libonnxruntime_providers_cuda.so": false
+          }
+        },
+        "startedAt": "2026-08-12T10:32:30.046987Z",
+        "state": "blocked",
+        "staticVerified": true,
+        "supported": false,
+        "task": "T14-LNX-CUDA-01",
+        "task14Complete": false,
+        "versions": {
+          "cudaRuntime": null,
+          "cudnn": null,
+          "nvidiaDriver": null,
+          "onnxruntime": null
+        }
+      },
+      "reportArtifact": {
+        "path": ".evidence/cuda/replay/round-2/report.json",
+        "bytes": 5689,
+        "sha256": "cc61682af29d37dea7f64fde566858bce773901917847e62788c71c8ecd90e77"
+      },
+      "trackedBefore": {
+        "evidence/conversions/cuda-ep-spike-manifest.json": {
+          "exists": true,
+          "bytes": 3336,
+          "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-spike-report.json": {
+          "exists": true,
+          "bytes": 5353,
+          "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-replay-report.json": {
+          "exists": true,
+          "bytes": 22057,
+          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
+          "mtimeNs": "1786530146069903400"
+        },
+        "evidence/golden/manifest.json": {
+          "exists": true,
+          "bytes": 18318,
+          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
+          "mtimeNs": "1786530749646823700"
+        },
+        "evidence/replay/task1-replay.json": {
+          "exists": true,
+          "bytes": 310919,
+          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
+          "mtimeNs": "1786530749652823300"
+        },
+        "evidence/conversions/conversion-spikes.json": {
+          "exists": true,
+          "bytes": 44348,
+          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
+          "mtimeNs": "1786530749603826400"
+        }
+      },
+      "trackedAfter": {
+        "evidence/conversions/cuda-ep-spike-manifest.json": {
+          "exists": true,
+          "bytes": 3336,
+          "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-spike-report.json": {
+          "exists": true,
+          "bytes": 5353,
+          "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff",
+          "mtimeNs": "1786527578048093200"
+        },
+        "evidence/reports/cuda-ep-replay-report.json": {
+          "exists": true,
+          "bytes": 22057,
+          "sha256": "730d7eaaf4ff4e4df6da37ff910dd13024b2a5d33d10922ff87e8565a178ff1a",
+          "mtimeNs": "1786530146069903400"
+        },
+        "evidence/golden/manifest.json": {
+          "exists": true,
+          "bytes": 18318,
+          "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210",
+          "mtimeNs": "1786530749646823700"
+        },
+        "evidence/replay/task1-replay.json": {
+          "exists": true,
+          "bytes": 310919,
+          "sha256": "5363c852ddd75deeee2f3db7012daa47280061075d234dd19018e37b0688e132",
+          "mtimeNs": "1786530749652823300"
+        },
+        "evidence/conversions/conversion-spikes.json": {
+          "exists": true,
+          "bytes": 44348,
+          "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2",
+          "mtimeNs": "1786530749603826400"
+        }
+      }
+    }
+  ],
+  "comparison": {
+    "stateEqual": true,
+    "failureStageEqual": true,
+    "failureMissingEqual": true,
+    "exitCodeEqual": true
+  },
+  "trackedEvidenceUnchanged": true
+}

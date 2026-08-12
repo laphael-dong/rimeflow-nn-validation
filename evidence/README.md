@@ -67,6 +67,8 @@ Core ML worker 在导入 Ultralytics/PyTorch 前校验 `.pt` 的 6,549,796 字�
 
 候选产物位于 `.evidence/coreml/artifacts/yolov8n-fp32.mlpackage`，只含 `model.mlmodel`、`weight.bin` 和 `Manifest.json` 三个文件，总计 12,825,402 字节；该路径被 Git 忽略。每轮均按排序后的 POSIX 相对路径、文件字节数和逐文件 SHA-256 计算 canonical tree digest，不读取目录时间戳。两轮原始 tree digest 不同：`weight.bin` 完全一致，差异仅为 `Manifest.json` 的随机 UUID 和 `model.mlmodel` 中 `description.metadata.userDefined.date`。比较层只为诊断计算移除这些字段后的 digest，未修改任何 package、模型图或权重；归一化 spec/manifest digest、I/O、精度和坐标契约均一致。
 
+跨自然日 ordinary replay 还会遇到 coremltools 自动写入的 `description.metadata.userDefined.com.github.apple.coremltools.conversion_date`。portable v2 比较只允许从 protobuf 副本中移除该字段和 `date`，并要求固定 candidate 与两轮新 package 的 deterministic protobuf SHA-256 完全一致；原始 `.mlpackage` 不被修改，未知 metadata、graph、weight、I/O 或 precision 变化仍会使 validator 失败。历史 record 的 legacy normalized digest 继续保留，不能被 portable digest 冒充 artifact identity。
+
 HarmonyOS 转换 spike 固定使用官方 MindSpore Lite 2.7.0 Linux x64 archive，archive SHA-256 为 `8bb1097100c9fec12675670ba2d4264a2cd6da3a9be093eb56631d00fc0c455b`，内部 commit 为 `d2b243f75f33a7a896483b09e567d845155cad06`。`converter_lite` 没有可用的 `--version` 子命令，因此版本证据由官方 archive 文件名/SHA、`.commit_id`、converter 二进制 SHA 和 `--help` 输出共同组成。执行两轮有限矩阵、Linux host Load/Run 与生产 Rust golden：
 
 ```sh
@@ -148,3 +150,56 @@ Apple 已通过官方 `.pt`/Ultralytics/Core ML 路径生成 ML Program `.mlpack
 Android 已通过官方 PyTorch/Ultralytics `format=litert` 路径生成 FP32 TFLite，并由 `ai-edge-litert==2.1.6` 在 host 完成真实 Load/Run 和五个图片 golden。runtime 实际输入为 `serving_default_args_0`/index 0/NCHW FP32 `[1,3,640,640]`，输出为 `serving_default_output_0_output`/index 414/attributes-first FP32 `[1,84,8400]`，量化 scale/zero-point 均为 `0/0`。官方 exporter 把输出 attributes 0..3 除以 640；测试层明确乘回 640 后比较，其他轴和值不映射。模型 op 列表无 NMS，letterbox/RGB/normalize 和 decode/NMS 仍由 adapter/operator 负责。HarmonyOS MindSpore Lite 已达到 Linux host `host-inference-verified`，但没有 HarmonyOS 真机证据。Windows x64/ARM64 缺真实 runner，不能以 Linux 上的兼容命令替代加载证据。
 
 `evidence/reports/model-provenance.json` 由 ONNX 1.22.0 读取真实 metadata，并结合 Git 历史和 `handoff-model-audit.json` 生成。原始 `.pt` 的来源、准确 SHA 和与两个 ONNX 的权重/推理等价性已经验证。用途限定为内部 `onnx-base` 框架验证，产品打包明确排除；商业授权判断不属于本次技术验证。Apple conversion 子项达到 `artifact-spec-verified`，Android 与 HarmonyOS conversion 子项达到 Linux host `host-inference-verified`；三者均缺真实目标平台 runner，且未实现对应 adapter、性能、包加载或 fallback 验证，因此 `supported` 均保持 `false`。任务 1.4 与大任务 1 仍保持 blocked，且 1.4 不勾选。
+
+### Linux CUDA 与 TensorRT provider spike
+
+CUDA 最终 harness 来自 `f0a4e7fc9e412d040c2a1bbc6db75def39d1acd7`。它锁定
+`onnxruntime-gpu==1.26.0`、CUDA 12.8、cuDNN 9.10 与 provider options，并要求真实
+`CUDAExecutionProvider` profile node、已映射 CUDA shared library、五个 fixture raw/decoded
+golden 和生产 Rust decode/NMS。当前 host 没有 NVIDIA GPU、driver、`nvidia-smi` 或对应 runtime，
+因此失败阶段严格为 `nvidia-hardware-driver-preflight`，`runtimeExecuted=false`、
+`hostInferenceVerified=false`、`goldenExecuted=false`、`supported=false`。普通 CPU ORT 结果不能冒充
+CUDA evidence。复跑命令为：
+
+```sh
+node evidence/scripts/replay_cuda_ep.mjs
+node evidence/scripts/test_cuda_ep_guards.mjs
+node evidence/scripts/validate_cuda_evidence.mjs
+```
+
+TensorRT 最终 harness 来自 `228956ea9992baa279bf71a57164b383e4823878`。它锁定 ORT 1.22.0、
+TensorRT 10.9.0.34、CUDA 12.8、cuDNN 9.7、container digest、engine/timing cache namespace 与
+provider 顺序，并要求真实 `TensorrtExecutionProvider` profile node和 fresh engine build；CUDA-only
+或 CPU execution 不能替代 TensorRT。当前 host 缺少真实 NVIDIA runner，失败阶段为
+`runner-preflight`，没有生成 engine、profile、raw tensor 或 golden，所有 runtime/golden 字段保持
+false，`supported=false`。复跑命令为：
+
+```sh
+node evidence/scripts/replay_tensorrt_ep.mjs .evidence/tensorrt/replay
+node evidence/scripts/test_tensorrt_ep_negative.mjs
+python3 evidence/scripts/test_tensorrt_record_publish.py
+node evidence/scripts/validate_tensorrt_ep.mjs
+```
+
+### 任务 1.4 聚合闭环
+
+`evidence/conversions/task1-4-aggregate.json` 是八个必需平台/provider spike 的机器可读技术聚合。
+其中 blocked 是完整且有效的 spike 结论，前提是失败阶段、runner、依赖、命令、许可证、I/O、
+量化、NMS 责任和不可冒充保护均可审计。聚合结论固定为
+`allRequiredSpikesRecorded=true`、`technicalSpikeClosure=true`，同时保持
+`publicationVerified=false`、`task14Complete=false`、`openspecTask1_4Checked=false`、
+`allPlatformsSupported=false`。这表示 spike 技术工作已有结论，不表示平台 supported，也不表示
+OpenSpec 任务完成。
+
+确定性刷新顺序为：
+
+```sh
+node evidence/scripts/generate_task14_aggregate.mjs
+node evidence/scripts/finalize_manifest.mjs
+bun run evidence/scripts/validate_evidence.mjs
+node evidence/scripts/test_validator_negative.mjs
+```
+
+当前最终 blocker 不再是 MindSpore、CUDA 或 TensorRT harness 缺失，而是聚合 commit 尚未推送、远端
+ref 尚未验证，以及各平台真实目标 runner、adapter、性能、fallback、包加载与 supported 发布闭环仍属
+后续任务。完成技术聚合不得修改或勾选 OpenSpec 任务 1.4。

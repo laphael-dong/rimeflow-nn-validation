@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "task": "T14-LNX-CUDA-01",
+  "state": "blocked",
+  "supported": false,
+  "task14Complete": false,
+  "staticVerified": true,
+  "buildVerified": false,
+  "runtimeExecuted": false,
+  "hostInferenceVerified": false,
+  "goldenExecuted": false,
+  "startedAt": "2026-08-12T04:20:15.165052Z",
+  "endedAt": "2026-08-12T04:20:15.403616Z",
+  "failureStage": "nvidia-hardware-driver-preflight",
+  "failure": {
+    "message": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
+    "missing": [
+      "NVIDIA GPU",
+      "NVIDIA driver / nvidia-smi",
+      "onnxruntime-gpu",
+      "libonnxruntime_providers_cuda.so",
+      "libcuda.so",
+      "libcudart.so",
+      "libcudnn.so",
+      "libcublas.so"
+    ]
+  },
+  "host": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "displayControllers": [
+      "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)"
+    ]
+  },
+  "model": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "converted": false,
+    "copied": false
+  },
+  "versions": {
+    "onnxruntime": null,
+    "cudaRuntime": null,
+    "cudnn": null,
+    "nvidiaDriver": null
+  },
+  "lockedPackages": {
+    "flatbuffers": "25.2.10",
+    "numpy": "2.2.3",
+    "onnxruntime-gpu": "1.26.0",
+    "packaging": "24.2",
+    "protobuf": "5.29.3",
+    "nvidia-cublas-cu12": "12.8.4.1",
+    "nvidia-cuda-nvrtc-cu12": "12.8.93",
+    "nvidia-cuda-runtime-cu12": "12.8.90",
+    "nvidia-cudnn-cu12": "9.10.2.21",
+    "nvidia-cufft-cu12": "11.3.3.83",
+    "nvidia-curand-cu12": "10.3.9.90",
+    "nvidia-nvjitlink-cu12": "12.8.93"
+  },
+  "requestedProviders": ["CUDAExecutionProvider"],
+  "providerOptionsRequested": {
+    "device_id": "0",
+    "arena_extend_strategy": "kNextPowerOfTwo",
+    "cudnn_conv_algo_search": "EXHAUSTIVE",
+    "cudnn_conv_use_max_workspace": "1",
+    "do_copy_in_default_stream": "1"
+  },
+  "availableProviders": [],
+  "sessionProviders": [],
+  "sessionProviderOptions": {},
+  "profile": {
+    "path": null,
+    "nodeProviderCounts": {},
+    "cudaNodeCount": 0,
+    "cpuNodeCount": 0
+  },
+  "sharedLibraries": {
+    "paths": [],
+    "requiredLoaded": {
+      "libonnxruntime_providers_cuda.so": false,
+      "libcuda.so": false,
+      "libcudart.so": false,
+      "libcudnn.so": false,
+      "libcublas.so": false
+    }
+  },
+  "ioContract": {
+    "input": {"name": "images", "shape": [1, 3, 640, 640], "dtype": "tensor(float)"},
+    "output": {"name": "output0", "shape": [1, 84, 8400], "dtype": "tensor(float)"}
+  },
+  "commands": [
+    {
+      "command": ["uname", "-a"],
+      "startedAt": "2026-08-12T04:20:15.174772Z",
+      "endedAt": "2026-08-12T04:20:15.176010Z",
+      "exitCode": 0,
+      "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+      "stderr": ""
+    },
+    {
+      "command": ["cat", "/etc/os-release"],
+      "startedAt": "2026-08-12T04:20:15.176185Z",
+      "endedAt": "2026-08-12T04:20:15.177416Z",
+      "exitCode": 0,
+      "stdout": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.4 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+      "stderr": ""
+    },
+    {
+      "command": ["bash", "-lc", "lspci -nn | grep -Ei 'VGA|3D controller'"],
+      "startedAt": "2026-08-12T04:20:15.177594Z",
+      "endedAt": "2026-08-12T04:20:15.317944Z",
+      "exitCode": 0,
+      "stdout": "c3:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Phoenix3 [1002:1900] (rev c2)\n",
+      "stderr": ""
+    },
+    {
+      "command": ["bash", "-lc", "ldconfig -p | grep -E 'lib(cuda|cudnn|cublas|cudart|onnxruntime_providers_cuda)'"],
+      "startedAt": "2026-08-12T04:20:15.318253Z",
+      "endedAt": "2026-08-12T04:20:15.326159Z",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": ["/usr/bin/python3", "-c", "import onnxruntime as ort; print(ort.__version__); print(ort.get_available_providers()); print(ort.__file__)"],
+      "startedAt": "2026-08-12T04:20:15.326227Z",
+      "endedAt": "2026-08-12T04:20:15.403063Z",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'onnxruntime'\n"
+    },
+    {
+      "command": ["nvidia-smi", "--query-gpu=name,uuid,driver_version,compute_cap", "--format=csv,noheader"],
+      "startedAt": "2026-08-12T04:20:15.403605Z",
+      "endedAt": "2026-08-12T04:20:15.403611Z",
+      "exitCode": 127,
+      "stdout": "",
+      "stderr": "nvidia-smi: command not found\n"
+    }
+  ],
+  "fixtures": [],
+  "productionPostprocess": {
+    "implementation": "src/postprocess.rs",
+    "runner": "evidence/tooling/raw-golden",
+    "cudaSpecificDecodeOrNms": false
+  }
+}

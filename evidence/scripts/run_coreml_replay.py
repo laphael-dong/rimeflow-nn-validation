@@ -132,6 +132,25 @@ def semantic_digests(result: dict[str, object]) -> dict[str, str]:
     }
 
 
+def portable_spec_evidence(package: Path) -> dict[str, object]:
+    from coremltools.proto import Model_pb2
+
+    spec_path = package / "Data/com.apple.CoreML/model.mlmodel"
+    spec = Model_pb2.Model()
+    spec.ParseFromString(spec_path.read_bytes())
+    volatile_keys = ["date", "com.github.apple.coremltools.conversion_date"]
+    removed = {}
+    for key in volatile_keys:
+        if key in spec.description.metadata.userDefined:
+            removed[key] = spec.description.metadata.userDefined[key]
+            del spec.description.metadata.userDefined[key]
+    return {
+        "normalization": "coreml-spec-portable-v2: remove only description.metadata.userDefined date and com.github.apple.coremltools.conversion_date",
+        "removedMetadata": removed,
+        "sha256": hashlib.sha256(spec.SerializeToString(deterministic=True)).hexdigest(),
+    }
+
+
 def validate_manifest_tree(manifest: dict[str, object]) -> None:
     tree = manifest["artifact"]["tree"]
     if stable_digest(tree["files"]) != tree["digest"]:
@@ -178,6 +197,7 @@ def validate_semantic_replay(
     manifest: dict[str, object],
     report: dict[str, object],
     results: list[dict[str, object]],
+    portable_recorded: dict[str, object],
 ) -> dict[str, object]:
     recorded = manifest["semanticReplayDigests"]
     lock_path = root / manifest["dependencies"]["lock"]["path"]
@@ -191,7 +211,7 @@ def validate_semantic_replay(
         "inputContract": all(item["spec"]["input"] == manifest["spec"]["input"] for item in results),
         "nmsResponsibility": all(item["spec"]["nms"] == manifest["spec"]["nms"] for item in results),
         "normalizedPackageManifestDigest": all(semantic_digests(item)["normalizedPackageManifestSha256"] == recorded["normalizedPackageManifestSha256"] for item in results),
-        "normalizedSpecDigest": all(semantic_digests(item)["normalizedSpecSha256"] == recorded["normalizedSpecSha256"] for item in results),
+        "normalizedSpecDigest": all(item["portableSpec"]["sha256"] == portable_recorded["sha256"] for item in results),
         "outputContract": all(item["spec"]["output"] == manifest["spec"]["output"] for item in results),
         "preprocessingResponsibility": all(item["spec"]["preprocessing"] == manifest["spec"]["preprocessing"] for item in results),
         "recordedReport": report["semanticReplayDigests"]["recorded"] == recorded,
@@ -201,6 +221,10 @@ def validate_semantic_replay(
         "weightBlob": all(semantic_digests(item)["weightBlobSha256"] == recorded["weightBlobSha256"] for item in results),
     }
     checks["allMatched"] = all(checks.values())
+    checks["portableSpec"] = {
+        "recordedArtifact": portable_recorded,
+        "rounds": [item["portableSpec"] for item in results],
+    }
     if not checks["allMatched"]:
         raise SystemExit(f"Core ML replay differs from recorded semantic evidence: {checks}")
     return checks
@@ -223,6 +247,7 @@ def compare_rounds(first: dict[str, object], second: dict[str, object]) -> dict[
         "expectedVolatileFields": [
             "Manifest.json itemInfoEntries UUID keys/rootModelIdentifier",
             "Data/com.apple.CoreML/model.mlmodel description.metadata.userDefined.date",
+            "Data/com.apple.CoreML/model.mlmodel description.metadata.userDefined.com.github.apple.coremltools.conversion_date",
         ],
         "ioMetadataEqual": {
             key: first["spec"][key] == second["spec"][key]
@@ -413,6 +438,9 @@ def main() -> int:
         if execution["exitCode"] != 0:
             raise SystemExit(f"round {number} Core ML conversion failed: {execution['stderr']}")
         result = parse_last_json(execution["stdout"])
+        result["portableSpec"] = portable_spec_evidence(
+            conversion_dir / "yolov8n.mlpackage"
+        )
         after = git_status(root)
         rounds.append(
             {
@@ -484,7 +512,12 @@ def main() -> int:
     else:
         manifest = recorded_manifest
         expected_recorded_digest = manifest["recordedArtifactTreeDigest"]
-        semantic_validation = validate_semantic_replay(root, manifest, recorded_report, results)
+        if not recorded_before["available"]:
+            raise SystemExit("portable Core ML replay requires the fixed recorded artifact")
+        portable_recorded = portable_spec_evidence(final_artifact)
+        semantic_validation = validate_semantic_replay(
+            root, manifest, recorded_report, results, portable_recorded
+        )
         semantic_validation["scope"] = (
             "normalized spec/package manifest, weight, contracts, source and toolchain; "
             "never an artifact identity"

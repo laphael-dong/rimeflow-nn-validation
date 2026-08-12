@@ -104,8 +104,8 @@
     },
     {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 41497,
-      "sha256": "10607785add654ef22c5ea54d1404f60174fc3dadfd0d8753c7841ca4ccbe43e"
+      "bytes": 44348,
+      "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
@@ -133,6 +133,16 @@
       "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
     },
     {
+      "path": "evidence/conversions/cuda-ep-spike-manifest.json",
+      "bytes": 3336,
+      "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c"
+    },
+    {
+      "path": "evidence/conversions/task1-4-aggregate.json",
+      "bytes": 4711,
+      "sha256": "e4845a31cc61eab4bc83bf0e7d6289432dc10f1d266294e26f37b5b78c927a1c"
+    },
+    {
       "path": "evidence/reports/windows-ml-spike-report.json",
       "bytes": 11756,
       "sha256": "5664ac74dfd7a235d1b8308eb91d55983d8f6cf015d7312def7ae3bd2f5b8f5b"
@@ -146,6 +156,16 @@
       "path": "evidence/reports/openvino-ep-report.json",
       "bytes": 132379,
       "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
+    },
+    {
+      "path": "evidence/reports/cuda-ep-spike-report.json",
+      "bytes": 5353,
+      "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff"
+    },
+    {
+      "path": "evidence/reports/tensorrt-ep-report.json",
+      "bytes": 4631,
+      "sha256": "ec3008190f240adf0bcec0d56da5e98aa40e90b55f4781184e936767b5eb0694"
     },
     {
       "path": "evidence/reports/handoff-model-audit.json",
@@ -233,6 +253,46 @@
       "sha256": "3e16f87dd96579b5771691fd35056ab3cd125d526815aebc41a7141fbc01f603"
     },
     {
+      "path": "evidence/tooling/cuda-requirements.lock",
+      "bytes": 1467,
+      "sha256": "8cbd7c6b4525ed6dfd1ff20f70a87addadb868b9cd6b7654fca033aaa4e0e91b"
+    },
+    {
+      "path": "evidence/tooling/cuda-runner/README.md",
+      "bytes": 4587,
+      "sha256": "e7677c9f37d47b29553bc181b510f3b3a4604c0f8888885eede78abc08a8ff84"
+    },
+    {
+      "path": "evidence/tooling/tensorrt-requirements.lock",
+      "bytes": 871,
+      "sha256": "db30c0b85de4d2cacd671150138b6c2ba3d392e144e1ce60dae94f2a5c9bd1d5"
+    },
+    {
+      "path": "evidence/tooling/tensorrt/Dockerfile",
+      "bytes": 1731,
+      "sha256": "3bb040e2834257939d3a63c53f1969dd3502a4178cc25ffea2b34a3531a050c3"
+    },
+    {
+      "path": "evidence/tooling/tensorrt/Dockerfile.dockerignore",
+      "bytes": 320,
+      "sha256": "1ea3352d90b5f583eafdd90550c897e529e5cebadb0a9cb4f8755fcebd39cc27"
+    },
+    {
+      "path": "evidence/tooling/tensorrt-postprocess/Cargo.toml",
+      "bytes": 181,
+      "sha256": "f72a9f4c44308de8e432ad98a6fdcbf21ac99f8796ad9cf98e099ecf26ad67d9"
+    },
+    {
+      "path": "evidence/tooling/tensorrt-postprocess/Cargo.lock",
+      "bytes": 173,
+      "sha256": "26e6b6df4b8f6c1e944c4a5915bb4b8d01651f8dd67ea921130305d451044f0a"
+    },
+    {
+      "path": "evidence/tooling/tensorrt-postprocess/main.rs",
+      "bytes": 1701,
+      "sha256": "0febfd0d902db5926f7dc87e67f6de6679acf25be1f67ecfaac7543637df57e6"
+    },
+    {
       "path": "evidence/tooling/raw-golden/Cargo.toml",
       "bytes": 165,
       "sha256": "8027af80bec76f757253743a1ef1414e31ce449ab1c8fa5391223b33a2378b0f"
@@ -259,8 +319,8 @@
     },
     {
       "path": "evidence/scripts/evidence_validation.mjs",
-      "bytes": 50202,
-      "sha256": "7c6f67ce33506e4a554e00e068be5b0556db47d05d00e6b6869443a430782a42"
+      "bytes": 51068,
+      "sha256": "899ec12b418a2917d5631d0b7402098d7b3d0038d402280fecf5c028da64f074"
     },
     {
       "path": "evidence/scripts/openvino_evidence_validation.mjs",
@@ -308,14 +368,94 @@
       "sha256": "9b97c723496241f9d5ef301f9e20d624c75fdb839daf43c28f5521055e3e4bd2"
     },
     {
+      "path": "evidence/scripts/cuda_evidence_validation.mjs",
+      "bytes": 28542,
+      "sha256": "9481b8051db5f9bff3a5ec1b82219c1adb091735fca5e938dd46a2d607a7e8ac"
+    },
+    {
+      "path": "evidence/scripts/replay_cuda_ep.mjs",
+      "bytes": 3929,
+      "sha256": "78105f8c191fa49c8027bb8e6b18a83a51138b04bf809caa9090203986a342e7"
+    },
+    {
+      "path": "evidence/scripts/run_cuda_ep.py",
+      "bytes": 23251,
+      "sha256": "01ecd70d1700f04bf647569c7923a179880bc8fa4fb5a1ab23a5d7d241326d95"
+    },
+    {
+      "path": "evidence/scripts/test_cuda_ep_guards.mjs",
+      "bytes": 11242,
+      "sha256": "c656b87603a4298a1bc68dee6a479ba1e434436cba461a24506e87cd1529fe7a"
+    },
+    {
+      "path": "evidence/scripts/validate_cuda_evidence.mjs",
+      "bytes": 1287,
+      "sha256": "c910bb107bf0d1e0414bfd76a4d5879e08bae8929c75e574f236eb3b058bd584"
+    },
+    {
+      "path": "evidence/scripts/generate_tensorrt_replay_manifest.mjs",
+      "bytes": 3498,
+      "sha256": "5b6c5d1ebc0ad957d5344df0a4f5f9b753c9221f59783b3d2a9d5ea31f256f5e"
+    },
+    {
+      "path": "evidence/scripts/replay_tensorrt_ep.mjs",
+      "bytes": 6340,
+      "sha256": "88f7f6fa32edfc621b5a52200112c24f7161b6ea8d997dee71dacbabe6219134"
+    },
+    {
+      "path": "evidence/scripts/run_tensorrt_ep.py",
+      "bytes": 32332,
+      "sha256": "e00677e1c79566f5a0c5f7fcca3fd24f3da113e42ec0079be64e60efdde78f86"
+    },
+    {
+      "path": "evidence/scripts/run_tensorrt_runner.sh",
+      "bytes": 2743,
+      "sha256": "11cd4f26889f00ef3e29c473c03d9c4011009011e34ea4a40416dbff2a097d85"
+    },
+    {
+      "path": "evidence/scripts/tensorrt_record_publish.py",
+      "bytes": 6830,
+      "sha256": "e614cb177dd9bf0fd4c3c6219ae1f1d46d24190a818d1eecbf5d521cdb8bad0f"
+    },
+    {
+      "path": "evidence/scripts/test_tensorrt_ep_negative.mjs",
+      "bytes": 12541,
+      "sha256": "13bb4cc6a467e91eb881a1e67f8a1f42dedc074028f439a09c6c4f160d18d1e9"
+    },
+    {
+      "path": "evidence/scripts/test_tensorrt_record_publish.py",
+      "bytes": 5717,
+      "sha256": "fc2990fa1ba7ed1ac88261a8c3b2fa6602957fdc9030975ac70886c358004335"
+    },
+    {
+      "path": "evidence/scripts/validate_tensorrt_ep.mjs",
+      "bytes": 41194,
+      "sha256": "d6c40c2bc24a210f76941b60af420ede9cd74fad78cea466f7b3268fa445cecf"
+    },
+    {
+      "path": "evidence/scripts/generate_task14_aggregate.mjs",
+      "bytes": 8283,
+      "sha256": "bc28301eb580a97ac88698dfd1e1e31626f483c547ec5e0a93ec567e3af0bc3c"
+    },
+    {
+      "path": "evidence/scripts/aggregate_evidence_validation.mjs",
+      "bytes": 5455,
+      "sha256": "3cd38e4c35e9336d7ec4cb95453443a0d792752d8009fb9a509e8c57261a461f"
+    },
+    {
+      "path": "evidence/tensorrt/contract.json",
+      "bytes": 3243,
+      "sha256": "ef34bf0e16ee3f37880d1e0c641bcb60870f8c6bd8717c6c83e9e24f375d35a9"
+    },
+    {
       "path": "evidence/scripts/replay_windows_ml_static_compile.mjs",
       "bytes": 6851,
       "sha256": "4d7139783adcf2f2d9503ae099c3c92fa6f4c57c467b09233df7008e9380e101"
     },
     {
       "path": "evidence/scripts/test_validator_negative.mjs",
-      "bytes": 24275,
-      "sha256": "fd4e10142e887816f4cde2b6ec8fc5c47c7882c32516a59d50f41971a0924b57"
+      "bytes": 30466,
+      "sha256": "ef9e0f8e26c558aff78251befdf2943ecb94d4fa66a92d565d01ec978f4482e0"
     },
     {
       "path": "evidence/scripts/test_windows_ml_runner_guards.mjs",
@@ -324,8 +464,8 @@
     },
     {
       "path": "evidence/scripts/validate_evidence.mjs",
-      "bytes": 23119,
-      "sha256": "ac5fadd9ae05a1cc6236d04297a92434902aa2ec7303c815bac87f200f548160"
+      "bytes": 24044,
+      "sha256": "f8a01beae462a98a97965455b900f1d155362e81f2b30c2c77c5f2a794db4ec5"
     },
     {
       "path": "evidence/tooling/windows-ml-runner/Program.cs",

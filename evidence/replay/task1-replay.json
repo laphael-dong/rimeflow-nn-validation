@@ -1447,10 +1447,65 @@
       }
     },
     {
+      "id": "spike-apple-coreml",
+      "command": "validate evidence/reports/coreml-conversion-report.json",
+      "rounds": [],
+      "platform": "apple",
+      "provider": "coreml",
+      "state": "artifact-spec-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "缺少 macOS/iOS Core ML Load/Run 真实 runner。"
+    },
+    {
+      "id": "spike-android-litert-v2",
+      "command": "validate evidence/reports/litert-golden-report.json",
+      "rounds": [],
+      "platform": "android",
+      "provider": "litert-v2",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "缺少 Android arm64 LiteRT v2 真机 runner。"
+    },
+    {
+      "id": "spike-windows-windows-ml",
+      "command": "validate evidence/reports/windows-ml-spike-report.json",
+      "rounds": [],
+      "platform": "windows",
+      "provider": "windows-ml",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "x64/ARM64 runner contract 与静态编译已验证；缺少真实 Windows Load/Run。"
+    },
+    {
+      "id": "spike-harmonyos-mindspore-lite",
+      "command": "validate evidence/reports/mindspore-golden-report.json",
+      "rounds": [],
+      "platform": "harmonyos",
+      "provider": "mindspore-lite",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "Linux host conversion/Load/Run/golden 已验证；缺少 HarmonyOS 真机。"
+    },
+    {
+      "id": "spike-linux-x86_64-cpu-cpuexecutionprovider",
+      "command": "validate evidence/conversions/conversion-spikes.json",
+      "rounds": [],
+      "platform": "linux-x86_64-cpu",
+      "provider": "cpuexecutionprovider",
+      "state": "inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "仅作为 canonical ONNX host inference 基线；adapter、性能和包加载属于后续任务。"
+    },
+    {
       "id": "linux-x86_64-openvino-provider-host-golden",
       "command": "$OPENVINO_PYTHON evidence/scripts/run_openvino_replay.py --workspace .evidence/openvino/replay-final",
       "executed": true,
-      "blockedReason": null,
+      "blockedReason": "OpenVINO profile 已证明真实执行；adapter、性能、fallback 与包加载属于后续任务。",
       "mode": "replay",
       "recordDigest": "84f799c553b8b9c478a295260f85342b01f10f9fd3244476bcfe63ec7745f9ee",
       "trackedEvidence": {
@@ -1600,67 +1655,74 @@
         "allExitCodesZero": true,
         "deterministicOutputDigestsEqual": true,
         "trackedEvidenceUnchanged": true
+      },
+      "platform": "linux-x86_64-openvino",
+      "provider": "openvinoexecutionprovider",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false
+    },
+    {
+      "id": "spike-linux-x86_64-cuda-cudaexecutionprovider",
+      "command": "node evidence/scripts/replay_cuda_ep.mjs",
+      "rounds": [],
+      "platform": "linux-x86_64-cuda",
+      "provider": "cudaexecutionprovider",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
+      "repeatComparison": {
+        "recordedBlockedConclusion": true,
+        "dedicatedReplayReport": "evidence/reports/cuda-ep-replay-report.json"
       }
     },
     {
-      "id": "delegated-platform-spikes",
-      "command": "Windows ML、Linux CUDA/TensorRT 与真实 Apple/Android/HarmonyOS runtime commands",
+      "id": "spike-linux-x86_64-tensorrt-tensorrtexecutionprovider",
+      "command": "node evidence/scripts/replay_tensorrt_ep.mjs .evidence/tensorrt/replay",
+      "rounds": [
+        {
+          "run": 1,
+          "exitCode": 2,
+          "failureStage": "runner-preflight",
+          "reportSha256": "ec3008190f240adf0bcec0d56da5e98aa40e90b55f4781184e936767b5eb0694"
+        }
+      ],
+      "platform": "linux-x86_64-tensorrt",
+      "provider": "tensorrtexecutionprovider",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "blockedReason": "需要 Linux x86_64 且可执行 nvidia-smi 的真实 NVIDIA runner",
+      "repeatComparison": {
+        "recordedBlockedConclusion": true,
+        "dedicatedReplayRequiredOnTargetRunner": true
+      }
+    },
+    {
+      "id": "publication-and-platform-closure",
+      "command": "push aggregate commit, verify remote ref, then close supported platform follow-up work",
       "executed": false,
-      "blockedReason": "Linux x86_64 OpenVINO host inference 已验证；CUDA/TensorRT 未处理。MindSpore Lite 缺 HarmonyOS 真机，Core ML 缺 macOS/iOS Load/Run，LiteRT 缺 Android runner，Windows ML 缺真实 runner。",
+      "blockedReason": "唯一聚合提交尚未推送，远端 ref 尚未验证；OpenSpec 任务 1.4 必须保持未勾选。",
       "rounds": [],
       "repeatComparison": null
     }
   ],
   "outputs": [
     {
-      "path": "evidence/model/model-contract.json",
-      "bytes": 4749,
-      "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
-    },
-    {
-      "path": "evidence/fixtures/manifest.json",
-      "bytes": 9945,
-      "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
-    },
-    {
-      "path": "evidence/golden/coverage-matrix.json",
-      "bytes": 4476,
-      "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
-    },
-    {
-      "path": "evidence/golden/manifest.json",
-      "bytes": 13351,
-      "sha256": "a236df3eea6d288af62566cbee558305a7c92c7dc21859957ebbd4642b0c628a"
-    },
-    {
-      "path": "evidence/golden/web-reference.json",
-      "bytes": 29752,
-      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
-    },
-    {
-      "path": "evidence/reports/preprocess-conformance.json",
-      "bytes": 3624,
-      "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
-    },
-    {
-      "path": "evidence/reports/handoff-model-audit.json",
-      "bytes": 16413,
-      "sha256": "2e48a1eeb6893673b8b0b9bfb9485d3cad580ee4a21ae5efb7dafb82e0898307"
-    },
-    {
-      "path": "evidence/reports/model-provenance.json",
-      "bytes": 5303,
-      "sha256": "478b09fc38b18929e70dc00968a1d31760a3ec5844a322a5bcbc648bd5f3403c"
-    },
-    {
       "path": "evidence/conversions/conversion-spikes.json",
-      "bytes": 41497,
-      "sha256": "10607785add654ef22c5ea54d1404f60174fc3dadfd0d8753c7841ca4ccbe43e"
+      "bytes": 44348,
+      "sha256": "95b6c087f91540ee0b41d8b114467844b500ef0c1b1aa6d6060e39bdd52f17d2"
     },
     {
       "path": "evidence/conversions/coreml-artifact-manifest.json",
       "bytes": 10276,
       "sha256": "8d5271e9c154c632f8b0a4f382128f2889bfadade59563a9ba5f58c4358c63f5"
+    },
+    {
+      "path": "evidence/conversions/cuda-ep-spike-manifest.json",
+      "bytes": 3336,
+      "sha256": "ec3d8efa1aeb022bc6d6f9a3308031cf6c20de35b11094503348ef4fcf42544c"
     },
     {
       "path": "evidence/conversions/litert-artifact-manifest.json",
@@ -1678,9 +1740,49 @@
       "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
     },
     {
+      "path": "evidence/conversions/task1-4-aggregate.json",
+      "bytes": 4711,
+      "sha256": "e4845a31cc61eab4bc83bf0e7d6289432dc10f1d266294e26f37b5b78c927a1c"
+    },
+    {
+      "path": "evidence/fixtures/manifest.json",
+      "bytes": 9945,
+      "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+    },
+    {
+      "path": "evidence/golden/coverage-matrix.json",
+      "bytes": 4476,
+      "sha256": "54d1f70451a178441db1ddab9344a2871e4b3053cf2494181b10921d5e72a287"
+    },
+    {
+      "path": "evidence/golden/manifest.json",
+      "bytes": 18318,
+      "sha256": "d651c0d1c8ecd691ce2f07cc7eebca59fa12b2fbac772ccb8ffab102594e8210"
+    },
+    {
+      "path": "evidence/golden/web-reference.json",
+      "bytes": 29752,
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+    },
+    {
+      "path": "evidence/model/model-contract.json",
+      "bytes": 4749,
+      "sha256": "8f236c2285a573101eccab5ebe07579af2d13486621e53b879c17a3acbfba197"
+    },
+    {
       "path": "evidence/reports/coreml-conversion-report.json",
       "bytes": 23862,
       "sha256": "896120667709d6cdb6e033857c67b33e2ac508536b76561c84574c635c30bf02"
+    },
+    {
+      "path": "evidence/reports/cuda-ep-spike-report.json",
+      "bytes": 5353,
+      "sha256": "ada8bc21eab4657ff4c95686cc895fae6e209f130e4a4deb70534b5eca72f0ff"
+    },
+    {
+      "path": "evidence/reports/handoff-model-audit.json",
+      "bytes": 16413,
+      "sha256": "2e48a1eeb6893673b8b0b9bfb9485d3cad580ee4a21ae5efb7dafb82e0898307"
     },
     {
       "path": "evidence/reports/litert-conversion-report.json",
@@ -1703,9 +1805,29 @@
       "sha256": "ec5e642369a04acf0dc5dc14f83af70a93c9fcfe042670e4d1bbd4c02f56c50c"
     },
     {
+      "path": "evidence/reports/model-provenance.json",
+      "bytes": 5303,
+      "sha256": "478b09fc38b18929e70dc00968a1d31760a3ec5844a322a5bcbc648bd5f3403c"
+    },
+    {
       "path": "evidence/reports/openvino-ep-report.json",
       "bytes": 132379,
       "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
+    },
+    {
+      "path": "evidence/reports/preprocess-conformance.json",
+      "bytes": 3624,
+      "sha256": "4ea1500ddf4ead39dfc89638b95b89c325288cb569deaa282410a094119376ff"
+    },
+    {
+      "path": "evidence/reports/tensorrt-ep-report.json",
+      "bytes": 4631,
+      "sha256": "ec3008190f240adf0bcec0d56da5e98aa40e90b55f4781184e936767b5eb0694"
+    },
+    {
+      "path": "evidence/tensorrt/contract.json",
+      "bytes": 3243,
+      "sha256": "ef34bf0e16ee3f37880d1e0c641bcb60870f8c6bd8717c6c83e9e24f375d35a9"
     },
     {
       "path": "evidence/tooling/coreml-requirements.lock",
@@ -1729,5 +1851,13 @@
     }
   ],
   "task1_7OwnershipReplayComplete": true,
-  "task1_4Complete": false
+  "task1_4Complete": false,
+  "closure": {
+    "allRequiredSpikesRecorded": true,
+    "technicalSpikeClosure": true,
+    "publicationVerified": false,
+    "task14Complete": false,
+    "openspecTask1_4Checked": false,
+    "allPlatformsSupported": false
+  }
 }

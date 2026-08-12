@@ -7,6 +7,9 @@ import Ajv from '../tooling/web/node_modules/ajv/lib/ajv.js';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
 import { compareWindowsMlStaticCompileEvidence, validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence, validateWindowsMlStaticCompileEvidence } from './evidence_validation.mjs';
 import { recoverOpenvinoPublication, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
+import { validateCudaEvidence, validateCudaReplay, validateCudaRepositoryBoundary } from './cuda_evidence_validation.mjs';
+import { validateTensorRtReport } from './validate_tensorrt_ep.mjs';
+import { validateTask14Aggregate } from './aggregate_evidence_validation.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 recoverOpenvinoPublication(root);
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -143,7 +146,14 @@ const openvinoReplay = await readJson('.evidence/openvino/replay-final/openvino-
 await validateOpenvinoReplayEvidence(root, openvinoReplay, openvinoManifest, openvinoReport);
 const openvino = conversion.spikes.find((item) => item.platform === 'linux-x86_64-openvino');
 if (openvino.state !== 'host-inference-verified' || !openvino.artifactVerified || !openvino.hostInferenceVerified || openvino.supported || openvino.task14Complete || openvino.attempt.executionPlan !== openvinoFacts.executionPlan || openvino.attempt.profileNodeCounts.OpenVINOExecutionProvider !== openvinoFacts.profileOpenvinoNodes || openvino.attempt.profileNodeCounts.CPUExecutionProvider !== openvinoFacts.profileCpuNodes) fail('OpenVINO conversion summary');
-for (const provider of ['cuda', 'tensorrt']) if (conversion.spikes.find((item) => item.platform === `linux-x86_64-${provider}`).state !== 'blocked') fail(`${provider} must remain independently blocked`);
+const cudaManifest = await readJson('evidence/conversions/cuda-ep-spike-manifest.json');
+const cudaReport = await readJson('evidence/reports/cuda-ep-spike-report.json');
+const cudaReplay = await readJson('evidence/reports/cuda-ep-replay-report.json');
+await validateCudaEvidence(root, cudaManifest, cudaReport);
+await validateCudaReplay(root, cudaReplay);
+await validateCudaRepositoryBoundary(root);
+const tensorrtReport = await readJson('evidence/reports/tensorrt-ep-report.json');
+await validateTensorRtReport(tensorrtReport, { sourceRoot: root });
 const provenance = await readJson('evidence/reports/model-provenance.json');
 const handoffAudit = await readJson('evidence/reports/handoff-model-audit.json');
 if (handoffAudit.sourceCheckpoint.sha256 !== 'f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36' || handoffAudit.candidateOnnx.sha256 !== '71002056f43781f2d26681c56e7ec3686d918951c5c8ae70ca55de10409a2a45') fail('handoff model digests');
@@ -153,6 +163,8 @@ if (handoffAudit.comparisons.inference.some((item) => !item.torchRepeatExact || 
 if (provenance.model.sha256 !== actualModelSha || provenance.model.embeddedMetadata.license !== 'AGPL-3.0 License (https://ultralytics.com/license)' || provenance.originalTrainingArtifact.state !== 'source-identified-and-weight-equivalent' || provenance.originalTrainingArtifact.sha256 !== handoffAudit.sourceCheckpoint.sha256) fail('model provenance');
 if (provenance.licensing.originalWeights.authorizationState !== 'out-of-scope-test-only' || provenance.licensing.conversionArtifacts.redistributionAllowed !== false || provenance.licensing.rimecutPackageRedistribution.allowed !== false || provenance.decision.task14 !== 'blocked' || provenance.decision.publication !== 'test-evidence-only') fail('model test-only decision');
 const replay = await readJson('evidence/replay/task1-replay.json');
+const task14Aggregate = await readJson('evidence/conversions/task1-4-aggregate.json');
+const aggregateFacts = await validateTask14Aggregate(root, task14Aggregate, conversion, replay);
 if (replay.schemaVersion !== 2 || replay.repository !== 'rimeflow-yolov8n' || replay.repositoryHeadAtReplay.kind !== 'evidence-input-head' || replay.repositoryHeadAtReplay.finalEvidenceCommitRecordedByGit !== true || replay.immutableLogEvidence.kind !== 'embedded-in-manifest') fail('operator replay metadata');
 for (const output of replay.outputs) {
   const bytes = await readFile(resolve(root, output.path));
@@ -190,5 +202,5 @@ for (const round of mindsporeReplayStep.rounds) {
 }
 const conversionReplayStep = replay.steps.find((item) => item.id === 'conversion-report-regeneration');
 if (conversionReplayStep.command !== 'node evidence/scripts/run_conversion_spikes.mjs --mindspore-only') fail('MindSpore-only conversion replay scope');
-if (replay.steps.find((item) => item.id === 'delegated-platform-spikes').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay blocked semantics');
-console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length }));
+if (replay.steps.find((item) => item.id === 'publication-and-platform-closure').executed !== false || replay.task1_7OwnershipReplayComplete !== true || replay.task1_4Complete !== false) fail('operator replay publication-blocked semantics');
+console.log(JSON.stringify({ ok: true, schemaVersion: 1, checkedArtifacts: manifest.artifacts.length, checkedFixtures: fixtures.images.length + fixtures.rawTensorFixtures.length, requiredSpikes: aggregateFacts.requiredSpikes, providerReplaySteps: aggregateFacts.providerReplaySteps }));

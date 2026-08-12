@@ -131,7 +131,15 @@
       "iosRuntimeVerified": false,
       "license": "coremltools BSD-3-Clause；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence；.mlpackage 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录",
-      "conclusion": "官方 .pt -> Ultralytics YOLO.export(format=coreml) -> coremltools ML Program 路径已生成并检查真实 .mlpackage spec；Linux 无 Core ML runtime，尚未执行 macOS/iOS Load/Run，不能标记 supported。"
+      "conclusion": "官方 .pt -> Ultralytics YOLO.export(format=coreml) -> coremltools ML Program 路径已生成并检查真实 .mlpackage spec；Linux 无 Core ML runtime，尚未执行 macOS/iOS Load/Run，不能标记 supported。",
+      "provider": "coreml",
+      "spikeClosure": true,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "缺少 macOS/iOS Core ML Load/Run 真实 runner。"
     },
     {
       "platform": "android",
@@ -200,7 +208,15 @@
       "androidRunnerVerified": false,
       "license": "litert-torch/ai-edge-litert Apache-2.0；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence；.tflite 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录",
-      "conclusion": "官方 PyTorch/Ultralytics LiteRT 路径已生成 FP32 TFLite，并由 host ai-edge-litert 2.1.6 完成真实 Load/Run 与冻结 Web golden；尚无 Android arm64 真机 runner，不能标记 supported。"
+      "conclusion": "官方 PyTorch/Ultralytics LiteRT 路径已生成 FP32 TFLite，并由 host ai-edge-litert 2.1.6 完成真实 Load/Run 与冻结 Web golden；尚无 Android arm64 真机 runner，不能标记 supported。",
+      "provider": "litert-v2",
+      "spikeClosure": true,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": true,
+      "blocker": "缺少 Android arm64 LiteRT v2 真机 runner。"
     },
     {
       "platform": "windows",
@@ -270,7 +286,14 @@
       "failedOperator": "Windows x64 与 ARM64 真实 runner 均未执行",
       "license": "Microsoft Windows App SDK and Windows ML Software License Terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0",
       "redistribution": "规范 ONNX 只原路径引用；模型、NuGet/SDK cache、bin/obj、publish 和临时输出均不进入 Git、RimeCut 产品包或发布目录",
-      "conclusion": "runner、精确依赖锁和证据契约已准备，Linux 仅完成 locked restore 与双 RID C# 静态编译；没有真实 Windows x64/ARM64 Load/Run，保持 blocked、supported=false、task14Complete=false。"
+      "conclusion": "runner、精确依赖锁和证据契约已准备，Linux 仅完成 locked restore 与双 RID C# 静态编译；没有真实 Windows x64/ARM64 Load/Run，保持 blocked、supported=false、task14Complete=false。",
+      "provider": "windows-ml",
+      "spikeClosure": true,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "x64/ARM64 runner contract 与静态编译已验证；缺少真实 Windows Load/Run。"
     },
     {
       "platform": "harmonyos",
@@ -782,7 +805,15 @@
       "failedOperator": null,
       "license": "MindSpore Apache-2.0；Ultralytics exporter 与模型 checkpoint metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence；.ms 位于 ignored .evidence，不进入 Git、RimeCut 产品包或发布目录",
-      "conclusion": "结构化改写 DFL Conv 后，官方 converter_lite 2.7.0 生成 MindIR Lite .ms；官方 benchmark 与 C++ runtime 在 Linux host 对五个 fixture 完成真实 Load/Run，冻结 golden 和生产 Rust decode/NMS 全部通过。尚无 HarmonyOS 真机证据，supported=false。"
+      "conclusion": "结构化改写 DFL Conv 后，官方 converter_lite 2.7.0 生成 MindIR Lite .ms；官方 benchmark 与 C++ runtime 在 Linux host 对五个 fixture 完成真实 Load/Run，冻结 golden 和生产 Rust decode/NMS 全部通过。尚无 HarmonyOS 真机证据，supported=false。",
+      "provider": "mindspore-lite",
+      "spikeClosure": true,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": true,
+      "blocker": "Linux host conversion/Load/Run/golden 已验证；缺少 HarmonyOS 真机。"
     },
     {
       "platform": "linux-x86_64-cpu",
@@ -875,7 +906,16 @@
       "failedOperator": null,
       "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "cpu provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。"
+      "conclusion": "cpu provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。",
+      "provider": "cpuexecutionprovider",
+      "spikeClosure": true,
+      "supported": false,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": false,
+      "blocker": "仅作为 canonical ONNX host inference 基线；adapter、性能和包加载属于后续任务。"
     },
     {
       "artifact": {
@@ -927,7 +967,13 @@
         "name": "onnxruntime-openvino",
         "openvinoVersion": "2025.4.1-0-test",
         "version": "1.24.1"
-      }
+      },
+      "provider": "openvinoexecutionprovider",
+      "spikeClosure": true,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": true,
+      "goldenExecuted": true,
+      "blocker": "OpenVINO profile 已证明真实执行；adapter、性能、fallback 与包加载属于后续任务。"
     },
     {
       "platform": "linux-x86_64-cuda",
@@ -982,7 +1028,16 @@
       "failedOperator": "provider/session initialization before graph execution",
       "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "cuda provider 未能进入固定输入 inference，保持 blocked。"
+      "conclusion": "cuda provider 未能进入固定输入 inference，保持 blocked。",
+      "provider": "cudaexecutionprovider",
+      "spikeClosure": true,
+      "supported": false,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted"
     },
     {
       "platform": "linux-x86_64-tensorrt",
@@ -1037,7 +1092,24 @@
       "failedOperator": "provider/session initialization before graph execution",
       "license": "ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0",
       "redistribution": "仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录",
-      "conclusion": "tensorrt provider 未能进入固定输入 inference，保持 blocked。"
+      "conclusion": "tensorrt provider 未能进入固定输入 inference，保持 blocked。",
+      "provider": "tensorrtexecutionprovider",
+      "spikeClosure": true,
+      "supported": false,
+      "task14Complete": false,
+      "openspecTask1_4Checked": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "需要 Linux x86_64 且可执行 nvidia-smi 的真实 NVIDIA runner"
     }
-  ]
+  ],
+  "closure": {
+    "allRequiredSpikesRecorded": true,
+    "technicalSpikeClosure": true,
+    "publicationVerified": false,
+    "task14Complete": false,
+    "openspecTask1_4Checked": false,
+    "allPlatformsSupported": false
+  }
 }

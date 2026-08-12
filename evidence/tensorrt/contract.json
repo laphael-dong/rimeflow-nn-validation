@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T14-LNX-TRT-01",
+  "sourceCommit": "b2c79e9e79b15588a8f41a90e1be4bb78e5f2c19",
+  "target": {
+    "os": "linux",
+    "arch": "x86_64",
+    "runner": "real-nvidia-gpu"
+  },
+  "canonicalModel": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "conversionAllowed": false
+  },
+  "officialPath": {
+    "package": "onnxruntime-gpu",
+    "packageVersion": "1.22.0",
+    "wheel": "onnxruntime_gpu-1.22.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+    "wheelSha256": "965da7d33a54917e8e5176f292cc22640819f328370f4fb86087908745b03708",
+    "requestedProviders": [
+      "TensorrtExecutionProvider",
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "successRequiresProfileProvider": "TensorrtExecutionProvider"
+  },
+  "compatibility": {
+    "onnxruntime": "1.22.0",
+    "tensorrt": "10.9.0.34",
+    "cuda": "12.8.0",
+    "cudnn": "9.7.0.66",
+    "python": "3.10",
+    "containerBaseTag": "nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04",
+    "containerIndex": "sha256:c900a2ac7f3d860c854f7364eadfe32b8cd33933a838f96b71e9bb6525f77a8c",
+    "containerAmd64Manifest": "sha256:2a015be069bda4de48d677b6e3f271a2794560c7d788a39a18ecf218cae0751d",
+    "rustBuilderTag": "rust:1.85.1-alpine3.21",
+    "rustBuilderIndex": "sha256:4333721398de61f53ccbe53b0b855bcc4bb49e55828e8f652d7a8ac33dd0c118",
+    "rustBuilderAmd64Manifest": "sha256:813376c206852d4250641eb86720c04fd20fbc6547d1a030c93a45b22a1303a3",
+    "tensorrtDebVersion": "10.9.0.34-1+cuda12.8"
+  },
+  "providerOptions": {
+    "device_id": "0",
+    "trt_fp16_enable": "0",
+    "trt_engine_cache_enable": "1",
+    "trt_engine_cache_path": ".evidence/tensorrt/engine-cache",
+    "trt_timing_cache_enable": "1",
+    "trt_timing_cache_path": ".evidence/tensorrt/timing-cache",
+    "trt_dump_subgraphs": "0",
+    "trt_detailed_build_log": "1"
+  },
+  "fixtures": [
+    "no-detection",
+    "single-target",
+    "multi-class",
+    "boundary-box",
+    "extreme-aspect"
+  ],
+  "frozenTolerances": {
+    "frozenBeforeNativeAdapterResults": true,
+    "classIdExact": true,
+    "confidenceAbsolute": 0.0001,
+    "boxIouMinimum": 0.999,
+    "rawTensorAbsolute": 0.00001,
+    "rawTensorRelative": 0.0001,
+    "decodedBoxAbsolute": 0.0001,
+    "missingValuePolicy": "fail",
+    "nonFinitePolicy": "fail"
+  },
+  "artifactPolicy": {
+    "allowedCacheRoot": ".evidence/tensorrt",
+    "trackedEngineOrCacheAllowed": false,
+    "releaseDirectoryAllowed": false,
+    "cacheModelShaRequired": true,
+    "freshEngineBuildRequired": true
+  },
+  "sources": [
+    {
+      "claim": "ORT 1.22.0 supports TensorRT 10.9 and publishes CUDA 12.x GPU wheels",
+      "url": "https://github.com/microsoft/onnxruntime/releases/tag/v1.22.0"
+    },
+    {
+      "claim": "ORT v1.22.0 TensorRT CI pins CUDA 12.8 and TensorRT 10.9.0.34",
+      "url": "https://github.com/microsoft/onnxruntime/blob/v1.22.0/tools/ci_build/github/linux/docker/Dockerfile.ubuntu_cuda12_tensorrt10"
+    },
+    {
+      "claim": "Official provider options and TensorRT/CUDA provider ordering",
+      "url": "https://onnxruntime.ai/docs/execution-providers/TensorRT-ExecutionProvider.html"
+    }
+  ]
+}

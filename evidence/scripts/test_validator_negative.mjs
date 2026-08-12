@@ -3,6 +3,9 @@ import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compareWindowsMlStaticCompileEvidence, validateCoremlEvidence, validateCoremlReplayEvidence, validateCoverageEvidence, validateLitertEvidence, validateMindsporeEvidence, validateMindsporeReplayEvidence, validateThirdPartyFixtureLicenses, validateWindowsMlEvidence, validateWindowsMlStaticCompileEvidence } from './evidence_validation.mjs';
+import { validateCudaEvidence, validateCudaReplay } from './cuda_evidence_validation.mjs';
+import { validateTensorRtReport } from './validate_tensorrt_ep.mjs';
+import { validateTask14Aggregate } from './aggregate_evidence_validation.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -17,6 +20,10 @@ const expectFailure = async (name, operation) => {
 
 const openvinoGuards = spawnSync('node', ['evidence/scripts/test_openvino_replay_guards.mjs'], { cwd: root, encoding: 'utf8' });
 if (openvinoGuards.status !== 0) throw new Error(`OpenVINO replay guard tests failed:\n${openvinoGuards.stdout}\n${openvinoGuards.stderr}`);
+const cudaGuards = spawnSync('node', ['evidence/scripts/test_cuda_ep_guards.mjs'], { cwd: root, encoding: 'utf8' });
+if (cudaGuards.status !== 0) throw new Error(`CUDA replay guard tests failed:\n${cudaGuards.stdout}\n${cudaGuards.stderr}`);
+const tensorrtGuards = spawnSync('node', ['evidence/scripts/test_tensorrt_ep_negative.mjs'], { cwd: root, encoding: 'utf8' });
+if (tensorrtGuards.status !== 0) throw new Error(`TensorRT negative tests failed:\n${tensorrtGuards.stdout}\n${tensorrtGuards.stderr}`);
 
 const coverage = await readJson('evidence/golden/coverage-matrix.json');
 const missingPath = structuredClone(coverage);
@@ -230,6 +237,23 @@ await expectFailure('Core ML semantic digest used as artifact identity', async (
 const weightDrift = structuredClone(coremlNonRecord);
 weightDrift.semanticReplayDigests.rounds[1].weightBlobSha256 = '2'.repeat(64);
 await expectFailure('Core ML non-record weight blob drift', async () => validateCoremlReplayEvidence(coremlManifest, weightDrift));
+const portableFixture = structuredClone(coremlNonRecord);
+portableFixture.semanticReplayDigests.rounds[0].normalizedSpecSha256 = '1'.repeat(64);
+portableFixture.semanticReplayDigests.rounds[1].normalizedSpecSha256 = '1'.repeat(64);
+portableFixture.semanticReplayValidation.portableSpec = {
+  recordedArtifact: { normalization: 'coreml-spec-portable-v2: remove only description.metadata.userDefined date and com.github.apple.coremltools.conversion_date', removedMetadata: { date: '2026-08-11T00:00:00', 'com.github.apple.coremltools.conversion_date': '2026-08-11' }, sha256: '2'.repeat(64) },
+  rounds: [
+    { normalization: 'coreml-spec-portable-v2: remove only description.metadata.userDefined date and com.github.apple.coremltools.conversion_date', removedMetadata: { date: '2026-08-12T00:00:00', 'com.github.apple.coremltools.conversion_date': '2026-08-12' }, sha256: '2'.repeat(64) },
+    { normalization: 'coreml-spec-portable-v2: remove only description.metadata.userDefined date and com.github.apple.coremltools.conversion_date', removedMetadata: { date: '2026-08-12T00:00:01', 'com.github.apple.coremltools.conversion_date': '2026-08-12' }, sha256: '2'.repeat(64) },
+  ],
+};
+validateCoremlReplayEvidence(coremlManifest, portableFixture);
+const portableSpecDrift = structuredClone(portableFixture);
+portableSpecDrift.semanticReplayValidation.portableSpec.rounds[1].sha256 = '3'.repeat(64);
+await expectFailure('Core ML portable spec drift', async () => validateCoremlReplayEvidence(coremlManifest, portableSpecDrift));
+const unknownVolatileMetadata = structuredClone(portableFixture);
+unknownVolatileMetadata.semanticReplayValidation.portableSpec.rounds[1].removedMetadata.unreviewed = 'ignored';
+await expectFailure('Core ML unknown metadata cannot be normalized away', async () => validateCoremlReplayEvidence(coremlManifest, unknownVolatileMetadata));
 const missingArtifactOverclaim = structuredClone(coremlNonRecord);
 Object.assign(missingArtifactOverclaim.recordedArtifactVerification, {
   availableBefore: false,
@@ -307,4 +331,37 @@ mindsporeTrackedDrift.trackedEvidence.goldenReport.sha256After = '3'.repeat(64);
 mindsporeTrackedDrift.trackedEvidence.goldenReport.unchanged = true;
 await expectFailure('MindSpore non-record tracked report drift', async () => validateMindsporeReplayEvidence(mindsporeManifest, mindsporeTrackedDrift));
 
-console.log(JSON.stringify({ ok: true, filesystemGuardTests: 7, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Windows ML blocked x64/ARM64 harness contract', 'Windows ML clean static compile report', 'Windows ML valid partial x64 runtime claim', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite record evidence', 'MindSpore Lite non-record artifact preservation evidence'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Linux ORT success claimed as Windows ML', 'Windows runtime verified without runner execution', 'x64 runtime evidence claimed as ARM64', 'Windows architectures merged into one verified flag', 'Windows ML model SHA drift', 'Windows ML I/O shape drift', 'Windows ML dtype drift', 'Windows ML provider introspection drift', 'ordinary CPU ORT claimed as Windows ML provider', 'Windows ML floating package version', 'Windows ML missing exact SDK version', 'Windows ML missing exact .NET runtime version', 'Windows ML runtime SDK introspection drift', 'Windows ML verification without runtime introspection', 'Windows ML supported without real x64 and ARM64 runners', 'Windows ML ONNX or build output added to release directory', 'Windows ML static compile missing assembly', 'Windows ML static compile forged assembly SHA', 'Windows ML static compile wrong RID assembly', 'Windows ML static compile reused obj', 'Windows ML static compile skipped CoreCompile', 'Windows ML static compile skipped Roslyn Csc', 'Windows ML static compile omitted Program.cs', 'Windows ML static compile manifest tool bypass', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication', 'MindSpore non-record replay changed fixed artifact', 'MindSpore missing artifact exact identity overclaim', 'MindSpore non-record replay created fixed artifact', 'MindSpore replay digest impersonates recorded artifact identity', 'MindSpore non-record tracked report drift'] }));
+const cudaManifest = await readJson('evidence/conversions/cuda-ep-spike-manifest.json');
+const cudaReport = await readJson('evidence/reports/cuda-ep-spike-report.json');
+const cudaReplay = await readJson('evidence/reports/cuda-ep-replay-report.json');
+await validateCudaEvidence(root, cudaManifest, cudaReport);
+await validateCudaReplay(root, cudaReplay);
+const tensorrtReport = await readJson('evidence/reports/tensorrt-ep-report.json');
+await validateTensorRtReport(tensorrtReport, { sourceRoot: root });
+const conversionAggregate = await readJson('evidence/conversions/conversion-spikes.json');
+const taskReplayAggregate = await readJson('evidence/replay/task1-replay.json');
+const task14Aggregate = await readJson('evidence/conversions/task1-4-aggregate.json');
+await validateTask14Aggregate(root, task14Aggregate, conversionAggregate, taskReplayAggregate);
+const aggregateNegativeCases = [];
+const aggregateFailure = async (name, mutate) => {
+  const aggregate = structuredClone(task14Aggregate);
+  const conversion = structuredClone(conversionAggregate);
+  const replay = structuredClone(taskReplayAggregate);
+  mutate(aggregate, conversion, replay);
+  await expectFailure(name, () => validateTask14Aggregate(root, aggregate, conversion, replay));
+  aggregateNegativeCases.push(name);
+};
+await aggregateFailure('缺少必需 spike 却声称 technicalSpikeClosure', (aggregate) => aggregate.spikes.pop());
+await aggregateFailure('重复 provider 条目', (aggregate) => aggregate.spikes[1] = structuredClone(aggregate.spikes[0]));
+await aggregateFailure('错误 provider 身份', (aggregate) => { aggregate.spikes[0].provider = 'wrong-provider'; });
+await aggregateFailure('CUDA blocked 报告伪造执行', (aggregate) => { aggregate.spikes.find((item) => item.provider === 'cudaexecutionprovider').runtimeExecuted = true; });
+await aggregateFailure('TensorRT blocked 报告伪造 golden', (aggregate) => { aggregate.spikes.find((item) => item.provider === 'tensorrtexecutionprovider').goldenExecuted = true; });
+await aggregateFailure('OpenVINO 仅配置未执行', (aggregate) => { aggregate.spikes.find((item) => item.provider === 'openvinoexecutionprovider').runtimeExecuted = false; });
+await aggregateFailure('technical closure 冒充 allPlatformsSupported', (aggregate, conversion, replay) => { aggregate.closure.allPlatformsSupported = true; conversion.closure.allPlatformsSupported = true; replay.closure.allPlatformsSupported = true; });
+await aggregateFailure('publicationVerified=false 却 task14Complete=true', (aggregate, conversion, replay) => { aggregate.closure.task14Complete = true; conversion.closure.task14Complete = true; replay.closure.task14Complete = true; });
+await aggregateFailure('未推送却勾选 OpenSpec 1.4', (aggregate, conversion, replay) => { aggregate.closure.openspecTask1_4Checked = true; conversion.closure.openspecTask1_4Checked = true; replay.closure.openspecTask1_4Checked = true; });
+await aggregateFailure('共享 aggregate 丢失 provider', (_aggregate, conversion) => { conversion.spikes.pop(); });
+await aggregateFailure('共享 replay 丢失 provider', (_aggregate, _conversion, replay) => { replay.steps = replay.steps.filter((item) => item.provider !== 'tensorrtexecutionprovider'); });
+await aggregateFailure('provider source provenance 漂移', (aggregate) => { aggregate.source.providerCommits.cuda = '0'.repeat(40); });
+
+console.log(JSON.stringify({ ok: true, filesystemGuardTests: 7, aggregateNegativeCases, providerGuardSuites: { openvino: true, cuda: true, tensorrt: true }, positiveCases: ['LiteRT evidence with differently ordered tolerance keys', 'Windows ML blocked x64/ARM64 harness contract', 'Windows ML clean static compile report', 'Windows ML valid partial x64 runtime claim', 'Core ML artifact/spec evidence', 'Core ML non-record artifact preservation evidence', 'MindSpore Lite record evidence', 'MindSpore Lite non-record artifact preservation evidence', 'CUDA blocked spike evidence', 'TensorRT blocked spike evidence', 'task 1.4 aggregate technical closure'], negativeCases: ['missing coverage path', 'missing local fixture license', 'LiteRT supported without Android runner', 'LiteRT relaxed frozen tolerance', 'LiteRT replay digest mismatch', 'Linux ORT success claimed as Windows ML', 'Windows runtime verified without runner execution', 'x64 runtime evidence claimed as ARM64', 'Windows architectures merged into one verified flag', 'Windows ML model SHA drift', 'Windows ML I/O shape drift', 'Windows ML dtype drift', 'Windows ML provider introspection drift', 'ordinary CPU ORT claimed as Windows ML provider', 'Windows ML floating package version', 'Windows ML missing exact SDK version', 'Windows ML missing exact .NET runtime version', 'Windows ML runtime SDK introspection drift', 'Windows ML verification without runtime introspection', 'Windows ML supported without real x64 and ARM64 runners', 'Windows ML ONNX or build output added to release directory', 'Windows ML static compile missing assembly', 'Windows ML static compile forged assembly SHA', 'Windows ML static compile wrong RID assembly', 'Windows ML static compile reused obj', 'Windows ML static compile skipped CoreCompile', 'Windows ML static compile skipped Roslyn Csc', 'Windows ML static compile omitted Program.cs', 'Windows ML static compile manifest tool bypass', 'Core ML supported without macOS/iOS runner', 'Core ML package tree digest drift', 'Core ML FP16 precision drift', 'Core ML fused NMS overclaim', 'Core ML non-record replay changed fixed artifact', 'Core ML semantic digest used as artifact identity', 'Core ML non-record weight blob drift', 'Core ML missing artifact exact identity overclaim', 'MindSpore supported without HarmonyOS device', 'MindSpore runtime input layout drift', 'MindSpore artifact digest drift', 'MindSpore relaxed frozen tolerance', 'MindSpore failure signature drift', 'MindSpore platform postprocess duplication', 'MindSpore non-record replay changed fixed artifact', 'MindSpore missing artifact exact identity overclaim', 'MindSpore non-record replay created fixed artifact', 'MindSpore replay digest impersonates recorded artifact identity', 'MindSpore non-record tracked report drift'] }));

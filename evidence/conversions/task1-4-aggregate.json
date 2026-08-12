@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "task": "OpenSpec rimeflow-backend-contract 1.4 technical spike aggregate",
+  "source": {
+    "aggregationBaseline": "7eba039ef1c55408216f0f54d543f0fdcbf1693b",
+    "providerCommits": {
+      "openvino": "7eba039ef1c55408216f0f54d543f0fdcbf1693b",
+      "cuda": "f0a4e7fc9e412d040c2a1bbc6db75def39d1acd7",
+      "tensorrt": "228956ea9992baa279bf71a57164b383e4823878"
+    },
+    "canonicalOnnx": {
+      "path": "models/yolov8n.onnx",
+      "bytes": 12851098,
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+    }
+  },
+  "closure": {
+    "allRequiredSpikesRecorded": true,
+    "technicalSpikeClosure": true,
+    "publicationVerified": false,
+    "task14Complete": false,
+    "openspecTask1_4Checked": false,
+    "allPlatformsSupported": false
+  },
+  "publication": {
+    "pushed": false,
+    "upstreamConfigured": false,
+    "remoteRefVerified": false,
+    "blocker": "唯一聚合提交尚未推送，远端 ref 尚未验证；OpenSpec 任务 1.4 必须保持未勾选。"
+  },
+  "spikes": [
+    {
+      "platform": "apple",
+      "provider": "coreml",
+      "state": "artifact-spec-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "缺少 macOS/iOS Core ML Load/Run 真实 runner。",
+      "report": "evidence/reports/coreml-conversion-report.json"
+    },
+    {
+      "platform": "android",
+      "provider": "litert-v2",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": true,
+      "blocker": "缺少 Android arm64 LiteRT v2 真机 runner。",
+      "report": "evidence/reports/litert-golden-report.json"
+    },
+    {
+      "platform": "windows",
+      "provider": "windows-ml",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "x64/ARM64 runner contract 与静态编译已验证；缺少真实 Windows Load/Run。",
+      "report": "evidence/reports/windows-ml-spike-report.json"
+    },
+    {
+      "platform": "harmonyos",
+      "provider": "mindspore-lite",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": true,
+      "blocker": "Linux host conversion/Load/Run/golden 已验证；缺少 HarmonyOS 真机。",
+      "report": "evidence/reports/mindspore-golden-report.json"
+    },
+    {
+      "platform": "linux-x86_64-cpu",
+      "provider": "cpuexecutionprovider",
+      "state": "inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": false,
+      "blocker": "仅作为 canonical ONNX host inference 基线；adapter、性能和包加载属于后续任务。",
+      "report": "evidence/conversions/conversion-spikes.json"
+    },
+    {
+      "platform": "linux-x86_64-openvino",
+      "provider": "openvinoexecutionprovider",
+      "state": "host-inference-verified",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": true,
+      "hostInferenceVerified": true,
+      "goldenExecuted": true,
+      "blocker": "OpenVINO profile 已证明真实执行；adapter、性能、fallback 与包加载属于后续任务。",
+      "report": "evidence/reports/openvino-ep-report.json"
+    },
+    {
+      "platform": "linux-x86_64-cuda",
+      "provider": "cudaexecutionprovider",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "NVIDIA GPU/driver unavailable; CUDA inference was not attempted",
+      "report": "evidence/reports/cuda-ep-spike-report.json"
+    },
+    {
+      "platform": "linux-x86_64-tensorrt",
+      "provider": "tensorrtexecutionprovider",
+      "state": "blocked",
+      "spikeClosure": true,
+      "supported": false,
+      "runtimeExecuted": false,
+      "hostInferenceVerified": false,
+      "goldenExecuted": false,
+      "blocker": "需要 Linux x86_64 且可执行 nvidia-smi 的真实 NVIDIA runner",
+      "report": "evidence/reports/tensorrt-ep-report.json"
+    }
+  ],
+  "remainingScope": [
+    "远端 push/ref 可达性与 publication closure",
+    "真实目标 runner 的 supported 闭环",
+    "adapter、性能、fallback、包加载与后续 OpenSpec 任务"
+  ]
+}

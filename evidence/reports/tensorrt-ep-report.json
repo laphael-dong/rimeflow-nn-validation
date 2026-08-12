@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 2,
+  "taskId": "T14-LNX-TRT-01",
+  "status": "blocked",
+  "supported": false,
+  "runtimeExecuted": false,
+  "hostInferenceVerified": false,
+  "goldenExecuted": false,
+  "task14Complete": false,
+  "openspecTask1_4Checked": false,
+  "failureStage": "runner-preflight",
+  "failureReason": "需要 Linux x86_64 且可执行 nvidia-smi 的真实 NVIDIA runner",
+  "sourceCommit": "b2c79e9e79b15588a8f41a90e1be4bb78e5f2c19",
+  "evidenceSourceCommit": "de34313770bbd937f67f8a3925b94e25a5e93adc",
+  "model": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+  },
+  "runner": {
+    "realNvidiaRunner": false,
+    "host": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+    "os": "Linux-7.0.0-28-generic-x86_64-with-glibc2.39",
+    "arch": "x86_64",
+    "gpu": null,
+    "driver": null,
+    "containerImageId": null
+  },
+  "versions": {
+    "onnxruntime": null,
+    "tensorrt": null,
+    "cuda": null,
+    "cudnn": null,
+    "python": "3.12.3",
+    "matchesContract": false
+  },
+  "providers": {
+    "requested": [
+      "TensorrtExecutionProvider",
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "available": [],
+    "session": [],
+    "options": {
+      "requested": {},
+      "session": {}
+    },
+    "profileArtifact": null,
+    "profileExecutionEventCounts": {
+      "TensorrtExecutionProvider": 0,
+      "CUDAExecutionProvider": 0,
+      "CPUExecutionProvider": 0,
+      "unknown": 0
+    },
+    "profileUniqueNodeCounts": {
+      "TensorrtExecutionProvider": 0,
+      "CUDAExecutionProvider": 0,
+      "CPUExecutionProvider": 0,
+      "unknown": 0
+    },
+    "executionPlan": "unknown",
+    "fallback": {
+      "cudaExecutionEvents": 0,
+      "cpuExecutionEvents": 0,
+      "cudaUniqueNodes": 0,
+      "cpuUniqueNodes": 0,
+      "hidden": false
+    }
+  },
+  "dynamicLibraries": [],
+  "runtimeEvidence": {
+    "mapsArtifact": null,
+    "versionProbeArtifact": null,
+    "containerImageInspectArtifact": null
+  },
+  "engineBuild": {
+    "attempted": false,
+    "succeeded": false,
+    "stage": "not-started",
+    "runId": "30c94643-b36c-4b34-aabe-e4506354da8a",
+    "transactionId": "a11833d2-d45c-4546-8b7e-3c713c0b21fd",
+    "startedAt": "2026-08-12T07:11:05.995471+00:00",
+    "startedAtEpochNs": "1786518665995483965",
+    "finishedAt": "2026-08-12T07:11:06.029263+00:00",
+    "finishedAtEpochNs": "1786518666029266423",
+    "generatedAt": null,
+    "logArtifact": null,
+    "errors": {
+      "parserErrors": [],
+      "buildErrors": [],
+      "operatorErrors": [],
+      "profileErrors": []
+    }
+  },
+  "cache": {
+    "root": ".evidence/tensorrt/container-run",
+    "modelSha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "freshBuildRequired": true,
+    "discardedBeforeRun": [],
+    "before": [],
+    "after": [],
+    "generated": []
+  },
+  "commands": [
+    {
+      "command": "uname -a",
+      "startedAt": "2026-08-12T07:11:06.022358+00:00",
+      "finishedAt": "2026-08-12T07:11:06.023546+00:00",
+      "startedAtEpochSeconds": 1786518666.0223556,
+      "finishedAtEpochSeconds": 1786518666.0235522,
+      "exitCode": 0,
+      "stdout": "Linux raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux\n",
+      "stderr": "",
+      "stage": "runner-preflight"
+    },
+    {
+      "command": "bash -lc \"command -v nvidia-smi\"",
+      "startedAt": "2026-08-12T07:11:06.023556+00:00",
+      "finishedAt": "2026-08-12T07:11:06.029225+00:00",
+      "startedAtEpochSeconds": 1786518666.0235555,
+      "finishedAtEpochSeconds": 1786518666.0292346,
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "",
+      "stage": "runner-preflight"
+    }
+  ],
+  "fixtures": [],
+  "webReference": {
+    "frozenReferenceSha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68",
+    "exporterManifest": null
+  },
+  "productionPostprocess": {
+    "implementation": "src/postprocess.rs",
+    "platformSpecificDecodeOrNmsAdded": false,
+    "sourceArtifacts": [],
+    "containerBinary": null,
+    "build": {
+      "command": "CARGO_TARGET_DIR=/build/tensorrt-target CARGO_INCREMENTAL=0 cargo build --locked --offline --release --manifest-path evidence/tooling/tensorrt-postprocess/Cargo.toml --bin rimeflow-tensorrt-postprocess",
+      "rustBuilderIndex": "sha256:4333721398de61f53ccbe53b0b855bcc4bb49e55828e8f652d7a8ac33dd0c118",
+      "rustBuilderAmd64Manifest": "sha256:813376c206852d4250641eb86720c04fd20fbc6547d1a030c93a45b22a1303a3"
+    }
+  }
+}

@@ -359,8 +359,16 @@ export function validateCoremlReplayEvidence(manifest, replay) {
   const semantic = manifest.semanticReplayDigests;
   if (replay.mode !== 'replay' || replay.recordedArtifactTreeDigest !== recordedDigest) throw new Error('Core ML non-record replay identity drift');
   if (Object.values(semantic).includes(recordedDigest)) throw new Error('Core ML semantic digest impersonates artifact identity');
-  if (JSON.stringify(replay.semanticReplayDigests?.recorded) !== JSON.stringify(semantic) || replay.semanticReplayDigests.rounds.length !== 2 || replay.semanticReplayDigests.rounds.some((item) => JSON.stringify(item) !== JSON.stringify(semantic))) throw new Error('Core ML non-record semantic digest drift');
-  if (!replay.semanticReplayValidation?.allMatched || !replay.semanticReplayValidation.scope?.includes('never an artifact identity')) throw new Error('Core ML non-record semantic validation drift');
+  const legacyRoundsMatch = replay.semanticReplayDigests.rounds.every((item) => JSON.stringify(item) === JSON.stringify(semantic));
+  const portable = replay.semanticReplayValidation?.portableSpec;
+  const portableNormalization = 'coreml-spec-portable-v2: remove only description.metadata.userDefined date and com.github.apple.coremltools.conversion_date';
+  const allowedVolatile = ['com.github.apple.coremltools.conversion_date', 'date'];
+  const portableEntries = portable ? [portable.recordedArtifact, ...portable.rounds] : [];
+  const portableValid = portableEntries.length === 3
+    && portableEntries.every((item) => item.normalization === portableNormalization && /^[0-9a-f]{64}$/.test(item.sha256) && JSON.stringify(Object.keys(item.removedMetadata).sort()) === JSON.stringify(allowedVolatile))
+    && portableEntries.every((item) => item.sha256 === portableEntries[0].sha256);
+  if (JSON.stringify(replay.semanticReplayDigests?.recorded) !== JSON.stringify(semantic) || replay.semanticReplayDigests.rounds.length !== 2 || (!legacyRoundsMatch && !portableValid)) throw new Error('Core ML non-record semantic digest drift');
+  if (!replay.semanticReplayValidation?.allMatched || !replay.semanticReplayValidation.scope?.includes('never an artifact identity') || (!legacyRoundsMatch && !portableValid)) throw new Error('Core ML non-record semantic validation drift');
   const verification = replay.recordedArtifactVerification;
   if (!verification || verification.expectedTreeDigest !== recordedDigest || !verification.unchanged || verification.availableBefore !== verification.availableAfter) throw new Error('Core ML non-record artifact preservation failed');
   if (verification.availableBefore) {

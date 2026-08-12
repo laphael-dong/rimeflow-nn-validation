@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "task": "T14-LNX-CUDA-01",
+  "scope": {
+    "os": "linux",
+    "architecture": "x86_64",
+    "executionProvider": "CUDAExecutionProvider",
+    "excluded": [
+      "OpenVINO",
+      "TensorRT",
+      "Linux ARM64",
+      "adapter",
+      "performance baseline",
+      "RimeCut"
+    ]
+  },
+  "canonicalOnnx": {
+    "path": "models/yolov8n.onnx",
+    "bytes": 12851098,
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad",
+    "converted": false,
+    "copied": false,
+    "modified": false
+  },
+  "compatibility": {
+    "onnxruntimeGpu": "1.26.0",
+    "onnxruntimeBuildCuda": "12.8",
+    "cudaRuntimePackage": "12.8.90",
+    "cudnnPackage": "9.10.2.21",
+    "cudnnMajor": 9,
+    "minimumNvidiaDriverMajor": 525,
+    "python": "3.12",
+    "lockfile": "evidence/tooling/cuda-requirements.lock",
+    "officialSources": [
+      "https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html",
+      "https://pypi.org/project/onnxruntime-gpu/1.26.0/",
+      "https://pypi.org/project/nvidia-cuda-runtime-cu12/12.8.90/",
+      "https://pypi.org/project/nvidia-cudnn-cu12/9.10.2.21/",
+      "https://pypi.org/project/nvidia-cublas-cu12/12.8.4.1/",
+      "https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html",
+      "https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/support-matrix.html"
+    ],
+    "basis": "ORT 1.26.x official packages use CUDA 12.8 and cuDNN 9.x; CUDA 12.x minor-version compatibility requires NVIDIA driver >= 525. Exact Python and NVIDIA wheels are hash-locked."
+  },
+  "ioContract": {
+    "input": {
+      "name": "images",
+      "shape": [1, 3, 640, 640],
+      "dtype": "tensor(float)",
+      "layout": "NCHW"
+    },
+    "output": {
+      "name": "output0",
+      "shape": [1, 84, 8400],
+      "dtype": "tensor(float)",
+      "layout": "N_ATTRIBUTES_ANCHORS"
+    }
+  },
+  "provider": {
+    "requested": ["CUDAExecutionProvider"],
+    "options": {
+      "device_id": "0",
+      "arena_extend_strategy": "kNextPowerOfTwo",
+      "cudnn_conv_algo_search": "EXHAUSTIVE",
+      "cudnn_conv_use_max_workspace": "1",
+      "do_copy_in_default_stream": "1"
+    },
+    "runtimeProof": [
+      "CUDAExecutionProvider is available",
+      "CUDAExecutionProvider is present in session providers",
+      "ORT profiling contains at least one Node with provider CUDAExecutionProvider",
+      "required ORT/CUDA/cuDNN/cuBLAS shared libraries are present in /proc/self/maps"
+    ],
+    "cpuFallbackMaySatisfyProof": false
+  },
+  "ownership": {
+    "preprocessing": "existing canonical Web tensor exporter",
+    "decode": "production src/postprocess.rs through evidence/tooling/raw-golden",
+    "nms": "operator production src/postprocess.rs",
+    "cudaSpecificDecodeOrNms": false
+  },
+  "artifactHandling": {
+    "runtimeWorkspace": ".evidence/cuda/",
+    "trackedOnnx": ["models/yolov8n.onnx"],
+    "rawOutputsTracked": false,
+    "runtimeLibrariesTracked": false,
+    "releaseDirectoryTouched": false,
+    "rimecutTouched": false
+  },
+  "status": {
+    "state": "blocked",
+    "staticVerified": true,
+    "buildVerified": false,
+    "runtimeExecuted": false,
+    "hostInferenceVerified": false,
+    "goldenExecuted": false,
+    "supported": false,
+    "task14Complete": false,
+    "openspecTask1_4Checked": false
+  }
+}

@@ -1,0 +1,12 @@
+*
+!evidence/
+evidence/*
+!evidence/tooling/
+evidence/tooling/*
+!evidence/tooling/tensorrt-requirements.lock
+!evidence/tooling/tensorrt-postprocess/
+!evidence/tooling/tensorrt-postprocess/main.rs
+!evidence/tooling/tensorrt-postprocess/Cargo.toml
+!evidence/tooling/tensorrt-postprocess/Cargo.lock
+!src/
+!src/postprocess.rs
