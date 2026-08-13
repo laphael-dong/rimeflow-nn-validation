@@ -13,7 +13,9 @@ export const PUBLICATION = Object.freeze({
   aggregateCommit: '19193a34f2fb2b36465538b02687a07608f7810e',
   aggregateParent: '7eba039ef1c55408216f0f54d543f0fdcbf1693b',
   aggregateSubject: '[ENH] Aggregate task 1.4 spike evidence',
-  closureSubject: '[DOC] Close task 1.4 publication evidence',
+  previousClosureCommit: 'a81b07f8b2b773f162d61cc82659f8c58ad3a832',
+  previousClosureSubject: '[DOC] Close task 1.4 publication evidence',
+  fixSubject: '[FIX] Bind task 1.4 closure to exact remote commit',
   validationClone: '/home/raffael/algo/github/rimeflow-nn-validation',
   baseRepository: 'laphael-dong/rimeflow-nn-base',
   baseUrl: 'https://github.com/laphael-dong/rimeflow-nn-base.git',
@@ -26,6 +28,20 @@ export const PUBLICATION = Object.freeze({
   tasksBeforeSha256: '54db708645bca38150425c23b68d20869710c6269825ce6e4517d022bc7188c2',
   tasksAfterSha256: '08b07922fbf93dfb8bb265440205bb059109f3fb6f46bb3029dbccee2acc5f47',
 });
+
+export const CRITICAL_EVIDENCE_PATHS = Object.freeze([
+  'evidence/reports/task1-4-publication-report.json',
+  'evidence/conversions/task1-4-aggregate.json',
+  'evidence/conversions/conversion-spikes.json',
+  'evidence/replay/task1-replay.json',
+  'evidence/golden/manifest.json',
+]);
+
+const IMMUTABLE_HISTORICAL_EVIDENCE_PATHS = Object.freeze([
+  'evidence/reports/task1-4-publication-report.json',
+  'evidence/conversions/task1-4-aggregate.json',
+  'evidence/conversions/conversion-spikes.json',
+]);
 
 export const REQUIRED_SPIKES = Object.freeze([
   ['apple', 'coreml'],
@@ -138,63 +154,123 @@ function parseCommitIdentity(text) {
   return { commit, parent, subject };
 }
 
+function commitBytes(cwd, ref) {
+  return execFileSync('git', ['cat-file', 'commit', ref], { cwd });
+}
+
+function parseTreeEntry(text, expectedPath) {
+  const match = /^(\d+) (\w+) ([0-9a-f]{40})\s+(\d+)\t(.+)$/.exec(text);
+  if (!match || match[2] !== 'blob' || match[5] !== expectedPath) fail(`tree entry missing: ${expectedPath}`);
+  return { mode: match[1], blob: match[3], bytes: Number(match[4]), path: match[5] };
+}
+
+function firstParentChain(cwd, tip) {
+  const text = git(cwd, ['rev-list', '--first-parent', '--parents', `${PUBLICATION.aggregateCommit}..${tip}`]);
+  return text ? text.split('\n').map((line) => line.split(' ')) : [];
+}
+
+function criticalBlobs(cwd, ref) {
+  return Object.fromEntries(CRITICAL_EVIDENCE_PATHS.map((path) => [path, git(cwd, ['rev-parse', `${ref}:${path}`])]));
+}
+
 export function collectLivePublicationFacts(root) {
+  const localHead = git(root, ['rev-parse', 'HEAD']);
   const remoteLine = git(root, ['ls-remote', '--heads', PUBLICATION.remoteUrl, PUBLICATION.remoteRef.replace('refs/heads/', '')]);
+  if (remoteLine.split('\n').length !== 1) fail('live remote ref missing or ambiguous');
   const [remoteSha, remoteRef] = remoteLine.split(/\s+/);
   const api = ghJson(['api', `repos/${PUBLICATION.repository}/git/ref/heads/${PUBLICATION.remoteRef.replace('refs/heads/', '')}`]);
   const actor = execFileSync('gh', ['api', 'user', '--jq', '.login'], { encoding: 'utf8' }).trim();
   const repo = ghJson(['api', `repos/${PUBLICATION.repository}`]);
-  const localIdentity = parseCommitIdentity(git(root, ['show', '--no-patch', '--format=%H%n%P%n%s', PUBLICATION.aggregateCommit]));
+  const localIdentity = parseCommitIdentity(git(root, ['show', '--no-patch', '--format=%H%n%P%n%s', 'HEAD']));
+  const previousClosureIdentity = parseCommitIdentity(git(root, ['show', '--no-patch', '--format=%H%n%P%n%s', PUBLICATION.previousClosureCommit]));
+  const aggregateIdentity = parseCommitIdentity(git(root, ['show', '--no-patch', '--format=%H%n%P%n%s', PUBLICATION.aggregateCommit]));
+  const localCommitDigest = sha256(commitBytes(root, 'HEAD'));
+  const localTree = git(root, ['rev-parse', 'HEAD^{tree}']);
+  const localFirstParentChain = firstParentChain(root, 'HEAD');
+  const localCriticalBlobs = criticalBlobs(root, 'HEAD');
+  const previousClosureCriticalBlobs = criticalBlobs(root, PUBLICATION.previousClosureCommit);
+
+  git(PUBLICATION.validationClone, ['fetch', '--no-tags', PUBLICATION.remoteUrl, PUBLICATION.remoteRef]);
   const fetchHead = git(PUBLICATION.validationClone, ['rev-parse', 'FETCH_HEAD']);
   const readbackIdentity = parseCommitIdentity(git(PUBLICATION.validationClone, ['show', '--no-patch', '--format=%H%n%P%n%s', 'FETCH_HEAD']));
-  const modelTree = git(PUBLICATION.validationClone, ['ls-tree', '-l', 'FETCH_HEAD', PUBLICATION.modelPath]).split(/\s+/);
+  const readbackCommitDigest = sha256(commitBytes(PUBLICATION.validationClone, 'FETCH_HEAD'));
+  const readbackTree = git(PUBLICATION.validationClone, ['rev-parse', 'FETCH_HEAD^{tree}']);
+  const readbackFirstParentChain = firstParentChain(PUBLICATION.validationClone, 'FETCH_HEAD');
+  const readbackCriticalBlobs = criticalBlobs(PUBLICATION.validationClone, 'FETCH_HEAD');
+  const localModel = parseTreeEntry(git(root, ['ls-tree', '-l', 'HEAD', PUBLICATION.modelPath]), PUBLICATION.modelPath);
+  const readbackModel = parseTreeEntry(git(PUBLICATION.validationClone, ['ls-tree', '-l', 'FETCH_HEAD', PUBLICATION.modelPath]), PUBLICATION.modelPath);
   const mainBlob = git(PUBLICATION.validationClone, ['rev-parse', `main:${PUBLICATION.modelPath}`]);
-  const aggregateBlob = git(PUBLICATION.validationClone, ['rev-parse', `FETCH_HEAD:${PUBLICATION.modelPath}`]);
   const modelSha = execFileSync('git', ['show', `FETCH_HEAD:${PUBLICATION.modelPath}`], { cwd: PUBLICATION.validationClone, maxBuffer: 20 * 1024 * 1024 });
-  const modelDiff = git(PUBLICATION.validationClone, ['diff', '--name-status', `${PUBLICATION.aggregateParent}..FETCH_HEAD`, '--', 'models']);
+  const localRemoteDiff = git(PUBLICATION.validationClone, ['diff', '--name-status', localHead, 'FETCH_HEAD']);
+  const modelDiff = git(PUBLICATION.validationClone, ['diff', '--name-status', `${PUBLICATION.aggregateCommit}..FETCH_HEAD`, '--', 'models']);
   const upstreamRef = git(root, ['ls-remote', '--heads', PUBLICATION.upstreamUrl, PUBLICATION.remoteRef.replace('refs/heads/', '')]);
   const baseRef = git(root, ['ls-remote', '--heads', PUBLICATION.baseUrl, PUBLICATION.remoteRef.replace('refs/heads/', '')]);
-  const validationTags = git(root, ['ls-remote', '--tags', PUBLICATION.remoteUrl]);
+  const validationRefs = git(root, ['ls-remote', '--heads', '--tags', PUBLICATION.remoteUrl]);
+  const refsAtExpectedSha = validationRefs.split('\n').filter(Boolean).filter((line) => line.split(/\s+/)[0] === localHead).map((line) => line.split(/\s+/)[1]).sort();
   const prs = ghJson(['api', `repos/${PUBLICATION.repository}/pulls?state=all&head=laphael-dong:${PUBLICATION.remoteRef.replace('refs/heads/', '')}`]);
   const releases = ghJson(['api', `repos/${PUBLICATION.repository}/releases`]);
   return {
     remoteSha, remoteRef, api, actor, canPush: repo.permissions?.push === true,
-    localIdentity, fetchHead, readbackIdentity,
-    modelBytes: Number(modelTree[3]), modelBlob: modelTree[2], mainBlob, aggregateBlob, modelSha256: sha256(modelSha), modelDiff,
-    upstreamRef, baseRef, validationTags, pullRequestCount: prs.length, releaseCount: releases.length,
+    localHead, localIdentity, previousClosureIdentity, aggregateIdentity,
+    freshFetchExecuted: true, fetchHead, readbackIdentity,
+    localCommitDigest, readbackCommitDigest, localTree, readbackTree, localRemoteDiff,
+    localFirstParentChain, readbackFirstParentChain, previousClosureCriticalBlobs, localCriticalBlobs, readbackCriticalBlobs,
+    localModel, readbackModel, mainBlob, modelSha256: sha256(modelSha), modelDiff,
+    upstreamRef, baseRef, refsAtExpectedSha, pullRequestCount: prs.length, releaseCount: releases.length,
   };
 }
 
 export function validateLivePublicationFacts(facts) {
+  if (!/^[0-9a-f]{40}$/.test(facts.localHead)) fail('local HEAD SHA shape');
   exact(facts.remoteRef, PUBLICATION.remoteRef, 'live remote ref');
   exact(facts.api?.ref, PUBLICATION.remoteRef, 'live GitHub API ref');
   exact(facts.api?.object?.type, 'commit', 'live GitHub API object type');
-  exact(facts.api?.object?.sha, facts.remoteSha, 'live GitHub API object SHA');
+  exact(facts.remoteSha, facts.localHead, 'live remote SHA/local HEAD');
+  exact(facts.api?.object?.sha, facts.localHead, 'live GitHub API object SHA/local HEAD');
   exact(facts.actor, 'laphael-dong', 'live GitHub actor');
   if (!facts.canPush) fail('live GitHub push permission missing');
-  exact(facts.localIdentity.commit, PUBLICATION.aggregateCommit, 'aggregate commit object');
-  exact(facts.localIdentity.parent, PUBLICATION.aggregateParent, 'aggregate parent object');
-  exact(facts.localIdentity.subject, PUBLICATION.aggregateSubject, 'aggregate subject object');
-  exact(facts.fetchHead, facts.remoteSha, 'live readback FETCH_HEAD');
-  exact(facts.readbackIdentity.commit, facts.remoteSha, 'live readback commit');
-  if (facts.remoteSha === PUBLICATION.aggregateCommit) {
-    exact(facts.readbackIdentity.parent, PUBLICATION.aggregateParent, 'aggregate readback parent');
-    exact(facts.readbackIdentity.subject, PUBLICATION.aggregateSubject, 'aggregate readback subject');
-  } else {
-    if (!/^[0-9a-f]{40}$/.test(facts.remoteSha)) fail('live closure SHA shape');
-    exact(facts.readbackIdentity.parent, PUBLICATION.aggregateCommit, 'closure readback parent');
-    exact(facts.readbackIdentity.subject, PUBLICATION.closureSubject, 'closure readback subject');
+  exact(facts.localIdentity.commit, facts.localHead, 'local HEAD commit object');
+  exact(facts.localIdentity.parent, PUBLICATION.previousClosureCommit, 'fix commit parent');
+  exact(facts.localIdentity.subject, PUBLICATION.fixSubject, 'fix commit subject');
+  exact(facts.previousClosureIdentity.commit, PUBLICATION.previousClosureCommit, 'previous closure commit object');
+  exact(facts.previousClosureIdentity.parent, PUBLICATION.aggregateCommit, 'previous closure parent');
+  exact(facts.previousClosureIdentity.subject, PUBLICATION.previousClosureSubject, 'previous closure subject');
+  exact(facts.aggregateIdentity.commit, PUBLICATION.aggregateCommit, 'aggregate commit object');
+  exact(facts.aggregateIdentity.parent, PUBLICATION.aggregateParent, 'aggregate parent object');
+  exact(facts.aggregateIdentity.subject, PUBLICATION.aggregateSubject, 'aggregate subject object');
+  if (facts.freshFetchExecuted !== true) fail('fresh fetch was not executed');
+  exact(facts.fetchHead, facts.localHead, 'fresh FETCH_HEAD/local HEAD');
+  exact(facts.readbackIdentity.commit, facts.localHead, 'readback commit/local HEAD');
+  exact(facts.readbackIdentity.parent, PUBLICATION.previousClosureCommit, 'readback fix parent');
+  exact(facts.readbackIdentity.subject, PUBLICATION.fixSubject, 'readback fix subject');
+  exact(facts.readbackCommitDigest, facts.localCommitDigest, 'commit object byte digest');
+  exact(facts.readbackTree, facts.localTree, 'commit tree OID');
+  exact(facts.localRemoteDiff, '', 'local HEAD/readback diff');
+  const expectedChain = [[facts.localHead, PUBLICATION.previousClosureCommit], [PUBLICATION.previousClosureCommit, PUBLICATION.aggregateCommit]];
+  if (JSON.stringify(facts.localFirstParentChain) !== JSON.stringify(expectedChain)) fail('local first-parent closure path drift or merge');
+  if (JSON.stringify(facts.readbackFirstParentChain) !== JSON.stringify(expectedChain)) fail('readback first-parent closure path drift or merge');
+  for (const path of CRITICAL_EVIDENCE_PATHS) {
+    if (!/^[0-9a-f]{40}$/.test(facts.localCriticalBlobs?.[path] ?? '')) fail(`local critical evidence blob missing: ${path}`);
+    exact(facts.readbackCriticalBlobs?.[path], facts.localCriticalBlobs[path], `readback critical evidence blob: ${path}`);
   }
-  exact(facts.modelBytes, PUBLICATION.modelBytes, 'live model bytes');
-  exact(facts.modelBlob, PUBLICATION.modelBlob, 'live model blob');
+  for (const path of IMMUTABLE_HISTORICAL_EVIDENCE_PATHS) {
+    exact(facts.localCriticalBlobs[path], facts.previousClosureCriticalBlobs?.[path], `immutable historical evidence blob: ${path}`);
+  }
+  exact(facts.localModel?.path, PUBLICATION.modelPath, 'local model path');
+  exact(facts.readbackModel?.path, PUBLICATION.modelPath, 'readback model path');
+  exact(facts.localModel?.mode, '100644', 'local model mode');
+  exact(facts.readbackModel?.mode, '100644', 'readback model mode');
+  exact(facts.localModel?.bytes, PUBLICATION.modelBytes, 'local model bytes');
+  exact(facts.readbackModel?.bytes, PUBLICATION.modelBytes, 'readback model bytes');
+  exact(facts.localModel?.blob, PUBLICATION.modelBlob, 'local model blob');
+  exact(facts.readbackModel?.blob, PUBLICATION.modelBlob, 'readback model blob');
   exact(facts.mainBlob, PUBLICATION.modelBlob, 'live main model blob');
-  exact(facts.aggregateBlob, PUBLICATION.modelBlob, 'live aggregate model blob');
   exact(facts.modelSha256, PUBLICATION.modelSha256, 'live model SHA-256');
   exact(facts.modelDiff, '', 'aggregate models diff');
   exact(facts.upstreamRef, '', 'upstream aggregate ref');
   exact(facts.baseRef, '', 'base aggregate ref');
-  exact(facts.validationTags, '', 'validation publication tags');
+  if (JSON.stringify(facts.refsAtExpectedSha) !== JSON.stringify([PUBLICATION.remoteRef])) fail('final SHA exists at an unauthorized branch or tag');
   exact(facts.pullRequestCount, 0, 'validation publication PR count');
   exact(facts.releaseCount, 0, 'validation release count');
-  return { remoteTipKind: facts.remoteSha === PUBLICATION.aggregateCommit ? 'aggregate' : 'closure', remoteSha: facts.remoteSha };
+  return { remoteTipKind: 'fix-closure', remoteSha: facts.remoteSha, tree: facts.localTree, commitObjectSha256: facts.localCommitDigest };
 }

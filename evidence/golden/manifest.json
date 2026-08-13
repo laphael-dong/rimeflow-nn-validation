@@ -449,8 +449,8 @@
     },
     {
       "path": "evidence/scripts/task14_publication_validation.mjs",
-      "bytes": 15181,
-      "sha256": "d74695670c7c8ac5b6d993dd3bb69aad82ff07bbaab94cb4c9c89e3e78f5a061"
+      "bytes": 20567,
+      "sha256": "c219786e8083bb17a750d0bab58ae6ff3e9669cdf4d87083be708411109e6d95"
     },
     {
       "path": "evidence/scripts/record_task14_publication.mjs",
@@ -459,13 +459,13 @@
     },
     {
       "path": "evidence/scripts/verify_task14_publication.mjs",
-      "bytes": 887,
-      "sha256": "bd2b22fb2e59e07b28760f4f79bfe89dda4cd5173caec5695d74fb7a39d5a6b8"
+      "bytes": 1319,
+      "sha256": "b84d490dd9d0667ca37d86d41c6606ad335f27d9011ea87fe344e6a6e1cb678b"
     },
     {
       "path": "evidence/scripts/test_task14_publication_negative.mjs",
-      "bytes": 7701,
-      "sha256": "41c2bb4c903a827375f1d6d1534ca49681284f3527ee5e0caa23b77950dd3bd9"
+      "bytes": 13099,
+      "sha256": "a79369c3fe6fe90744ca10175c3a5f4c4cf12bdc8e520f4ac82d265ab0bc886a"
     },
     {
       "path": "evidence/tensorrt/contract.json",

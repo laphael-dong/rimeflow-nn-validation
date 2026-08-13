@@ -7,4 +7,24 @@ const aggregate = JSON.parse(await readFile(resolve(root, 'evidence/conversions/
 await readAndValidatePublicationReceipt(root, aggregate);
 const facts = collectLivePublicationFacts(root);
 const live = validateLivePublicationFacts(facts);
-console.log(JSON.stringify({ ok: true, trackedEvidenceModified: false, repository: 'laphael-dong/rimeflow-nn-validation', ref: facts.remoteRef, aggregateCommit: '19193a34f2fb2b36465538b02687a07608f7810e', remoteTipKind: live.remoteTipKind, remoteTip: live.remoteSha, modelBlob: facts.modelBlob, modelSha256: facts.modelSha256 }));
+console.log(JSON.stringify({
+  ok: true,
+  trackedEvidenceModified: false,
+  freshFetchExecuted: facts.freshFetchExecuted,
+  repository: 'laphael-dong/rimeflow-nn-validation',
+  ref: facts.remoteRef,
+  aggregateCommit: '19193a34f2fb2b36465538b02687a07608f7810e',
+  previousClosureCommit: facts.previousClosureIdentity.commit,
+  remoteTipKind: live.remoteTipKind,
+  remoteTip: live.remoteSha,
+  localHead: facts.localHead,
+  tree: live.tree,
+  commitObjectSha256: live.commitObjectSha256,
+  parent: facts.localIdentity.parent,
+  subject: facts.localIdentity.subject,
+  modelPath: facts.readbackModel.path,
+  modelMode: facts.readbackModel.mode,
+  modelBytes: facts.readbackModel.bytes,
+  modelBlob: facts.readbackModel.blob,
+  modelSha256: facts.modelSha256,
+}));
