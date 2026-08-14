@@ -47,6 +47,10 @@ export const TRACKED_CUDA_EVIDENCE = [
   'evidence/replay/task1-replay.json',
   'evidence/conversions/conversion-spikes.json',
 ];
+const RECORDED_CUDA_CURRENT_IDENTITY = [
+  'evidence/conversions/cuda-ep-spike-manifest.json',
+  'evidence/reports/cuda-ep-spike-report.json',
+];
 
 const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -326,7 +330,11 @@ export async function validateCudaReplay(root, replay) {
   }
   const replayReportPath = 'evidence/reports/cuda-ep-replay-report.json';
   const currentIdentityPaths = replay.recorded
-    ? TRACKED_CUDA_EVIDENCE.filter((path) => path !== replayReportPath)
+    // A recorded replay is historical preservation evidence. The conversion summary,
+    // golden manifest, and Task-1 replay are finalized after this CUDA step and are
+    // independently bound by aggregate validation. Ordinary replay still binds every
+    // protected path to its current bytes.
+    ? RECORDED_CUDA_CURRENT_IDENTITY
     : TRACKED_CUDA_EVIDENCE;
   for (const path of currentIdentityPaths) {
     const bytes = await readFile(resolve(root, path));

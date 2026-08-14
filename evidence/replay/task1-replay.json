@@ -1770,7 +1770,7 @@
     {
       "path": "evidence/golden/manifest.json",
       "bytes": 19238,
-      "sha256": "7ca69756f7d3c85702ce3facb00a4eb9f13ce768f02744bd88c9a68de8a0c642"
+      "sha256": "44dca7e09066ca3426d54342bb14e4fb3bd91c3ec49458890e7661d696b0e96f"
     },
     {
       "path": "evidence/golden/web-reference.json",

@@ -171,6 +171,13 @@ node evidence/scripts/test_cuda_ep_guards.mjs
 node evidence/scripts/validate_cuda_evidence.mjs
 ```
 
+tracked CUDA replay report 是 blocked-host record 当时六个 protected path 的历史 before/after
+保存证明；其中 CUDA manifest/report 继续与当前 bytes/SHA 直接绑定，record report 自身必须与
+当前 committed Git blob 完全一致。conversion summary、golden manifest 与 Task-1 replay 在 CUDA
+step 之后才由 Task-1.4 closure finalize，因此其当前身份由 aggregate/manifest/replay validator 独立
+绑定，不能反向改写历史 snapshot。ordinary CUDA replay 仍要求全部六个 protected path 的
+before/after 与当前 bytes/SHA 完全一致。
+
 TensorRT 最终 harness 来自 `228956ea9992baa279bf71a57164b383e4823878`。它锁定 ORT 1.22.0、
 TensorRT 10.9.0.34、CUDA 12.8、cuDNN 9.7、container digest、engine/timing cache namespace 与
 provider 顺序，并要求真实 `TensorrtExecutionProvider` profile node和 fresh engine build；CUDA-only

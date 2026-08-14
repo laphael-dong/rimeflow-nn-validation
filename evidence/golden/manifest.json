@@ -374,8 +374,8 @@
     },
     {
       "path": "evidence/scripts/cuda_evidence_validation.mjs",
-      "bytes": 28526,
-      "sha256": "bfd6b2bdde5eba8b9d5986c006b2bd34d5b15edfc1172638b5f42a7ac6f97f43"
+      "bytes": 28938,
+      "sha256": "35603e9785bacbde778d76af298b533a4b294b5db7ab43e5979766ff5a491857"
     },
     {
       "path": "evidence/scripts/replay_cuda_ep.mjs",
