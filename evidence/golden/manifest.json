@@ -129,8 +129,8 @@
     },
     {
       "path": "evidence/conversions/openvino-ep-manifest.json",
-      "bytes": 12181,
-      "sha256": "b4fcb58c60f5c91138c8cbd6dbc24a5a0e6ba68b5ce25a075fc4cbda285ff774"
+      "bytes": 11978,
+      "sha256": "0b972f5e838303e94b3e95bd1c8cba36c1d4fd7b485b9f41c7bc4002855b583a"
     },
     {
       "path": "evidence/conversions/cuda-ep-spike-manifest.json",
@@ -329,8 +329,8 @@
     },
     {
       "path": "evidence/scripts/openvino_evidence_validation.mjs",
-      "bytes": 35971,
-      "sha256": "53ad1a7252d9b8b79b80270f7cc24ac3657df52ee58f5a0b7f3fcb232486b489"
+      "bytes": 37663,
+      "sha256": "9e7a04757150519d092a44f974308d4868acbc2122942df7ce38985e5c6df586"
     },
     {
       "path": "evidence/scripts/openvino_durable_publication.py",
@@ -349,13 +349,13 @@
     },
     {
       "path": "evidence/scripts/run_openvino_replay.py",
-      "bytes": 32254,
-      "sha256": "1f51b8e7dca57296cb2726e1608a5d8b15d1342f93fa5a325a668efe2dd54fb4"
+      "bytes": 32168,
+      "sha256": "b0eddf9902731f50461b84e5041a14b28c5150f8ad86cf5ec2e86100a8055eb1"
     },
     {
       "path": "evidence/scripts/run_conversion_spikes.mjs",
-      "bytes": 21875,
-      "sha256": "77ea7b3c440bb885b56ac91cf847186829b8e7872d8923bc8c1af91da758c143"
+      "bytes": 22667,
+      "sha256": "3cd63b8f03da157bbcc627166021834ad469f1d6a974e270106b298bafe8195c"
     },
     {
       "path": "evidence/scripts/test_openvino_publish_transaction.py",
@@ -364,8 +364,8 @@
     },
     {
       "path": "evidence/scripts/test_openvino_replay_guards.mjs",
-      "bytes": 15295,
-      "sha256": "c221f18ead48d2e61b40578c56a402b38b1417dd1d2b0dff1302ef71da8d00ec"
+      "bytes": 17155,
+      "sha256": "9f5963ada596adc60d7860d6fc735389b5870640cc96431b3237e493b2eebe80"
     },
     {
       "path": "evidence/scripts/test_openvino_rust_identity_guards.mjs",

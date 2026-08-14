@@ -243,8 +243,10 @@ def loaded_libraries(capi: Path) -> list[dict[str, object]]:
         if not candidates:
             raise RuntimeError(f"required ORT/OpenVINO library was not mapped by the process: {name}")
         path = candidates[0]
-        item = artifact(path, f"$VENV/{path.relative_to(capi.parent.parent.parent)}")
-        item["actualPath"] = str(path)
+        venv_root = capi.parents[4]
+        canonical_path = f"$OPENVINO_VENV/{path.relative_to(venv_root)}"
+        item = artifact(path, canonical_path)
+        item["actualPath"] = canonical_path
         item["componentVersion"] = "1.24.1" if name.startswith("libonnxruntime") or name.startswith("onnxruntime_") else "2025.4.1"
         item["name"] = name
         item["mappedByProcess"] = True
@@ -367,8 +369,6 @@ def comparable_manifest(value: dict[str, object]) -> dict[str, object]:
     for key in ("install", "pipCheck", "pythonVersionCommand"):
         comparable["toolchain"][key].pop("startedAt", None)
         comparable["toolchain"][key].pop("endedAt", None)
-    for library in comparable["runtime"]["libraries"]:
-        library["actualPath"] = "$OPENVINO_VENV/" + library["actualPath"].split("/site-packages/", 1)[1]
     return comparable
 
 

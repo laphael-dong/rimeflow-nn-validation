@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, mkdtemp, rm, symlink } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { recoverOpenvinoPublication, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
+import { recoverOpenvinoPublication, resolveTrustedOpenvinoLibraryPath, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 recoverOpenvinoPublication(root);
@@ -46,6 +46,19 @@ async function rejected(name, mutate) {
 }
 
 const cases = [];
+await Promise.all(manifest.runtime.libraries.map((library) => resolveTrustedOpenvinoLibraryPath(root, library)));
+cases.push(await rejected('absolute library path injection', async (candidate) => {
+  candidate.runtime.libraries[0].actualPath = '/tmp/injected/libopenvino.so';
+}));
+cases.push(await rejected('library path traversal', async (candidate) => {
+  candidate.runtime.libraries[0].actualPath = '$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/../../../../../../tmp/injected.so';
+}));
+cases.push(await rejected('wrong library capi directory', async (candidate) => {
+  candidate.runtime.libraries[0].actualPath = '$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/wrong-capi/libonnxruntime_providers_openvino.so';
+}));
+cases.push(await rejected('library basename substitution', async (candidate) => {
+  candidate.runtime.libraries[0].actualPath = '$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so';
+}));
 cases.push(await rejected('ordinary CPU ORT impersonates OpenVINO', async (candidate, evidence) => {
   candidate.runtime.onnxruntimeOpenvino = '1.24.1';
   evidence.rounds[0].availableProviders = ['CPUExecutionProvider'];
@@ -213,6 +226,24 @@ try {
   await rm(temporary, { recursive: true, force: true });
 }
 
+const symlinkRoot = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-library-escape-'));
+try {
+  const capi = join(symlinkRoot, '.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi');
+  const outside = join(symlinkRoot, 'outside.so');
+  await mkdir(capi, { recursive: true });
+  await writeFile(outside, 'outside');
+  await symlink(outside, join(capi, manifest.runtime.libraries[0].name));
+  try {
+    await resolveTrustedOpenvinoLibraryPath(symlinkRoot, manifest.runtime.libraries[0]);
+    throw new Error('OpenVINO negative case unexpectedly passed: symlink escape');
+  } catch (error) {
+    if (String(error).includes('unexpectedly passed')) throw error;
+    cases.push('symlink escape');
+  }
+} finally {
+  await rm(symlinkRoot, { recursive: true, force: true });
+}
+
 const transaction = spawnSync(
   resolve(root, '.evidence/openvino/venv/bin/python'),
   ['evidence/scripts/test_openvino_publish_transaction.py'],
@@ -227,4 +258,4 @@ if (rustIdentity.status !== 0) throw new Error(`OpenVINO Rust source/binary iden
 const rustIdentityResult = JSON.parse(rustIdentity.stdout);
 if (!rustIdentityResult.ok || rustIdentityResult.cases.length < 34 || rustIdentityResult.environmentCases !== 15 || rustIdentityResult.sourceCount !== 5) throw new Error('OpenVINO Rust source/binary guard coverage drift');
 
-console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['real OpenVINO record files and runtime evidence'], rustIdentityCases: rustIdentityResult.cases }));
+console.log(JSON.stringify({ filesystemCases: transactionResult.filesystemCases, ok: true, negativeCases: cases, positiveCases: ['trusted token resolves from current clean checkout venv root', 'real OpenVINO record files and runtime evidence'], rustIdentityCases: rustIdentityResult.cases }));

@@ -114,6 +114,8 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 Linux x86_64 OpenVINO provider spike 使用官方 `onnxruntime-openvino==1.24.1` CPython 3.12 manylinux wheel；该 wheel 内置 OpenVINO Runtime `2025.4.1`。完整传递依赖、每个 wheel 的 SHA-256 与精确版本固定在 `evidence/tooling/openvino-requirements.lock`，官方 PyPI 下载 URL、许可证字段、ORT build commit、实际映射的 ORT/OpenVINO shared library bytes/SHA、host/CPU/kernel/glibc、OpenVINO CPU device/plugin introspection 则记录在 `evidence/conversions/openvino-ep-manifest.json`。本 spike 不做模型转换，只读取唯一 `models/yolov8n.onnx`；runtime、wheel、cache、profile 和 raw tensor 仅进入 ignored `.evidence/openvino/`，不进入 Git、RimeCut、产品包或发布目录。
 
+OpenVINO manifest 的 runtime library `path` 与 `actualPath` 使用固定 `$OPENVINO_VENV/` trusted-root token 加 `lib/python3.12/site-packages/onnxruntime/capi/` 下的库名，不记录 checkout-specific absolute path。validator 只将该 token 解析到当前 checkout 的 canonical `.evidence/openvino/venv`，并拒绝绝对路径、遍历、错误 capi、basename substitution、symlink escape 以及 bytes/SHA/version/library set 漂移；tracked manifest 的 token 化是一次确定性证据迁移，不是新的 runtime record。
+
 建立并执行 record：
 
 ```sh
@@ -210,8 +212,7 @@ bun run evidence/scripts/validate_evidence.mjs
 node evidence/scripts/test_validator_negative.mjs
 ```
 
-生成顺序是 receipt/provider reports 生成 aggregate 与 conversion summary，再生成 artifact manifest，
-最后生成 replay ledger。artifact manifest 纳入 receipt、aggregate、生成器和 validator，但明确排除
+生成顺序是基础 provider reports 生成 conversion summary，随后由 Task-1.4 closure handoff 补齐 provider/spike/runtime/golden 状态和顶层 closure，再生成 artifact manifest，最后生成 replay ledger；Task-1 replay 在写入基础 ledger 后再次执行同一 closure handoff，确保 scoped provider regeneration 不会拆散最终闭包。artifact manifest 纳入 receipt、aggregate、生成器和 validator，但明确排除
 replay；replay 哈希上游产物但不哈希自身。这个最小排除避免 manifest/replay/receipt 循环哈希，且
 生成器不重写 `observedAt`、不访问网络、不修改 canonical ONNX、不创建第二份 ONNX。连续运行两次必须
 得到逐字节一致的 aggregate、conversion summary、artifact manifest 与 replay ledger。普通 recorder

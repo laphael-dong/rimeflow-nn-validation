@@ -26,6 +26,7 @@ const mindsporeGolden = JSON.parse(mindsporeGoldenBytes);
 const mindsporeConversionBytes = await readFile(resolve(root, 'evidence/reports/mindspore-conversion-report.json'));
 const mindsporeConversion = JSON.parse(mindsporeConversionBytes);
 const reportPath = resolve(root, 'evidence/conversions/conversion-spikes.json');
+const previousConversion = JSON.parse(await readFile(reportPath, 'utf8'));
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const stable = (value) => JSON.stringify(value, null, 2) + '\n';
 const normalizeLog = (value) => value
@@ -323,10 +324,17 @@ const report = {
       exitCode: pythonResult.litert.attempt.exitCode,
       purpose: '历史负向证据；不作为本轮转换结论',
     }),
-    { platform: 'windows-x86_64-and-arm64', format: 'onnx', state: 'blocked', conversion: '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入', tool: { name: 'Windows ML / Windows App SDK', version: '1.8 target; unavailable on Linux host', officialSource: 'https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models' }, attempt: { ...windowsMl, requiredRunnerCommand: 'dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin', requiredApi: 'Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)' }, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: 'Windows runner/toolchain discovery before Windows ML model load', license: 'Windows ML follows Windows App SDK terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: '没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。' },
+    previousConversion.spikes.find((item) => item.platform === 'windows') ?? { platform: 'windows', format: 'onnx', state: 'blocked', conversion: '无格式转换：Windows ML 随 Windows App SDK 提供 ONNX Runtime API，原 ONNX 应由 Microsoft.ML.OnnxRuntime.InferenceSession 实际加载并执行固定输入', tool: { name: 'Windows ML / Windows App SDK', version: '1.8 target; unavailable on Linux host', officialSource: 'https://learn.microsoft.com/windows/ai/new-windows-ml/run-onnx-models' }, attempt: { ...windowsMl, requiredRunnerCommand: 'dotnet run --configuration Release --framework net8.0-windows10.0.26100.0 -- models/yolov8n.onnx single-target.nchw-f32le.bin', requiredApi: 'Microsoft.ML.OnnxRuntime.InferenceSession(modelPath, sessionOptions)' }, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: 'Windows runner/toolchain discovery before Windows ML model load', license: 'Windows ML follows Windows App SDK terms；模型 checkpoint/ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: '没有 Windows x64 或 ARM64 runner；未实际加载，两个架构均保持 blocked，不能由 Linux ORT 推断。' },
     mindsporeSpike(),
     ...linuxProviders.map((attempt) => ({ platform: `linux-x86_64-${attempt.requestedProvider}`, format: 'onnx', state: attempt.exitCode === 0 ? 'inference-verified' : 'blocked', tool: { name: 'onnxruntime-node', version: '1.24.3' }, attempt, artifact: { path: 'models/yolov8n.onnx', sha256: sha256(modelBytes) }, ioChanges: 'none', quantization: 'none', nmsResponsibility: 'operator', failedOperator: attempt.exitCode === 0 ? null : 'provider/session initialization before graph execution', license: 'ONNX Runtime MIT；ONNX metadata 声明 AGPL-3.0', redistribution: '仅允许隔离的内部框架验证 evidence，不进入 RimeCut 产品发布目录', conclusion: attempt.exitCode === 0 ? `${attempt.requestedProvider} provider 已用固定 canonical 输入完成真实 inference；仅为本机 build-verified 证据。` : `${attempt.requestedProvider} provider 未能进入固定输入 inference，保持 blocked。` })),
   ],
 };
+// The dedicated OpenVINO receipt is the provider source of truth. The ordinary
+// Node probe may not have that backend installed, so carry its verified summary
+// forward without claiming a new runtime execution.
+const openvinoManifest = JSON.parse(await readFile(resolve(root, 'evidence/conversions/openvino-ep-manifest.json'), 'utf8'));
+const openvinoReport = JSON.parse(await readFile(resolve(root, 'evidence/reports/openvino-ep-report.json'), 'utf8'));
+const openvinoClosure = summarizeOpenvinoForConversion(openvinoManifest, openvinoReport);
+report.spikes = report.spikes.map((item) => item.platform === 'linux-x86_64-openvino' ? openvinoClosure : item);
 await writeFile(reportPath, stable(report));
 console.log(sha256(Buffer.from(stable(report))));

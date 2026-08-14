@@ -54,66 +54,66 @@
     "device": "CPU-OPENVINO_CPU",
     "libraries": [
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
         "bytes": 2000856,
         "componentVersion": "1.24.1",
         "mappedByProcess": true,
         "name": "libonnxruntime_providers_openvino.so",
-        "path": "$VENV/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_openvino.so",
         "sha256": "b19cae6eb713f35427a8427f141ffc8fc2471ae0532f57e52d84fa9a66799c30"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
         "bytes": 15776,
         "componentVersion": "1.24.1",
         "mappedByProcess": true,
         "name": "libonnxruntime_providers_shared.so",
-        "path": "$VENV/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so",
         "sha256": "5e02c1ff90e7d71365264dbb6767c00f04a8b57a96cddbc0085c61fa1393250d"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino.so.2541",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino.so.2541",
         "bytes": 25284089,
         "componentVersion": "2025.4.1",
         "mappedByProcess": true,
         "name": "libopenvino.so.2541",
-        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino.so.2541",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino.so.2541",
         "sha256": "ac9634b715a242a61644c77bc38f17508fe73f517e418027e2410f4bee004943"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so",
         "bytes": 389321,
         "componentVersion": "2025.4.1",
         "mappedByProcess": true,
         "name": "libopenvino_c.so",
-        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_c.so",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so",
         "sha256": "e515e35253414797438772767dbc4be3a4c8e8940f2fa31954bd711d514e782e"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
         "bytes": 67008289,
         "componentVersion": "2025.4.1",
         "mappedByProcess": true,
         "name": "libopenvino_intel_cpu_plugin.so",
-        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_intel_cpu_plugin.so",
         "sha256": "034df890550ae9199fe5f8608c0df8fd0fe355f303bad56bea10bae14c14c3cb"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
         "bytes": 7006249,
         "componentVersion": "2025.4.1",
         "mappedByProcess": true,
         "name": "libopenvino_onnx_frontend.so.2541",
-        "path": "$VENV/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_onnx_frontend.so.2541",
         "sha256": "f426710881d8c1a01d5ed6d7eaa076d923b19983d3ab3a18bb19d25dba7d8923"
       },
       {
-        "actualPath": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
+        "actualPath": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
         "bytes": 33766592,
         "componentVersion": "1.24.1",
         "mappedByProcess": true,
         "name": "onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
-        "path": "$VENV/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
+        "path": "$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so",
         "sha256": "00793442cbfc4b8e6c6909ddcc8146ac7476f5e25c2712a4250d2dd294de42b7"
       }
     ],

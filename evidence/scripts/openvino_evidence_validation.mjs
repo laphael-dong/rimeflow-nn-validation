@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { copyFile, lstat, mkdir, mkdtemp, opendir, readFile, realpath, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir, userInfo } from 'node:os';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, normalize, relative, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const MODEL_SHA = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad';
@@ -23,6 +23,26 @@ const canonical = (value) => {
 const same = (left, right) => JSON.stringify(canonical(left)) === JSON.stringify(canonical(right));
 const fail = (message) => { throw new Error(`OpenVINO evidence: ${message}`); };
 const nearlyEqual = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= Number.EPSILON * Math.max(1, Math.abs(left), Math.abs(right)) * 8;
+const OPENVINO_VENV_TOKEN = '$OPENVINO_VENV/';
+const OPENVINO_CAPI_RELATIVE = 'lib/python3.12/site-packages/onnxruntime/capi';
+
+export async function resolveTrustedOpenvinoLibraryPath(root, library) {
+  const expectedRelative = `${OPENVINO_CAPI_RELATIVE}/${library.name}`;
+  for (const field of ['actualPath', 'path']) {
+    if (typeof library[field] !== 'string' || !library[field].startsWith(OPENVINO_VENV_TOKEN)) fail(`${field} must use the trusted OpenVINO venv token: ${library.name}`);
+    const relativePath = library[field].slice(OPENVINO_VENV_TOKEN.length);
+    if (isAbsolute(relativePath) || relativePath.includes('\\') || normalize(relativePath) !== relativePath || relativePath !== expectedRelative) fail(`${field} has an invalid OpenVINO library relative path: ${library.name}`);
+  }
+  const venvRoot = await realpath(resolve(root, '.evidence/openvino/venv')).catch(() => fail('canonical OpenVINO venv is unavailable'));
+  const expectedCapi = resolve(venvRoot, OPENVINO_CAPI_RELATIVE);
+  const canonicalCapi = await realpath(expectedCapi).catch(() => fail('OpenVINO capi directory is unavailable'));
+  if (canonicalCapi !== expectedCapi || !canonicalCapi.startsWith(`${venvRoot}${sep}`)) fail('OpenVINO capi directory escapes the trusted venv');
+  const candidate = resolve(venvRoot, expectedRelative);
+  if (relative(venvRoot, candidate) !== expectedRelative) fail(`OpenVINO library path containment failed: ${library.name}`);
+  const canonical = await realpath(candidate).catch(() => fail(`OpenVINO library is unavailable: ${library.name}`));
+  if (!canonical.startsWith(`${venvRoot}${sep}`) || dirname(canonical) !== canonicalCapi || basename(canonical) !== library.name) fail(`OpenVINO library symlink/path containment failed: ${library.name}`);
+  return canonical;
+}
 
 function checkedSpawn(command, args, options, label) {
   const result = spawnSync(command, args, { encoding: 'utf8', ...options });
@@ -492,13 +512,12 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
   if (manifest.toolchain.wheels.length !== 7 || manifest.toolchain.wheels.some((wheel) => !wheel.source.startsWith('https://files.pythonhosted.org/') || !/^[0-9a-f]{64}$/.test(wheel.sha256) || !wheel.license)) fail('wheel source/hash/license metadata');
   if (manifest.runtime.onnxruntimeOpenvino !== '1.24.1' || manifest.runtime.openvino.runtime.buildNumber !== '2025.4.1-0-test' || manifest.runtime.numpy !== '2.5.2' || manifest.runtime.python !== '3.12.3' || manifest.runtime.pip !== '24.0') fail('runtime exact versions');
   if (!manifest.runtime.buildInfo.includes('git-commit-id=b5963e82c8') || manifest.runtime.device !== 'CPU-OPENVINO_CPU' || !manifest.runtime.openvino.availableDevices.includes('CPU') || manifest.runtime.openvino.requestedDevice !== 'CPU') fail('runtime build/device introspection');
-  const capi = await realpath(resolve(root, '.evidence/openvino/venv/lib/python3.12/site-packages/onnxruntime/capi'));
   const requiredLibraries = new Set(['libonnxruntime_providers_openvino.so', 'libonnxruntime_providers_shared.so', 'libopenvino.so.2541', 'libopenvino_c.so', 'libopenvino_intel_cpu_plugin.so', 'libopenvino_onnx_frontend.so.2541', 'onnxruntime_pybind11_state.cpython-312-x86_64-linux-gnu.so']);
   if (manifest.runtime.libraries.length !== requiredLibraries.size) fail('loaded library count');
   for (const library of manifest.runtime.libraries) {
     if (!requiredLibraries.delete(library.name) || !library.mappedByProcess) fail(`loaded library declaration: ${library.name}`);
-    const path = resolve(capi, basename(library.path));
-    if (library.actualPath !== path || !['1.24.1', '2025.4.1'].includes(library.componentVersion)) fail(`loaded library path/version: ${library.name}`);
+    const path = await resolveTrustedOpenvinoLibraryPath(root, library);
+    if (!['1.24.1', '2025.4.1'].includes(library.componentVersion)) fail(`loaded library path/version: ${library.name}`);
     const bytes = await readFile(path);
     if (bytes.length !== library.bytes || sha256(bytes) !== library.sha256) fail(`loaded library identity: ${library.name}`);
   }

@@ -367,4 +367,8 @@ const manifest = {
 };
 await mkdir(dirname(outputPath), { recursive: true });
 await writeFile(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
+// Scoped provider regeneration above may intentionally replace one provider entry.
+// Re-apply the complete Task 1.4 closure only after this base replay exists, so the
+// aggregate, golden manifest, and replay hashes describe the same final generation.
+await import('./generate_task14_aggregate.mjs');
 console.log(JSON.stringify({ output: 'evidence/replay/task1-replay.json', outputCount: artifacts.length }));
