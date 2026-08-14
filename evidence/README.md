@@ -116,6 +116,8 @@ Linux x86_64 OpenVINO provider spike 使用官方 `onnxruntime-openvino==1.24.1`
 
 OpenVINO manifest 的 runtime library `path` 与 `actualPath` 使用固定 `$OPENVINO_VENV/` trusted-root token 加 `lib/python3.12/site-packages/onnxruntime/capi/` 下的库名，不记录 checkout-specific absolute path。validator 只将该 token 解析到当前 checkout 的 canonical `.evidence/openvino/venv`，并拒绝绝对路径、遍历、错误 capi、basename substitution、symlink escape 以及 bytes/SHA/version/library set 漂移；tracked manifest 的 token 化是一次确定性证据迁移，不是新的 runtime record。
 
+OpenVINO profile identity 使用 `$OPENVINO_WORKSPACE/round-{1,2}/ort-profile.node-events.json`，其 `openvino-profile-node-events-v1` 规范化只保留真实 ORT profile 中按源顺序出现的 Node event `name` 与 `provider`。tracked record 中旧 checkout 的绝对 profile path/易变 timing bytes 已通过已有 `nodeEvents` 确定性迁移为该 1723-byte canonical artifact，并在 `recordedSourceArtifact` 保留原 raw profile 的 bytes/SHA 与 `retained=false`；这不是新的 runtime record。ordinary replay 同时保留固定名 `ort-profile.raw.json`，validator 对 raw 与 canonical profile 分别执行固定 token、当前 canonical workspace、非 symlink、bytes/SHA 检查，并从两者独立重算 provider counts/execution plan 后要求完全一致；绝对路径、遍历、错误 round/directory、symlink escape 或 identity drift 均被拒绝。tracked record 中 deterministic raw/Web tensor 的历史 `record-fix03-final` logical path 只按固定 round/fixture/repeat grammar 解析到当前 canonical `replay-final`，随后仍逐文件检查 bytes/SHA 和全部数值语义；其他历史路径、遍历或 symlink 不会被重定向。
+
 建立并执行 record：
 
 ```sh

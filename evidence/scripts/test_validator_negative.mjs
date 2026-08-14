@@ -333,10 +333,10 @@ await expectFailure('MindSpore non-record tracked report drift', async () => val
 
 const cudaManifest = await readJson('evidence/conversions/cuda-ep-spike-manifest.json');
 const cudaReport = await readJson('evidence/reports/cuda-ep-spike-report.json');
-const cudaReplay = await readJson('evidence/reports/cuda-ep-replay-report.json');
+const cudaReplay = await readJson(process.env.RIMEFLOW_CUDA_ORDINARY_REPLAY ?? 'evidence/reports/cuda-ep-replay-report.json');
 await validateCudaEvidence(root, cudaManifest, cudaReport);
 await validateCudaReplay(root, cudaReplay);
-const cudaReplayWorkingTreeDrift = structuredClone(cudaReplay);
+const cudaReplayWorkingTreeDrift = await readJson('evidence/reports/cuda-ep-replay-report.json');
 cudaReplayWorkingTreeDrift.rounds[0].command.stdout = 'unstaged mutation';
 await expectFailure('CUDA recorded replay working tree differs from staged Git blob', async () => validateCudaReplay(root, cudaReplayWorkingTreeDrift));
 const tensorrtReport = await readJson('evidence/reports/tensorrt-ep-report.json');

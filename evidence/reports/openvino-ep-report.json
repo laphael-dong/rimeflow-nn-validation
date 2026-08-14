@@ -1518,7 +1518,7 @@
         }
       ],
       "profile": {
-        "bytes": 12969,
+        "bytes": 1723,
         "executionEventCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 10,
@@ -1567,8 +1567,14 @@
             "provider": "OpenVINOExecutionProvider"
           }
         ],
-        "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-1/ort-profile_2026-08-12_16-19-34.json",
-        "sha256": "db0fe68e10345a08b02385cfa5384ac0a5fb4ff6ecc5349d7647ff950d3f980f",
+        "normalization": "openvino-profile-node-events-v1: retain only Node event name and provider in source order",
+        "path": "$OPENVINO_WORKSPACE/round-1/ort-profile.node-events.json",
+        "recordedSourceArtifact": {
+          "bytes": 12969,
+          "retained": false,
+          "sha256": "db0fe68e10345a08b02385cfa5384ac0a5fb4ff6ecc5349d7647ff950d3f980f"
+        },
+        "sha256": "a48a378d97d67df1b78635954bf9a7fb3e624232db08b1e8ecdc165e2e4f8dd8",
         "uniqueNodeCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 1,
@@ -2959,7 +2965,7 @@
         }
       ],
       "profile": {
-        "bytes": 12967,
+        "bytes": 1723,
         "executionEventCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 10,
@@ -3008,8 +3014,14 @@
             "provider": "OpenVINOExecutionProvider"
           }
         ],
-        "path": "/tmp/rimeflow-task14-openvino-fix03-primary/.evidence/openvino/record-fix03-final/round-2/ort-profile_2026-08-12_16-19-37.json",
-        "sha256": "190f45d1172bc77f236d0c24f3bb15ddc2b363b8e6efaedb82e8487febb5fe0a",
+        "normalization": "openvino-profile-node-events-v1: retain only Node event name and provider in source order",
+        "path": "$OPENVINO_WORKSPACE/round-2/ort-profile.node-events.json",
+        "recordedSourceArtifact": {
+          "bytes": 12967,
+          "retained": false,
+          "sha256": "190f45d1172bc77f236d0c24f3bb15ddc2b363b8e6efaedb82e8487febb5fe0a"
+        },
+        "sha256": "598eb58e0e62d26c8b16e1fb73a6b391f07201ac24d2e7b005c6c3bab6f0aaf6",
         "uniqueNodeCounts": {
           "CPUExecutionProvider": 0,
           "OpenVINOExecutionProvider": 1,

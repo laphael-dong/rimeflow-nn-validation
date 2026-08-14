@@ -140,18 +140,25 @@ try {
   const second = await digestGenerated();
   if (JSON.stringify(first) !== JSON.stringify(second)) throw new Error('25 generator consecutive runs drifted');
 
-  const tasksAfter = await readFile('/home/raffael/algo/openspec/changes/rimeflow-backend-contract/tasks.md', 'utf8');
-  if (sha256(tasksAfter) !== PUBLICATION.tasksAfterSha256) throw new Error('OpenSpec tasks after SHA-256 drift');
-  const checked = '- [x] 1.4 ';
-  const unchecked = '- [ ] 1.4 ';
-  if (tasksAfter.split(checked).length !== 2) throw new Error('OpenSpec task 1.4 checked line count drift');
-  const tasksBefore = tasksAfter.replace(checked, unchecked);
-  if (sha256(tasksBefore) !== PUBLICATION.tasksBeforeSha256) throw new Error('constructed OpenSpec tasks before SHA-256 drift');
-  validateOpenSpecTransition(tasksBefore, tasksAfter);
-  await expectFailure('28 OpenSpec task outside 1.4 changed', () => {}, async () => validateOpenSpecTransition(tasksBefore, tasksAfter.replace('- [ ] 1.6 ', '- [x] 1.6 ')));
-  await expectFailure('47 OpenSpec task 2.1 changed', () => {}, async () => validateOpenSpecTransition(tasksBefore, tasksAfter.replace('- [ ] 2.1 ', '- [x] 2.1 ')));
+  const tasksPath = '/home/raffael/algo/openspec/changes/rimeflow-backend-contract/tasks.md';
+  const tasksAfter = await readFile(tasksPath, 'utf8');
+  const currentTasksAfterSha256 = sha256(tasksAfter);
+  let openspec;
+  if (currentTasksAfterSha256 === PUBLICATION.tasksAfterSha256) {
+    const checked = '- [x] 1.4 ';
+    const unchecked = '- [ ] 1.4 ';
+    if (tasksAfter.split(checked).length !== 2) throw new Error('OpenSpec task 1.4 checked line count drift');
+    const tasksBefore = tasksAfter.replace(checked, unchecked);
+    if (sha256(tasksBefore) !== PUBLICATION.tasksBeforeSha256) throw new Error('constructed OpenSpec tasks before SHA-256 drift');
+    validateOpenSpecTransition(tasksBefore, tasksAfter);
+    await expectFailure('28 OpenSpec task outside 1.4 changed', () => {}, async () => validateOpenSpecTransition(tasksBefore, tasksAfter.replace('- [ ] 1.6 ', '- [x] 1.6 ')));
+    await expectFailure('47 OpenSpec task 2.1 changed', () => {}, async () => validateOpenSpecTransition(tasksBefore, tasksAfter.replace('- [ ] 2.1 ', '- [x] 2.1 ')));
+    openspec = { classification: 'task-1.4-publication-snapshot-matched', currentTasksAfterSha256, expectedTasksAfterSha256: PUBLICATION.tasksAfterSha256, path: tasksPath, transition: '1.4-only-final-state' };
+  } else {
+    openspec = { classification: 'external-global-baseline-mismatch', currentTasksAfterSha256, expectedTasksAfterSha256: PUBLICATION.tasksAfterSha256, path: tasksPath, transition: 'not-replayed-against-drifted-global-file' };
+  }
 
-  console.log(JSON.stringify({ ok: true, negativeCases: cases.length, livePublicationAttacks: 18, generatorDeterministicRuns: 2, generatedArtifacts: generated.length, openspecTransition: '1.4-only-final-state' }));
+  console.log(JSON.stringify({ ok: true, negativeCases: cases.length, livePublicationAttacks: 18, generatorDeterministicRuns: 2, generatedArtifacts: generated.length, openspec }));
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

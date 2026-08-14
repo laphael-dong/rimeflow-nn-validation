@@ -3,11 +3,12 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile, mkdtemp, rm, symlink } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { recoverOpenvinoPublication, resolveTrustedOpenvinoLibraryPath, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
+import { recoverOpenvinoPublication, resolveTrustedOpenvinoLibraryPath, resolveTrustedOpenvinoProfilePath, validateOpenvinoEvidence, validateOpenvinoReplayEvidence } from './openvino_evidence_validation.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 recoverOpenvinoPublication(root);
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
+const resolveReplayArtifact = (path) => resolve(root, path.replace('.evidence/openvino/record-fix03-final/', '.evidence/openvino/replay-final/'));
 const manifest = await readJson('evidence/conversions/openvino-ep-manifest.json');
 const report = await readJson('evidence/reports/openvino-ep-report.json');
 const frozen = await readJson('evidence/golden/web-reference.json');
@@ -58,6 +59,18 @@ cases.push(await rejected('wrong library capi directory', async (candidate) => {
 }));
 cases.push(await rejected('library basename substitution', async (candidate) => {
   candidate.runtime.libraries[0].actualPath = '$OPENVINO_VENV/lib/python3.12/site-packages/onnxruntime/capi/libopenvino_c.so';
+}));
+cases.push(await rejected('absolute profile path injection', async (_candidate, evidence) => {
+  evidence.rounds[0].profile.path = '/tmp/injected-profile.json';
+}));
+cases.push(await rejected('profile path traversal', async (_candidate, evidence) => {
+  evidence.rounds[0].profile.path = '$OPENVINO_WORKSPACE/round-1/../../injected-profile.json';
+}));
+cases.push(await rejected('wrong profile directory', async (_candidate, evidence) => {
+  evidence.rounds[0].profile.path = '$OPENVINO_WORKSPACE/round-2/ort-profile.node-events.json';
+}));
+cases.push(await rejected('deterministic profile identity drift', async (_candidate, evidence) => {
+  evidence.rounds[0].profile.sha256 = '9'.repeat(64);
 }));
 cases.push(await rejected('ordinary CPU ORT impersonates OpenVINO', async (candidate, evidence) => {
   candidate.runtime.onnxruntimeOpenvino = '1.24.1';
@@ -116,14 +129,14 @@ for (const [name, mutate] of provenanceCases) {
 
 const temporary = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-negative-'));
 try {
-  cases.push(await rejected('profile file has no OpenVINO node', async (_candidate, evidence) => {
+  cases.push(await rejected('absolute injected profile with no OpenVINO node', async (_candidate, evidence) => {
     const profile = join(temporary, 'cpu-profile.json');
     const bytes = Buffer.from(JSON.stringify([{ cat: 'Node', name: 'cpu', args: { provider: 'CPUExecutionProvider' } }]));
     await writeFile(profile, bytes);
     Object.assign(evidence.rounds[0].profile, { path: profile, bytes: bytes.length, sha256: (await import('node:crypto')).createHash('sha256').update(bytes).digest('hex') });
   }));
   cases.push(await rejected('raw tensor contains NaN', async (_candidate, evidence) => {
-    const source = resolve(root, evidence.rounds[0].fixtures[0].runs[0].raw.path);
+    const source = resolveReplayArtifact(evidence.rounds[0].fixtures[0].runs[0].raw.path);
     const bytes = Buffer.from(await readFile(source));
     bytes.writeFloatLE(Number.NaN, 0);
     const raw = join(temporary, 'nan.f32le');
@@ -131,7 +144,7 @@ try {
     Object.assign(evidence.rounds[0].fixtures[0].runs[0].raw, { path: raw, sha256: digest(bytes) });
   }));
   cases.push(await rejected('raw tensor contains Infinity', async (_candidate, evidence) => {
-    const source = resolve(root, evidence.rounds[0].fixtures[0].runs[0].raw.path);
+    const source = resolveReplayArtifact(evidence.rounds[0].fixtures[0].runs[0].raw.path);
     const bytes = Buffer.from(await readFile(source));
     bytes.writeFloatLE(Number.POSITIVE_INFINITY, 0);
     const raw = join(temporary, 'infinity.f32le');
@@ -140,7 +153,7 @@ try {
   }));
   cases.push(await rejected('raw tensor byte length drift', async (_candidate, evidence) => {
     const run = evidence.rounds[0].fixtures[0].runs[0];
-    const bytes = Buffer.from(await readFile(resolve(root, run.raw.path))).subarray(0, 1024);
+    const bytes = Buffer.from(await readFile(resolveReplayArtifact(run.raw.path))).subarray(0, 1024);
     const raw = join(temporary, 'truncated.f32le');
     await writeFile(raw, bytes);
     Object.assign(run.raw, { bytes: bytes.length, path: raw, sha256: digest(bytes) });
@@ -150,7 +163,7 @@ try {
   }));
   cases.push(await rejected('finite raw value exceeds frozen tolerance despite forged pass flags', async (_candidate, evidence) => {
     const run = evidence.rounds[0].fixtures[0].runs[0];
-    const bytes = Buffer.from(await readFile(resolve(root, run.raw.path)));
+    const bytes = Buffer.from(await readFile(resolveReplayArtifact(run.raw.path)));
     bytes.writeFloatLE(bytes.readFloatLE(0) + 1, 0);
     const raw = join(temporary, 'finite-tamper.f32le');
     await writeFile(raw, bytes);
@@ -160,7 +173,7 @@ try {
   }));
   cases.push(await rejected('synchronized finite raw tamper across every round and repeat', async (_candidate, evidence) => {
     const first = evidence.rounds[0].fixtures[0].runs[0];
-    const bytes = Buffer.from(await readFile(resolve(root, first.raw.path)));
+    const bytes = Buffer.from(await readFile(resolveReplayArtifact(first.raw.path)));
     bytes.writeFloatLE(bytes.readFloatLE(0) + 1, 0);
     const raw = join(temporary, 'finite-tamper-all-runs.f32le');
     await writeFile(raw, bytes);
@@ -242,6 +255,25 @@ try {
   }
 } finally {
   await rm(symlinkRoot, { recursive: true, force: true });
+}
+
+const profileSymlinkRoot = await mkdtemp(join(tmpdir(), 'rimeflow-openvino-profile-escape-'));
+try {
+  const workspace = join(profileSymlinkRoot, '.evidence/openvino/replay-final');
+  const round = join(workspace, 'round-1');
+  const outside = join(profileSymlinkRoot, 'outside-profile.json');
+  await mkdir(round, { recursive: true });
+  await writeFile(outside, '[]\n');
+  await symlink(outside, join(round, 'ort-profile.node-events.json'));
+  try {
+    await resolveTrustedOpenvinoProfilePath(profileSymlinkRoot, '.evidence/openvino/replay-final', report.rounds[0].profile, 1);
+    throw new Error('OpenVINO negative case unexpectedly passed: profile symlink escape');
+  } catch (error) {
+    if (String(error).includes('unexpectedly passed')) throw error;
+    cases.push('profile symlink escape');
+  }
+} finally {
+  await rm(profileSymlinkRoot, { recursive: true, force: true });
 }
 
 const transaction = spawnSync(

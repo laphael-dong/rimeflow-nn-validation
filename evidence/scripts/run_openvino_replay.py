@@ -30,6 +30,7 @@ TRACKED = {
     "report": "evidence/reports/openvino-ep-report.json",
 }
 TRANSACTION_DIRECTORY = ".evidence/openvino/transaction"
+PROFILE_NORMALIZATION = "openvino-profile-node-events-v1: retain only Node event name and provider in source order"
 WHEELS = [
     ("flatbuffers", "25.12.19", "flatbuffers-25.12.19-py2.py3-none-any.whl", "7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4", "Apache-2.0", "https://files.pythonhosted.org/packages/e8/2d/d2a548598be01649e2d46231d151a6c56d10b964d94043a335ae56ea2d92/flatbuffers-25.12.19-py2.py3-none-any.whl"),
     ("mpmath", "1.3.0", "mpmath-1.3.0-py3-none-any.whl", "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c", "BSD-3-Clause", "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c9c4b49b8ee9ac9850d6e63b03c9c32c0367a13ae62209/mpmath-1.3.0-py3-none-any.whl"),
@@ -309,7 +310,7 @@ def compare_decoded(actual: list[dict[str, object]], expected: list[dict[str, ob
     return {"actualCount": len(actual), "comparisons": comparisons, "expectedCount": len(expected), "passed": len(actual) == len(expected) and all(item["passed"] for item in comparisons)}
 
 
-def profile_evidence(profile_path: Path) -> dict[str, object]:
+def profile_evidence(profile_path: Path, round_number: int) -> dict[str, object]:
     events = json.loads(profile_path.read_text())
     nodes = [event for event in events if event.get("cat") == "Node"]
     execution_counts = {"CPUExecutionProvider": 0, "OpenVINOExecutionProvider": 0, "unknown": 0}
@@ -325,11 +326,19 @@ def profile_evidence(profile_path: Path) -> dict[str, object]:
     execution_plan = "unknown"
     if unique_counts["OpenVINOExecutionProvider"] > 0:
         execution_plan = "partitioned" if unique_counts["CPUExecutionProvider"] > 0 else "full"
+    normalized_events = [
+        {"args": {"provider": event["provider"]}, "cat": "Node", "name": event["name"]}
+        for event in normalized
+    ]
+    normalized_path = profile_path.with_name("ort-profile.node-events.json")
+    normalized_path.write_bytes(stable_bytes(normalized_events))
     return {
-        **artifact(profile_path, str(profile_path)),
+        **artifact(normalized_path, f"$OPENVINO_WORKSPACE/round-{round_number}/ort-profile.node-events.json"),
         "executionEventCounts": execution_counts,
         "executionPlan": execution_plan,
         "nodeEvents": normalized,
+        "normalization": PROFILE_NORMALIZATION,
+        "sourceArtifact": artifact(profile_path, f"$OPENVINO_WORKSPACE/round-{round_number}/ort-profile.raw.json"),
         "uniqueNodeCounts": unique_counts,
     }
 
@@ -501,9 +510,11 @@ def main() -> int:
             if not deterministic:
                 raise RuntimeError(f"{fixture_id}: same-round determinism failed")
             fixtures.append({"canonicalInput": artifact(canonical_path), "deterministic": deterministic, "id": fixture_id, "runs": runs})
-        profile_path = Path(session.end_profiling())
+        generated_profile_path = Path(session.end_profiling())
+        profile_path = round_root / "ort-profile.raw.json"
+        generated_profile_path.replace(profile_path)
         ended = utc_now()
-        profile = profile_evidence(profile_path)
+        profile = profile_evidence(profile_path, round_number)
         if profile["uniqueNodeCounts"]["OpenVINOExecutionProvider"] < 1:
             raise RuntimeError("profile contains no OpenVINO graph node")
         rounds.append({
@@ -539,6 +550,14 @@ def main() -> int:
         "toolchain": {"environmentCreationCommand": ["python3", "-m", "venv", ".evidence/openvino/venv"], "install": install, "lock": artifact(lock, "evidence/tooling/openvino-requirements.lock"), "pipCheck": pip_check, "pythonVersionCommand": version_output, "wheels": wheels},
         "usageScope": {"cache": "ignored .evidence/openvino only", "licenseAndRedistribution": "ONNX Runtime wheel is MIT and includes third-party notices; bundled OpenVINO runtime is Apache-2.0 with bundled notices. Preserve notices when redistributing. This spike does not redistribute the runtime or model.", "modelLicenseMetadata": "AGPL-3.0 License (https://ultralytics.com/license)", "productPackaging": "excluded", "rawTensorPublication": "prohibited", "runtimePublication": "prohibited"},
     }
+    recorded_rounds = json.loads(json.dumps(rounds))
+    for round_data in recorded_rounds:
+        source_artifact = round_data["profile"].pop("sourceArtifact")
+        round_data["profile"]["recordedSourceArtifact"] = {
+            "bytes": source_artifact["bytes"],
+            "retained": False,
+            "sha256": source_artifact["sha256"],
+        }
     report = {
         "executionPlan": rounds[0]["profile"]["executionPlan"],
         "host": host_identity(),
@@ -552,7 +571,7 @@ def main() -> int:
             "platformSpecificImplementationAdded": False,
         },
         "recordDigest": semantic_digest(rounds),
-        "rounds": rounds,
+        "rounds": recorded_rounds,
         "schemaVersion": 1,
         "status": manifest["status"],
         "tolerances": frozen["tolerances"],

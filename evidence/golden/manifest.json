@@ -154,8 +154,8 @@
     },
     {
       "path": "evidence/reports/openvino-ep-report.json",
-      "bytes": 132379,
-      "sha256": "b016e9365d740779b9748fec2f071bdc64a01b194a2b2e083a1ed5a4a5351767"
+      "bytes": 132851,
+      "sha256": "a94f3ae7c3bdc8e7b5c89a75ee97695a9efab5c6c8f4821f7eff9a1beacb4f56"
     },
     {
       "path": "evidence/reports/cuda-ep-spike-report.json",
@@ -329,8 +329,8 @@
     },
     {
       "path": "evidence/scripts/openvino_evidence_validation.mjs",
-      "bytes": 37663,
-      "sha256": "9e7a04757150519d092a44f974308d4868acbc2122942df7ce38985e5c6df586"
+      "bytes": 43108,
+      "sha256": "bb5c00d56c6dd78f553db64fb06c12d50d716d4294970c4b10c676adb6f8555b"
     },
     {
       "path": "evidence/scripts/openvino_durable_publication.py",
@@ -349,8 +349,8 @@
     },
     {
       "path": "evidence/scripts/run_openvino_replay.py",
-      "bytes": 32168,
-      "sha256": "b0eddf9902731f50461b84e5041a14b28c5150f8ad86cf5ec2e86100a8055eb1"
+      "bytes": 33323,
+      "sha256": "b9fe828e60e89ce1859b4e07b1e77bb5f6c3435512af74216a10440e22c2a4d2"
     },
     {
       "path": "evidence/scripts/run_conversion_spikes.mjs",
@@ -364,8 +364,8 @@
     },
     {
       "path": "evidence/scripts/test_openvino_replay_guards.mjs",
-      "bytes": 17155,
-      "sha256": "9f5963ada596adc60d7860d6fc735389b5870640cc96431b3237e493b2eebe80"
+      "bytes": 18977,
+      "sha256": "756cd0d5a7cc14cf819ce2ce8952c8b2a36ea3f265dd8a15ea44e833bfb7485b"
     },
     {
       "path": "evidence/scripts/test_openvino_rust_identity_guards.mjs",
@@ -464,8 +464,8 @@
     },
     {
       "path": "evidence/scripts/test_task14_publication_negative.mjs",
-      "bytes": 13099,
-      "sha256": "a79369c3fe6fe90744ca10175c3a5f4c4cf12bdc8e520f4ac82d265ab0bc886a"
+      "bytes": 13585,
+      "sha256": "7dd9690ecd358bf5a84d8acfbd1f87ff1a51a78ee44d52bb1781f670df65f93a"
     },
     {
       "path": "evidence/tensorrt/contract.json",
@@ -479,8 +479,8 @@
     },
     {
       "path": "evidence/scripts/test_validator_negative.mjs",
-      "bytes": 31150,
-      "sha256": "c53d27a2a0218354fad85c4cac905182013026457ffe8f9930c2db07cad89910"
+      "bytes": 31229,
+      "sha256": "b80025e07e50d2ec48cc8ddad1217daccc56f9a61edf05019593bb9bcc613491"
     },
     {
       "path": "evidence/scripts/test_windows_ml_runner_guards.mjs",

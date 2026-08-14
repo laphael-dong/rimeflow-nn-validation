@@ -25,6 +25,8 @@ const fail = (message) => { throw new Error(`OpenVINO evidence: ${message}`); };
 const nearlyEqual = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) <= Number.EPSILON * Math.max(1, Math.abs(left), Math.abs(right)) * 8;
 const OPENVINO_VENV_TOKEN = '$OPENVINO_VENV/';
 const OPENVINO_CAPI_RELATIVE = 'lib/python3.12/site-packages/onnxruntime/capi';
+const OPENVINO_WORKSPACE_TOKEN = '$OPENVINO_WORKSPACE/';
+const OPENVINO_PROFILE_NORMALIZATION = 'openvino-profile-node-events-v1: retain only Node event name and provider in source order';
 
 export async function resolveTrustedOpenvinoLibraryPath(root, library) {
   const expectedRelative = `${OPENVINO_CAPI_RELATIVE}/${library.name}`;
@@ -42,6 +44,31 @@ export async function resolveTrustedOpenvinoLibraryPath(root, library) {
   const canonical = await realpath(candidate).catch(() => fail(`OpenVINO library is unavailable: ${library.name}`));
   if (!canonical.startsWith(`${venvRoot}${sep}`) || dirname(canonical) !== canonicalCapi || basename(canonical) !== library.name) fail(`OpenVINO library symlink/path containment failed: ${library.name}`);
   return canonical;
+}
+
+export async function resolveTrustedOpenvinoProfilePath(root, workspace, profile, round, source = false) {
+  if (typeof workspace !== 'string' || isAbsolute(workspace) || workspace.includes('\\') || normalize(workspace) !== workspace) fail('invalid OpenVINO replay workspace');
+  const workspaceParts = workspace.split('/');
+  if (workspaceParts.length !== 3 || workspaceParts[0] !== '.evidence' || workspaceParts[1] !== 'openvino' || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(workspaceParts[2])) fail('OpenVINO replay workspace must be one direct child of .evidence/openvino');
+  if (![1, 2].includes(round)) fail(`invalid OpenVINO profile round: ${round}`);
+  const filename = source ? 'ort-profile.raw.json' : 'ort-profile.node-events.json';
+  const expectedRelative = `round-${round}/${filename}`;
+  const artifact = source ? profile.sourceArtifact : profile;
+  if (artifact?.path !== `${OPENVINO_WORKSPACE_TOKEN}${expectedRelative}`) fail(`round ${round} ${source ? 'raw ' : ''}profile path token drift`);
+
+  const repository = await realpath(root);
+  const expectedWorkspace = resolve(repository, workspace);
+  if (relative(repository, expectedWorkspace) !== workspace) fail('OpenVINO replay workspace containment failed');
+  const canonicalWorkspace = await realpath(expectedWorkspace).catch(() => fail('canonical OpenVINO replay workspace is unavailable'));
+  if (canonicalWorkspace !== expectedWorkspace || !canonicalWorkspace.startsWith(`${repository}${sep}`)) fail('OpenVINO replay workspace symlink/path escape');
+  const candidate = resolve(canonicalWorkspace, expectedRelative);
+  if (relative(canonicalWorkspace, candidate) !== expectedRelative) fail(`round ${round} profile containment failed`);
+  const [canonicalProfile, metadata] = await Promise.all([
+    realpath(candidate).catch(() => fail(`round ${round} ${source ? 'raw ' : ''}profile is unavailable`)),
+    lstat(candidate).catch(() => fail(`round ${round} ${source ? 'raw ' : ''}profile is unavailable`)),
+  ]);
+  if (canonicalProfile !== candidate || !metadata.isFile() || metadata.isSymbolicLink() || !canonicalProfile.startsWith(`${canonicalWorkspace}${sep}`)) fail(`round ${round} profile symlink/path escape`);
+  return canonicalProfile;
 }
 
 function checkedSpawn(command, args, options, label) {
@@ -467,11 +494,43 @@ function profileFacts(events) {
   return { counts, executionPlan, uniqueCounts };
 }
 
+function normalizedProfileEvents(nodeEvents) {
+  if (!Array.isArray(nodeEvents)) fail('profile nodeEvents are unavailable');
+  return nodeEvents.map((event) => ({ args: { provider: event.provider }, cat: 'Node', name: event.name }));
+}
+
+function stableProfileBytes(nodeEvents) {
+  return Buffer.from(`${JSON.stringify(canonical(normalizedProfileEvents(nodeEvents)), null, 2)}\n`);
+}
+
+function validateNormalizedProfile(profile, profileBytes, round) {
+  if (profile.normalization !== OPENVINO_PROFILE_NORMALIZATION) fail(`round ${round} profile normalization drift`);
+  const expectedBytes = stableProfileBytes(profile.nodeEvents);
+  if (!profileBytes.equals(expectedBytes) || profileBytes.length !== profile.bytes || sha256(profileBytes) !== profile.sha256) fail(`round ${round} deterministic profile identity`);
+  const events = JSON.parse(profileBytes);
+  const facts = profileFacts(events);
+  if (!same(facts.counts, profile.executionEventCounts) || !same(facts.uniqueCounts, profile.uniqueNodeCounts) || facts.executionPlan !== profile.executionPlan || facts.uniqueCounts.OpenVINOExecutionProvider < 1) fail(`round ${round} real profile provider counts`);
+  return { events, facts };
+}
+
+async function resolveRecordedOpenvinoDataPath(root, path) {
+  const legacyPrefix = '.evidence/openvino/record-fix03-final/';
+  if (typeof path !== 'string' || !path.startsWith(legacyPrefix)) return resolve(root, path);
+  const relativePath = path.slice(legacyPrefix.length);
+  if (!/^round-[12]\/(?:raw\/[a-z-]+-[12]\.f32le|web-reference\/[a-z-]+\/raw\.f32le)$/.test(relativePath)) fail(`invalid recorded OpenVINO data path: ${path}`);
+  const workspace = await realpath(resolve(root, '.evidence/openvino/replay-final')).catch(() => fail('canonical OpenVINO replay workspace is unavailable'));
+  const candidate = resolve(workspace, relativePath);
+  if (relative(workspace, candidate) !== relativePath) fail(`recorded OpenVINO data containment failed: ${path}`);
+  const canonicalPath = await realpath(candidate).catch(() => fail(`replayed OpenVINO data is unavailable: ${relativePath}`));
+  if (canonicalPath !== candidate || !canonicalPath.startsWith(`${workspace}${sep}`)) fail(`replayed OpenVINO data symlink/path escape: ${relativePath}`);
+  return canonicalPath;
+}
+
 async function validateRaw(root, raw, fixture, frozenFixture, tolerances, temporary, rustRunner) {
-  const rawPath = resolve(root, raw.raw.path);
+  const rawPath = await resolveRecordedOpenvinoDataPath(root, raw.raw.path);
   const actualBytes = await readFile(rawPath);
   const referenceArtifact = raw.rawComparison.reference;
-  const referencePath = resolve(root, referenceArtifact.path);
+  const referencePath = await resolveRecordedOpenvinoDataPath(root, referenceArtifact.path);
   const referenceBytes = await readFile(referencePath);
   const expectedReferenceDigest = frozenFixture.runs[0].rawTensor.sha256Float32Le;
   const expectedMetadata = { dtype: 'float32', elementCount: OUTPUT.elementCount, shape: OUTPUT.shape };
@@ -533,11 +592,11 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
     verifyRecordedProductionPostprocess(report.productionPostprocess, trustedRust, 'record');
     for (const round of report.rounds) {
       if (!round.availableProviders.includes('OpenVINOExecutionProvider') || round.sessionProviders[0] !== 'OpenVINOExecutionProvider' || !same(round.inputs, [INPUT]) || !same(round.outputs, [OUTPUT])) fail(`round ${round.round} provider/I/O`);
-      const profilePath = resolve(round.profile.path);
+      if (round.profile.sourceArtifact !== undefined) fail(`round ${round.round} tracked report must not claim a retained raw profile`);
+      if (!Number.isInteger(round.profile.recordedSourceArtifact?.bytes) || round.profile.recordedSourceArtifact.bytes < 1 || !/^[0-9a-f]{64}$/.test(round.profile.recordedSourceArtifact?.sha256 ?? '') || round.profile.recordedSourceArtifact.retained !== false || round.profile.recordedSourceArtifact.path !== undefined) fail(`round ${round.round} historical raw profile identity`);
+      const profilePath = await resolveTrustedOpenvinoProfilePath(root, '.evidence/openvino/replay-final', round.profile, round.round);
       const profileBytes = await readFile(profilePath);
-      if (profileBytes.length !== round.profile.bytes || sha256(profileBytes) !== round.profile.sha256) fail(`round ${round.round} real profile identity`);
-      const facts = profileFacts(JSON.parse(profileBytes));
-      if (!same(facts.counts, round.profile.executionEventCounts) || !same(facts.uniqueCounts, round.profile.uniqueNodeCounts) || facts.executionPlan !== round.profile.executionPlan || facts.uniqueCounts.OpenVINOExecutionProvider < 1) fail(`round ${round.round} real profile provider counts`);
+      validateNormalizedProfile(round.profile, profileBytes, round.round);
       if (round.fixtures.length !== 5) fail(`round ${round.round} fixture count`);
       for (const item of round.fixtures) {
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
@@ -561,7 +620,7 @@ export async function validateOpenvinoEvidence(root, manifest, report, frozen, f
   return { executionPlan: report.executionPlan, fixtureCount: 5, profileOpenvinoNodes: report.rounds[0].profile.uniqueNodeCounts.OpenVINOExecutionProvider, profileCpuNodes: report.rounds[0].profile.uniqueNodeCounts.CPUExecutionProvider };
 }
 
-export async function validateOpenvinoReplayEvidence(root, replay, manifest, report) {
+export async function validateOpenvinoReplayEvidence(root, replay, manifest, report, workspace = '.evidence/openvino/replay-final') {
   if (replay.schemaVersion !== 1 || replay.mode !== 'replay' || replay.recordDigest !== report.recordDigest || replay.rounds.length !== 2) fail('ordinary replay identity');
   for (const [key, path] of Object.entries({ manifest: 'evidence/conversions/openvino-ep-manifest.json', report: 'evidence/reports/openvino-ep-report.json' })) {
     const absolute = resolve(root, path);
@@ -580,10 +639,17 @@ export async function validateOpenvinoReplayEvidence(root, replay, manifest, rep
     verifyRecordedProductionPostprocess(report.productionPostprocess, trustedRust, 'ordinary replay record');
     if (!same(replay.productionPostprocess, report.productionPostprocess)) fail('ordinary replay production postprocess provenance drift');
     for (const round of replay.rounds) {
-      const profileBytes = await readFile(resolve(round.profile.path));
-      if (profileBytes.length !== round.profile.bytes || sha256(profileBytes) !== round.profile.sha256) fail(`ordinary replay round ${round.round} profile identity`);
-      const facts = profileFacts(JSON.parse(profileBytes));
-      if (!same(facts.counts, round.profile.executionEventCounts) || !same(facts.uniqueCounts, round.profile.uniqueNodeCounts) || facts.uniqueCounts.OpenVINOExecutionProvider < 1 || facts.executionPlan !== round.profile.executionPlan) fail(`ordinary replay round ${round.round} profile`);
+      const [profilePath, sourcePath] = await Promise.all([
+        resolveTrustedOpenvinoProfilePath(root, workspace, round.profile, round.round),
+        resolveTrustedOpenvinoProfilePath(root, workspace, round.profile, round.round, true),
+      ]);
+      const [profileBytes, sourceBytes] = await Promise.all([readFile(profilePath), readFile(sourcePath)]);
+      const normalized = validateNormalizedProfile(round.profile, profileBytes, round.round);
+      if (sourceBytes.length !== round.profile.sourceArtifact.bytes || sha256(sourceBytes) !== round.profile.sourceArtifact.sha256) fail(`ordinary replay round ${round.round} raw profile identity`);
+      const sourceEvents = JSON.parse(sourceBytes);
+      const sourceFacts = profileFacts(sourceEvents);
+      const sourceNodeEvents = sourceEvents.filter((event) => event.cat === 'Node').map((event) => ({ name: event.name, provider: event.args?.provider }));
+      if (!same(sourceFacts, normalized.facts) || !same(sourceNodeEvents, round.profile.nodeEvents)) fail(`ordinary replay round ${round.round} raw/normalized profile drift`);
       if (!round.availableProviders.includes('OpenVINOExecutionProvider') || round.sessionProviders[0] !== 'OpenVINOExecutionProvider' || !same(round.inputs, [INPUT]) || !same(round.outputs, [OUTPUT]) || round.fixtures.length !== 5) fail(`ordinary replay round ${round.round} provider/I/O`);
       for (const item of round.fixtures) {
         const fixture = fixtures.images.find((candidate) => candidate.id === item.id);
