@@ -10,6 +10,7 @@ import { recoverOpenvinoPublication, validateOpenvinoEvidence, validateOpenvinoR
 import { validateCudaEvidence, validateCudaReplay, validateCudaRepositoryBoundary } from './cuda_evidence_validation.mjs';
 import { validateTensorRtReport } from './validate_tensorrt_ep.mjs';
 import { validateTask14Aggregate } from './aggregate_evidence_validation.mjs';
+import { buildReport as buildPlatformConformanceReport, validateReport as validatePlatformConformanceReport } from './platform_conformance.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 recoverOpenvinoPublication(root);
 const readJson = async (path) => JSON.parse(await readFile(resolve(root, path), 'utf8'));
@@ -20,6 +21,13 @@ const schema = await readJson('evidence/schemas/model-contract.schema.json');
 const ajv = new Ajv({ allErrors: true, strict: false });
 const validateContract = ajv.compile(schema);
 if (!validateContract(contract)) fail(`model-contract JSON Schema: ${JSON.stringify(validateContract.errors)}`);
+const platformConformanceSchema = await readJson('evidence/schemas/platform-conformance-report.schema.json');
+const validatePlatformConformanceSchema = ajv.compile(platformConformanceSchema);
+const platformConformance = await readJson('evidence/reports/platform-conformance-report.json');
+if (!validatePlatformConformanceSchema(platformConformance)) fail(`platform conformance JSON Schema: ${JSON.stringify(validatePlatformConformanceSchema.errors)}`);
+validatePlatformConformanceReport(platformConformance);
+const derivedPlatformConformance = await buildPlatformConformanceReport();
+if (JSON.stringify(platformConformance) !== JSON.stringify(derivedPlatformConformance)) fail('platform conformance report is not derived from current frozen evidence');
 for (const mutate of [
   (copy) => { copy.model.output.layout = 'CANDIDATE_MAJOR'; },
   (copy) => { copy.model.output.axes = ['batch', 'anchor', 'attribute']; },

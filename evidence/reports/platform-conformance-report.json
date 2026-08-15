@@ -1,0 +1,641 @@
+{
+  "schemaVersion": 1,
+  "change": "rimeflow-backend-contract",
+  "ownership": "Validation",
+  "baseRuntime": {
+    "commit": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3"
+  },
+  "model": {
+    "path": "models/yolov8n.onnx",
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+  },
+  "postprocess": {
+    "owner": "src/postprocess.rs",
+    "decode": "operator",
+    "nms": "operator"
+  },
+  "evidenceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+  "platforms": [
+    {
+      "id": "apple-coreml",
+      "section": "6.2",
+      "status": "artifact-spec-verified",
+      "supported": false,
+      "runner": {
+        "identity": null,
+        "os": "macos-or-ios",
+        "arch": "arm64",
+        "availability": "required-not-recorded",
+        "scope": "target-runner"
+      },
+      "sdkRuntime": {
+        "coreml": "CoreML5",
+        "minimumMacos": "12.0",
+        "minimumIos": "15.0"
+      },
+      "converter": {
+        "name": "coremltools",
+        "version": "9.0",
+        "path": "Ultralytics YOLO.export(format='coreml') -> torch.jit.trace -> coremltools.convert(convert_to='mlprogram')"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "Core ML ML Program .mlpackage",
+        "digest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NCHW",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "blocked",
+          "reason": "No real macOS or iOS Core ML runner has loaded the package.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "golden": {
+          "outcome": "blocked",
+          "reason": "No real macOS or iOS Core ML runner has produced golden comparisons.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "fault": {
+          "outcome": "blocked",
+          "reason": "No target Core ML fault-injection run is recorded.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Spec inspection and two-round semantic replay are recorded.",
+          "evidence": [
+            "evidence/reports/coreml-conversion-report.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "blocked",
+          "reason": "Package inspection is not a macOS/iOS Core ML Load/Run result.",
+          "evidence": [
+            "evidence/conversions/coreml-artifact-manifest.json"
+          ]
+        }
+      },
+      "blockers": [
+        "Missing real macOS/iOS Core ML Load/Run runner and target package-load, timeout, fault, golden, and performance evidence."
+      ]
+    },
+    {
+      "id": "android-litert-v2",
+      "section": "6.3",
+      "status": "host-inference-verified",
+      "supported": false,
+      "runner": {
+        "identity": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+        "os": "linux",
+        "arch": "x64",
+        "availability": "recorded",
+        "scope": "evidence-host"
+      },
+      "sdkRuntime": {
+        "runtime": "ai-edge-litert Interpreter",
+        "version": "2.1.6",
+        "targetRunner": "required Android arm64 LiteRT v2 runner"
+      },
+      "converter": {
+        "name": "litert-torch/litert-converter",
+        "version": "0.3.1",
+        "path": "official Ultralytics YOLO.export(format='litert') -> litert-torch -> litert-converter -> TFLite"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+        "digest": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NCHW",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "passed",
+          "reason": "Linux x64 host interpreter replay ran all five image fixtures.",
+          "evidence": [
+            "evidence/reports/litert-conversion-report.json"
+          ]
+        },
+        "golden": {
+          "outcome": "passed",
+          "reason": "Five-fixture frozen golden comparison passed deterministically on the recorded host.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "fault": {
+          "outcome": "blocked",
+          "reason": "No Android runner fault-injection result is recorded.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Two-round conversion and I/O metadata comparison are recorded.",
+          "evidence": [
+            "evidence/reports/litert-conversion-report.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/conversions/litert-artifact-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "passed",
+          "reason": "Recorded Linux host interpreter loaded the TFLite candidate; this does not establish Android package loading.",
+          "evidence": [
+            "evidence/reports/litert-conversion-report.json"
+          ]
+        }
+      },
+      "blockers": [
+        "Missing Android arm64 LiteRT v2 runner, its timeout/fault/performance evidence, and Android package-load evidence."
+      ]
+    },
+    {
+      "id": "windows-ml-x64",
+      "section": "6.4",
+      "status": "build-verified",
+      "supported": false,
+      "runner": {
+        "identity": null,
+        "os": "windows",
+        "arch": "x64",
+        "availability": "required-not-recorded",
+        "scope": "target-runner"
+      },
+      "sdkRuntime": {
+        "dotnetSdk": "8.0.423",
+        "dotnetRuntime": "8.0.29",
+        "windowsMl": "2.1.74"
+      },
+      "converter": {
+        "name": "none",
+        "version": "canonical ONNX is consumed directly",
+        "path": "no conversion"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "ONNX",
+        "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NCHW",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "blocked",
+          "reason": "No real win-x64 Windows ML Load/Run runner is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "golden": {
+          "outcome": "blocked",
+          "reason": "No real win-x64 Windows ML golden output is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "fault": {
+          "outcome": "passed",
+          "reason": "Runner lifecycle defines failure stages and static compile guards exercise the contract.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json",
+            "evidence/scripts/test_windows_ml_runner_guards.mjs"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Static compile report and Windows ML runtime-introspection contract are recorded.",
+          "evidence": [
+            "evidence/reports/windows-ml-static-compile-report.json",
+            "evidence/reports/windows-ml-spike-report.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "blocked",
+          "reason": "No real win-x64 Windows ML package-load result is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        }
+      },
+      "blockers": [
+        "没有真实 Windows x64 runner 报告；Linux 只能 restore/静态编译，不能执行 Windows ML Load/Run、runtime introspection 或 golden。"
+      ]
+    },
+    {
+      "id": "windows-ml-arm64",
+      "section": "6.4",
+      "status": "build-verified",
+      "supported": false,
+      "runner": {
+        "identity": null,
+        "os": "windows",
+        "arch": "arm64",
+        "availability": "required-not-recorded",
+        "scope": "target-runner"
+      },
+      "sdkRuntime": {
+        "dotnetSdk": "8.0.423",
+        "dotnetRuntime": "8.0.29",
+        "windowsMl": "2.1.74"
+      },
+      "converter": {
+        "name": "none",
+        "version": "canonical ONNX is consumed directly",
+        "path": "no conversion"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "ONNX",
+        "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NCHW",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "blocked",
+          "reason": "No real win-arm64 Windows ML Load/Run runner is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "golden": {
+          "outcome": "blocked",
+          "reason": "No real win-arm64 Windows ML golden output is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "fault": {
+          "outcome": "passed",
+          "reason": "Runner lifecycle defines failure stages and static compile guards exercise the contract.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json",
+            "evidence/scripts/test_windows_ml_runner_guards.mjs"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Static compile report and Windows ML runtime-introspection contract are recorded.",
+          "evidence": [
+            "evidence/reports/windows-ml-static-compile-report.json",
+            "evidence/reports/windows-ml-spike-report.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "blocked",
+          "reason": "No real win-arm64 Windows ML package-load result is recorded.",
+          "evidence": [
+            "evidence/conversions/windows-ml-spike-manifest.json"
+          ]
+        }
+      },
+      "blockers": [
+        "没有真实 Windows ARM64 runner 报告；x64、ARM64EC、模拟器和交叉 publish 均不能替代 ARM64 Windows ML Load/Run、runtime introspection 或 golden。"
+      ]
+    },
+    {
+      "id": "linux-ort-x64",
+      "section": "6.5",
+      "status": "host-inference-verified",
+      "supported": false,
+      "runner": {
+        "identity": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+        "os": "linux",
+        "arch": "x64",
+        "availability": "recorded",
+        "scope": "target-runner"
+      },
+      "sdkRuntime": {
+        "runtime": "onnxruntime-node-native",
+        "evidenceRuntime": "onnxruntime-web/onnxruntime-node validation harness"
+      },
+      "converter": {
+        "name": "none",
+        "version": "canonical ONNX is consumed directly",
+        "path": "no conversion"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "ONNX",
+        "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NCHW",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/manifest/validation-runtime-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/manifest/validation-runtime-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/manifest/validation-runtime-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "passed",
+          "reason": "Native ORT completed three runs for every frozen image fixture.",
+          "evidence": [
+            "evidence/reports/validation-manifest-golden-report.json"
+          ]
+        },
+        "golden": {
+          "outcome": "passed",
+          "reason": "Native ORT raw and decoded outputs matched the frozen Web baseline.",
+          "evidence": [
+            "evidence/reports/validation-manifest-golden-report.json"
+          ]
+        },
+        "fault": {
+          "outcome": "passed",
+          "reason": "Validation matrix includes rejection coverage for invalid I/O, roles, tolerance, and ownership.",
+          "evidence": [
+            "evidence/reports/validation-manifest-golden-report.json"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Per-fixture raw summaries and production postprocess identity are recorded.",
+          "evidence": [
+            "evidence/reports/validation-manifest-golden-report.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/manifest/validation-runtime-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "passed",
+          "reason": "The native ONNX Runtime session loaded the canonical ONNX model.",
+          "evidence": [
+            "evidence/reports/validation-manifest-golden-report.json"
+          ]
+        }
+      },
+      "blockers": [
+        "Adapter, target package, timeout, and performance closure are outside this Validation evidence; supported remains false."
+      ]
+    },
+    {
+      "id": "harmonyos-mindspore-lite",
+      "section": "6.6",
+      "status": "host-inference-verified",
+      "supported": false,
+      "runner": {
+        "identity": "raffael-HP-EliteBook-845-14-inch-G11-Notebook-PC",
+        "os": "linux",
+        "arch": "x64",
+        "availability": "recorded",
+        "scope": "evidence-host"
+      },
+      "sdkRuntime": {
+        "runtime": "MindSpore Lite",
+        "version": "2.7.0",
+        "targetRunner": "required HarmonyOS device runner"
+      },
+      "converter": {
+        "name": "MindSpore Lite converter",
+        "version": "2.7.0",
+        "path": ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite"
+      },
+      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "artifact": {
+        "format": "MindIR Lite / MINDIR_LITE FlatBuffer (.ms)",
+        "digest": "7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5"
+      },
+      "io": {
+        "inputRole": "image",
+        "inputLayout": "NHWC",
+        "outputRole": "detections",
+        "outputLayout": "N_ATTRIBUTES_ANCHORS",
+        "nmsFused": false
+      },
+      "checks": {
+        "artifactManifest": {
+          "outcome": "passed",
+          "reason": "Tracked artifact manifest identifies the candidate and digest.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "logicalIo": {
+          "outcome": "passed",
+          "reason": "Logical image/detections roles and non-fused NMS are explicit.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "timeout": {
+          "outcome": "blocked",
+          "reason": "No target-runner timeout evidence is recorded; this field cannot be inferred from host replay.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "smoke": {
+          "outcome": "passed",
+          "reason": "Official benchmark and C++ runtime loaded and ran five fixtures on recorded Linux x64 host.",
+          "evidence": [
+            "evidence/reports/mindspore-golden-report.json"
+          ]
+        },
+        "golden": {
+          "outcome": "passed",
+          "reason": "Five fixture outputs passed the frozen golden and production postprocess checks.",
+          "evidence": [
+            "evidence/reports/mindspore-golden-report.json"
+          ]
+        },
+        "fault": {
+          "outcome": "passed",
+          "reason": "Conversion matrix records expected failure signatures for unsupported source paths.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "diagnostics": {
+          "outcome": "passed",
+          "reason": "Converter archive, binary, derived ONNX, and runtime I/O evidence are recorded.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "performance": {
+          "outcome": "blocked",
+          "reason": "No target-platform performance sample is recorded in Validation evidence.",
+          "evidence": [
+            "evidence/conversions/mindspore-artifact-manifest.json"
+          ]
+        },
+        "packageLoad": {
+          "outcome": "passed",
+          "reason": "The official C++ MindSpore Lite runtime loaded the recorded .ms artifact on Linux x64.",
+          "evidence": [
+            "evidence/reports/mindspore-golden-report.json"
+          ]
+        }
+      },
+      "blockers": [
+        "Missing HarmonyOS device runner and target timeout/performance/package evidence; host evidence does not establish HarmonyOS support."
+      ]
+    }
+  ]
+}

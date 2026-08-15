@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rimeflow.dev/schemas/platform-conformance-report/v1.json",
+  "title": "Rimeflow platform conformance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "change", "ownership", "baseRuntime", "model", "postprocess", "evidenceCommit", "platforms"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "change": { "const": "rimeflow-backend-contract" },
+    "ownership": { "const": "Validation" },
+    "baseRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit"],
+      "properties": { "commit": { "const": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3" } }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "const": "models/yolov8n.onnx" },
+        "sha256": { "const": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad" }
+      }
+    },
+    "evidenceCommit": { "const": "ef483004c57a48d8373171018f8b0ada8fb590d9" },
+    "postprocess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "decode", "nms"],
+      "properties": {
+        "owner": { "const": "src/postprocess.rs" },
+        "decode": { "const": "operator" },
+        "nms": { "const": "operator" }
+      }
+    },
+    "platforms": {
+      "type": "array",
+      "minItems": 6,
+      "items": { "$ref": "#/$defs/platform" }
+    }
+  },
+  "$defs": {
+    "outcome": { "enum": ["passed", "blocked", "not-run", "not-applicable"] },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "reason", "evidence"],
+      "properties": {
+        "outcome": { "$ref": "#/$defs/outcome" },
+        "reason": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "section", "status", "supported", "runner", "sdkRuntime", "converter", "sourceCommit", "artifact", "io", "checks", "blockers"],
+      "properties": {
+        "id": { "type": "string" },
+        "section": { "type": "string" },
+        "status": { "enum": ["artifact-spec-verified", "build-verified", "host-inference-verified", "blocked"] },
+        "supported": { "const": false },
+        "runner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identity", "os", "arch", "availability", "scope"],
+          "properties": {
+            "identity": { "type": ["string", "null"] },
+            "os": { "type": "string" },
+            "arch": { "type": "string" },
+            "availability": { "enum": ["recorded", "required-not-recorded"] },
+            "scope": { "enum": ["evidence-host", "target-runner"] }
+          }
+        },
+        "sdkRuntime": { "type": "object" },
+        "converter": { "type": "object" },
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["format", "digest"],
+          "properties": { "format": { "type": "string" }, "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+        },
+        "io": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inputRole", "inputLayout", "outputRole", "outputLayout", "nmsFused"],
+          "properties": {
+            "inputRole": { "const": "image" },
+            "inputLayout": { "type": "string" },
+            "outputRole": { "const": "detections" },
+            "outputLayout": { "const": "N_ATTRIBUTES_ANCHORS" },
+            "nmsFused": { "const": false }
+          }
+        },
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifactManifest", "logicalIo", "timeout", "smoke", "golden", "fault", "diagnostics", "performance", "packageLoad"],
+          "properties": {
+            "artifactManifest": { "$ref": "#/$defs/check" }, "logicalIo": { "$ref": "#/$defs/check" }, "timeout": { "$ref": "#/$defs/check" },
+            "smoke": { "$ref": "#/$defs/check" }, "golden": { "$ref": "#/$defs/check" }, "fault": { "$ref": "#/$defs/check" },
+            "diagnostics": { "$ref": "#/$defs/check" }, "performance": { "$ref": "#/$defs/check" }, "packageLoad": { "$ref": "#/$defs/check" }
+          }
+        },
+        "blockers": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
