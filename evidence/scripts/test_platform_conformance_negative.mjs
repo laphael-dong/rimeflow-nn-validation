@@ -25,4 +25,6 @@ expectFailure('unsupported platform promoted', (report) => { report.platforms[1]
 expectFailure('Windows runtime promoted without runner', (report) => { report.platforms[2].status = 'host-inference-verified'; });
 expectFailure('logical output role omitted', (report) => { report.platforms[4].io.outputRole = 'unknown'; });
 expectFailure('artifact digest removed', (report) => { report.platforms[5].artifact.digest = ''; });
-process.stdout.write(`${JSON.stringify({ ok: true, negativeCases: 6 })}\n`);
+expectFailure('Base tree drift', (report) => { report.baseRuntime.tree = '0'.repeat(40); });
+expectFailure('Validation implementation commit drift', (report) => { report.validationImplementation.commit = '0'.repeat(40); });
+process.stdout.write(`${JSON.stringify({ ok: true, negativeCases: 8 })}\n`);

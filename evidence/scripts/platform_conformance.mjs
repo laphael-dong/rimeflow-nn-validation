@@ -6,9 +6,19 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const outputPath = 'evidence/reports/platform-conformance-report.json';
-const BASE_COMMIT = '96fcfa0a54a3db1978af5ec38fc3a92132be4ee3';
 const MODEL_SHA = '9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad';
-const EVIDENCE_COMMIT = 'ef483004c57a48d8373171018f8b0ada8fb590d9';
+const BASE_RUNTIME = Object.freeze({
+  repository: 'github/rimeflow-nn-base',
+  ref: 'refs/heads/laphael-dong/os6-base-platform-adapters-integration',
+  commit: '83d330e1717b844d71f9fe2af314e96afa768978',
+  tree: '5faafe63537a69beabe1f4c851f946c69133ffeb',
+});
+const VALIDATION_IMPLEMENTATION = Object.freeze({
+  repository: 'github/rimeflow-nn-validation',
+  commit: '27582f5dbbbf7a33e827a1712e66dfa3c656850d',
+  tree: '08d9ef9ab35b0b8d6b13042840d319de8d9ca390',
+});
+const EVIDENCE_COMMIT = VALIDATION_IMPLEMENTATION.commit;
 
 const stable = (value) => `${JSON.stringify(value, null, 2)}\n`;
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -56,7 +66,6 @@ export async function buildReport() {
   ]);
   const modelBytes = await readFile(resolve(root, 'models/yolov8n.onnx'));
   check(sha256(modelBytes) === MODEL_SHA, 'frozen model digest mismatch');
-  check(runtimeManifest.baseRuntime?.commit === BASE_COMMIT, 'Base runtime identity drift');
   check(runtimeManifest.model?.sha256 === MODEL_SHA, 'runtime manifest model identity drift');
   check(coreml.status?.value === 'artifact-spec-verified' && coreml.status.supported === false, 'Core ML status overclaim');
   check(litert.status?.value === 'host-inference-verified' && litert.status.androidRunnerVerified === false && litert.status.supported === false, 'LiteRT status overclaim');
@@ -72,7 +81,8 @@ export async function buildReport() {
     schemaVersion: 1,
     change: 'rimeflow-backend-contract',
     ownership: 'Validation',
-    baseRuntime: { commit: BASE_COMMIT },
+    baseRuntime: { ...BASE_RUNTIME },
+    validationImplementation: { ...VALIDATION_IMPLEMENTATION },
     model: { path: 'models/yolov8n.onnx', sha256: MODEL_SHA },
     postprocess: { owner: 'src/postprocess.rs', decode: 'operator', nms: 'operator' },
     evidenceCommit: EVIDENCE_COMMIT,
@@ -164,7 +174,18 @@ export async function buildReport() {
 
 export function validateReport(report) {
   check(report.schemaVersion === 1 && report.change === 'rimeflow-backend-contract' && report.ownership === 'Validation', 'report identity drift');
-  check(report.baseRuntime?.commit === BASE_COMMIT && report.model?.sha256 === MODEL_SHA && report.evidenceCommit === EVIDENCE_COMMIT, 'report input identity drift');
+  check(
+    report.baseRuntime?.repository === BASE_RUNTIME.repository
+      && report.baseRuntime.ref === BASE_RUNTIME.ref
+      && report.baseRuntime.commit === BASE_RUNTIME.commit
+      && report.baseRuntime.tree === BASE_RUNTIME.tree
+      && report.validationImplementation?.repository === VALIDATION_IMPLEMENTATION.repository
+      && report.validationImplementation.commit === VALIDATION_IMPLEMENTATION.commit
+      && report.validationImplementation.tree === VALIDATION_IMPLEMENTATION.tree
+      && report.model?.sha256 === MODEL_SHA
+      && report.evidenceCommit === EVIDENCE_COMMIT,
+    'report input identity drift',
+  );
   check(report.postprocess?.owner === 'src/postprocess.rs' && report.postprocess.decode === 'operator' && report.postprocess.nms === 'operator', 'postprocess ownership drift');
   const expected = ['apple-coreml', 'android-litert-v2', 'windows-ml-x64', 'windows-ml-arm64', 'linux-ort-x64', 'harmonyos-mindspore-lite'];
   check(JSON.stringify(report.platforms.map((item) => item.id)) === JSON.stringify(expected), 'platform coverage/order drift');

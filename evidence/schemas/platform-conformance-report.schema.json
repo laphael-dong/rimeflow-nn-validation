@@ -4,7 +4,7 @@
   "title": "Rimeflow platform conformance report",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "change", "ownership", "baseRuntime", "model", "postprocess", "evidenceCommit", "platforms"],
+  "required": ["schemaVersion", "change", "ownership", "baseRuntime", "validationImplementation", "model", "postprocess", "evidenceCommit", "platforms"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "change": { "const": "rimeflow-backend-contract" },
@@ -12,8 +12,23 @@
     "baseRuntime": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["commit"],
-      "properties": { "commit": { "const": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3" } }
+      "required": ["repository", "ref", "commit", "tree"],
+      "properties": {
+        "repository": { "const": "github/rimeflow-nn-base" },
+        "ref": { "const": "refs/heads/laphael-dong/os6-base-platform-adapters-integration" },
+        "commit": { "const": "83d330e1717b844d71f9fe2af314e96afa768978" },
+        "tree": { "const": "5faafe63537a69beabe1f4c851f946c69133ffeb" }
+      }
+    },
+    "validationImplementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "tree"],
+      "properties": {
+        "repository": { "const": "github/rimeflow-nn-validation" },
+        "commit": { "const": "27582f5dbbbf7a33e827a1712e66dfa3c656850d" },
+        "tree": { "const": "08d9ef9ab35b0b8d6b13042840d319de8d9ca390" }
+      }
     },
     "model": {
       "type": "object",
@@ -24,7 +39,7 @@
         "sha256": { "const": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad" }
       }
     },
-    "evidenceCommit": { "const": "ef483004c57a48d8373171018f8b0ada8fb590d9" },
+    "evidenceCommit": { "const": "27582f5dbbbf7a33e827a1712e66dfa3c656850d" },
     "postprocess": {
       "type": "object",
       "additionalProperties": false,

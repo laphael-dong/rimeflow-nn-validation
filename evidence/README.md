@@ -114,7 +114,7 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 ### 平台 conformance 汇总
 
-Validation 维护一份可消费的、版本化平台 conformance 报告：`evidence/schemas/platform-conformance-report.schema.json` 定义 schema，`evidence/reports/platform-conformance-report.json` 是由已冻结转换 manifest、replay 和 validation report 派生出的当前实例。它不新增平台 adapter，也不复制 decode/NMS；所有非融合产物仍由 `src/postprocess.rs` 作为唯一生产后处理所有者。
+Validation 维护一份可消费的、版本化平台 conformance 报告：`evidence/schemas/platform-conformance-report.schema.json` 定义 schema，`evidence/reports/platform-conformance-report.json` 是由已冻结转换 manifest、replay 和 validation report 派生出的当前实例。报告显式锁定已发布的 Base platform-adapters integration ref、commit 与 tree，以及生成该报告的固定 Validation implementation commit/tree；它不新增平台 adapter，也不复制 decode/NMS，所有非融合产物仍由 `src/postprocess.rs` 作为唯一生产后处理所有者。
 
 重新生成并校验该报告：
 

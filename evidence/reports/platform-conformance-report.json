@@ -3,7 +3,15 @@
   "change": "rimeflow-backend-contract",
   "ownership": "Validation",
   "baseRuntime": {
-    "commit": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3"
+    "repository": "github/rimeflow-nn-base",
+    "ref": "refs/heads/laphael-dong/os6-base-platform-adapters-integration",
+    "commit": "83d330e1717b844d71f9fe2af314e96afa768978",
+    "tree": "5faafe63537a69beabe1f4c851f946c69133ffeb"
+  },
+  "validationImplementation": {
+    "repository": "github/rimeflow-nn-validation",
+    "commit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
+    "tree": "08d9ef9ab35b0b8d6b13042840d319de8d9ca390"
   },
   "model": {
     "path": "models/yolov8n.onnx",
@@ -14,7 +22,7 @@
     "decode": "operator",
     "nms": "operator"
   },
-  "evidenceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+  "evidenceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
   "platforms": [
     {
       "id": "apple-coreml",
@@ -38,7 +46,7 @@
         "version": "9.0",
         "path": "Ultralytics YOLO.export(format='coreml') -> torch.jit.trace -> coremltools.convert(convert_to='mlprogram')"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "Core ML ML Program .mlpackage",
         "digest": "299e6218590fb62da49407e334431a43a999a96020bdf52b4ebc04708218fb98"
@@ -141,7 +149,7 @@
         "version": "0.3.1",
         "path": "official Ultralytics YOLO.export(format='litert') -> litert-torch -> litert-converter -> TFLite"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
         "digest": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
@@ -244,7 +252,7 @@
         "version": "canonical ONNX is consumed directly",
         "path": "no conversion"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "ONNX",
         "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
@@ -349,7 +357,7 @@
         "version": "canonical ONNX is consumed directly",
         "path": "no conversion"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "ONNX",
         "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
@@ -453,7 +461,7 @@
         "version": "canonical ONNX is consumed directly",
         "path": "no conversion"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "ONNX",
         "digest": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
@@ -556,7 +564,7 @@
         "version": "2.7.0",
         "path": ".evidence/mindspore/mindspore-lite-2.7.0-linux-x64/tools/converter/converter/converter_lite"
       },
-      "sourceCommit": "ef483004c57a48d8373171018f8b0ada8fb590d9",
+      "sourceCommit": "27582f5dbbbf7a33e827a1712e66dfa3c656850d",
       "artifact": {
         "format": "MindIR Lite / MINDIR_LITE FlatBuffer (.ms)",
         "digest": "7ceeca31471d772c0ccf426b856a2533fcf66735aa3c3c90726c2e459c83e6a5"
