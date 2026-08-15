@@ -4,6 +4,13 @@
   "repository": "github/rimeflow-nn-validation",
   "ownership": "Validation",
   "phase": "2-test-first",
+  "cargoDependencyInput": {
+    "manifestPath": "evidence/tooling/validation-contract/Cargo.toml",
+    "lockPath": "evidence/tooling/validation-contract/Cargo.lock",
+    "configPath": "evidence/tooling/validation-contract/cargo-config.toml",
+    "vendorDirectory": "evidence/tooling/validation-contract/vendor",
+    "policy": "all Cargo.lock registry sources are vendored with Cargo checksum metadata"
+  },
   "originalBaseCommit": "eacbcf00dfc2fba941b494e2955e87fffd707382",
   "phase1DependencyCommit": "c90d3957fbbd04b3f0b29eff7bc873b70eed4400",
   "model": {
@@ -40,7 +47,7 @@
             {
               "testId": "RFB-VAL-IO-001",
               "testFunction": "rfb_val_io_001_layout_and_dtype_preserve_logical_image",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_001_layout_and_dtype_preserve_logical_image -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_001_layout_and_dtype_preserve_logical_image -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-IO-001: target_assertion",
@@ -55,7 +62,7 @@
             {
               "testId": "RFB-VAL-IO-002",
               "testFunction": "rfb_val_io_002_invalid_quantization_is_rejected",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_002_invalid_quantization_is_rejected -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_002_invalid_quantization_is_rejected -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-IO-002: target_assertion",
@@ -75,7 +82,7 @@
             {
               "testId": "RFB-VAL-ROLE-001",
               "testFunction": "rfb_val_role_001_renamed_output_maps_to_detections",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_001_renamed_output_maps_to_detections -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_001_renamed_output_maps_to_detections -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-ROLE-001: target_assertion",
@@ -90,7 +97,7 @@
             {
               "testId": "RFB-VAL-ROLE-002",
               "testFunction": "rfb_val_role_002_missing_output_role_is_rejected",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_002_missing_output_role_is_rejected -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_002_missing_output_role_is_rejected -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-ROLE-002: target_assertion",
@@ -110,7 +117,7 @@
             {
               "testId": "RFB-VAL-GOLDEN-001",
               "testFunction": "rfb_val_golden_001_all_raw_and_decoded_fixtures_match",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_001_all_raw_and_decoded_fixtures_match -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_001_all_raw_and_decoded_fixtures_match -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-GOLDEN-001: target_assertion",
@@ -125,7 +132,7 @@
             {
               "testId": "RFB-VAL-GOLDEN-002",
               "testFunction": "rfb_val_golden_002_out_of_tolerance_output_is_rejected",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_002_out_of_tolerance_output_is_rejected -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_002_out_of_tolerance_output_is_rejected -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-GOLDEN-002: target_assertion",
@@ -145,7 +152,7 @@
             {
               "testId": "RFB-VAL-POST-001",
               "testFunction": "rfb_val_post_001_preprocessing_responsibility_is_applied_once",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_001_preprocessing_responsibility_is_applied_once -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_001_preprocessing_responsibility_is_applied_once -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-POST-001: target_assertion",
@@ -160,7 +167,7 @@
             {
               "testId": "RFB-VAL-POST-002",
               "testFunction": "rfb_val_post_002_decode_and_nms_have_one_owner",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_002_decode_and_nms_have_one_owner -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_002_decode_and_nms_have_one_owner -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-POST-002: target_assertion",
@@ -180,7 +187,7 @@
             {
               "testId": "RFB-VAL-FIXTURE-001",
               "testFunction": "rfb_val_fixture_001_web_golden_covers_all_image_fixtures",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_001_web_golden_covers_all_image_fixtures -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_001_web_golden_covers_all_image_fixtures -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-FIXTURE-001: target_assertion",
@@ -190,7 +197,7 @@
             {
               "testId": "RFB-VAL-DETERMINISM-001",
               "testFunction": "rfb_val_determinism_001_three_logical_runs_are_identical",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_determinism_001_three_logical_runs_are_identical -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_determinism_001_three_logical_runs_are_identical -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-DETERMINISM-001: target_assertion",
@@ -205,7 +212,7 @@
             {
               "testId": "RFB-VAL-FIXTURE-002",
               "testFunction": "rfb_val_fixture_002_missing_tolerance_is_rejected",
-              "command": "cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_002_missing_tolerance_is_rejected -- --exact",
+              "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_002_missing_tolerance_is_rejected -- --exact",
               "expectedFailure": {
                 "classification": "target-assertion",
                 "marker": "RFB-VAL-FIXTURE-002: target_assertion",

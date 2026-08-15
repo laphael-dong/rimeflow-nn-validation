@@ -7,6 +7,13 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const matrixPath = resolve(root, 'evidence/requirements/validation-requirement-test-matrix.json');
 const matrix = JSON.parse(await readFile(matrixPath, 'utf8'));
+const expectedCargoDependencyInput = {
+  manifestPath: 'evidence/tooling/validation-contract/Cargo.toml',
+  lockPath: 'evidence/tooling/validation-contract/Cargo.lock',
+  configPath: 'evidence/tooling/validation-contract/cargo-config.toml',
+  vendorDirectory: 'evidence/tooling/validation-contract/vendor',
+  policy: 'all Cargo.lock registry sources are vendored with Cargo checksum metadata',
+};
 
 const requiredScenarios = new Set([
   'Input semantics are explicit::Layout and dtype differ by artifact',
@@ -51,6 +58,10 @@ invariant(matrix.schemaVersion === 1, 'matrix schemaVersion must be 1');
 invariant(matrix.repository === 'github/rimeflow-nn-validation', 'matrix repository mismatch');
 invariant(matrix.ownership === 'Validation', 'matrix ownership mismatch');
 invariant(matrix.phase === '2-test-first', 'matrix phase mismatch');
+invariant(
+  JSON.stringify(matrix.cargoDependencyInput) === JSON.stringify(expectedCargoDependencyInput),
+  'hermetic Cargo dependency input mismatch',
+);
 invariant(/^[0-9a-f]{40}$/.test(matrix.originalBaseCommit), 'invalid original base commit');
 invariant(/^[0-9a-f]{40}$/.test(matrix.phase1DependencyCommit), 'invalid Phase 1 dependency commit');
 invariant(/^[0-9a-f]{64}$/.test(matrix.model.sha256), 'invalid model SHA-256');
@@ -84,12 +95,29 @@ for (const test of tests) {
   invariant(!testFunctions.has(test.testFunction), `duplicate Validation test function: ${test.testFunction}`);
   testIds.add(test.testId);
   testFunctions.add(test.testFunction);
-  const expectedCommand = `cargo test --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::${test.testFunction} -- --exact`;
+  const expectedCommand = `cargo test --config ${matrix.cargoDependencyInput.configPath} --offline --locked --manifest-path ${matrix.cargoDependencyInput.manifestPath} tests::${test.testFunction} -- --exact`;
   invariant(test.command === expectedCommand, `non-reproducible command for ${test.testId}`);
   invariant(test.expectedFailure?.classification === 'target-assertion', `invalid failure classification for ${test.testId}`);
   invariant(test.expectedFailure?.marker === `${test.testId}: target_assertion`, `invalid failure marker for ${test.testId}`);
   invariant(typeof test.expectedFailure?.assertion === 'string' && test.expectedFailure.assertion.length > 0, `missing target assertion for ${test.testId}`);
 }
+
+const cargoMetadata = spawnSync(
+  'cargo',
+  [
+    'metadata',
+    '--config', matrix.cargoDependencyInput.configPath,
+    '--offline',
+    '--locked',
+    '--manifest-path', matrix.cargoDependencyInput.manifestPath,
+    '--format-version', '1',
+  ],
+  { cwd: root, encoding: 'utf8' },
+);
+invariant(
+  cargoMetadata.status === 0,
+  `hermetic Cargo dependency input is incomplete: ${cargoMetadata.stderr.trim()}`,
+);
 
 const testSource = await readFile(resolve(root, matrix.testSource), 'utf8');
 const registrations = [...testSource.matchAll(/rfb_val_red_test!\(\s*"(RFB-VAL-[A-Z0-9-]+)",\s*([a-z0-9_]+),/gs)]

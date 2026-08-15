@@ -8,6 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const matrixPath = resolve(root, 'evidence/requirements/validation-requirement-test-matrix.json');
 const matrixBytes = await readFile(matrixPath);
 const matrix = JSON.parse(matrixBytes.toString('utf8'));
+const cargoDependencyArgs = ['--config', matrix.cargoDependencyInput.configPath];
 const tests = matrix.requirements.flatMap((requirement) =>
   requirement.scenarios.flatMap((scenario) => scenario.tests),
 );
@@ -26,6 +27,7 @@ const results = [];
 for (const test of tests) {
   const args = [
     'test',
+    ...cargoDependencyArgs,
     '--offline',
     '--locked',
     '--manifest-path',
