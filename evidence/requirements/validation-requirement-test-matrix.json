@@ -3,7 +3,15 @@
   "change": "rimeflow-backend-contract",
   "repository": "github/rimeflow-nn-validation",
   "ownership": "Validation",
-  "phase": "2-test-first",
+  "phase": "5-validation-manifest-golden",
+  "validationManifestPath": "evidence/manifest/validation-runtime-manifest.json",
+  "baseRuntime": {
+    "repository": "github/rimeflow-nn-base",
+    "ref": "refs/heads/laphael-dong/os4-base-runtime-implement",
+    "commit": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3",
+    "tree": "2a41a1f0bae4784cf9d2a0896c8d74929a1bbd2e",
+    "parent": "bc2c0139e744517df5a9d3ee6d0cbe17b6de7ab2"
+  },
   "cargoDependencyInput": {
     "manifestPath": "evidence/tooling/validation-contract/Cargo.toml",
     "lockPath": "evidence/tooling/validation-contract/Cargo.lock",
@@ -36,7 +44,7 @@
     "repeatCount": 3
   },
   "testSource": "evidence/tooling/validation-contract/src/lib.rs",
-  "reportPath": "evidence/reports/validation-test-first.json",
+  "reportPath": "evidence/reports/validation-manifest-golden-report.json",
   "requirements": [
     {
       "requirement": "Input semantics are explicit",
@@ -48,9 +56,8 @@
               "testId": "RFB-VAL-IO-001",
               "testFunction": "rfb_val_io_001_layout_and_dtype_preserve_logical_image",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_001_layout_and_dtype_preserve_logical_image -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-IO-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "同一逻辑 RGB 输入按 NCHW/NHWC 和声明 dtype 转换后保持相同语义"
               }
             }
@@ -63,9 +70,8 @@
               "testId": "RFB-VAL-IO-002",
               "testFunction": "rfb_val_io_002_invalid_quantization_is_rejected",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_io_002_invalid_quantization_is_rejected -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-IO-002: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "无效量化 scale 必须作为输入契约错误被拒绝"
               }
             }
@@ -83,9 +89,8 @@
               "testId": "RFB-VAL-ROLE-001",
               "testFunction": "rfb_val_role_001_renamed_output_maps_to_detections",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_001_renamed_output_maps_to_detections -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-ROLE-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "LiteRT 重命名输出和归一化坐标必须映射回 detections role 与 ONNX 坐标语义"
               }
             }
@@ -98,9 +103,8 @@
               "testId": "RFB-VAL-ROLE-002",
               "testFunction": "rfb_val_role_002_missing_output_role_is_rejected",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_role_002_missing_output_role_is_rejected -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-ROLE-002: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "缺失 detections 逻辑 role 的输出契约必须被拒绝"
               }
             }
@@ -118,9 +122,8 @@
               "testId": "RFB-VAL-GOLDEN-001",
               "testFunction": "rfb_val_golden_001_all_raw_and_decoded_fixtures_match",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_001_all_raw_and_decoded_fixtures_match -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-GOLDEN-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "六类 raw fixture 经逻辑 role 归一化后必须复用生产 decode/NMS 并匹配冻结结果"
               }
             }
@@ -133,9 +136,8 @@
               "testId": "RFB-VAL-GOLDEN-002",
               "testFunction": "rfb_val_golden_002_out_of_tolerance_output_is_rejected",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_golden_002_out_of_tolerance_output_is_rejected -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-GOLDEN-002: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "超出冻结 raw tensor 容差的候选输出必须被拒绝"
               }
             }
@@ -153,9 +155,8 @@
               "testId": "RFB-VAL-POST-001",
               "testFunction": "rfb_val_post_001_preprocessing_responsibility_is_applied_once",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_001_preprocessing_responsibility_is_applied_once -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-POST-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "Core ML 已融合的 RGB/scale 与未融合的 letterbox 责任必须各执行一次"
               }
             }
@@ -168,9 +169,8 @@
               "testId": "RFB-VAL-POST-002",
               "testFunction": "rfb_val_post_002_decode_and_nms_have_one_owner",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_post_002_decode_and_nms_have_one_owner -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-POST-002: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "非融合产物只调用生产 src/postprocess.rs 一次，融合 NMS 的产物不得重复 NMS"
               }
             }
@@ -188,9 +188,8 @@
               "testId": "RFB-VAL-FIXTURE-001",
               "testFunction": "rfb_val_fixture_001_web_golden_covers_all_image_fixtures",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_001_web_golden_covers_all_image_fixtures -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-FIXTURE-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "五类真实图片 fixture 必须同时校验 role/shape、raw 摘要、decoded 结果与三次重复运行"
               }
             },
@@ -198,9 +197,8 @@
               "testId": "RFB-VAL-DETERMINISM-001",
               "testFunction": "rfb_val_determinism_001_three_logical_runs_are_identical",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_determinism_001_three_logical_runs_are_identical -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-DETERMINISM-001: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "六类 fixture 的逻辑 role 归一化与生产后处理连续三次必须逐位确定"
               }
             }
@@ -213,9 +211,8 @@
               "testId": "RFB-VAL-FIXTURE-002",
               "testFunction": "rfb_val_fixture_002_missing_tolerance_is_rejected",
               "command": "cargo test --config evidence/tooling/validation-contract/cargo-config.toml --offline --locked --manifest-path evidence/tooling/validation-contract/Cargo.toml tests::rfb_val_fixture_002_missing_tolerance_is_rejected -- --exact",
-              "expectedFailure": {
-                "classification": "target-assertion",
-                "marker": "RFB-VAL-FIXTURE-002: target_assertion",
+              "expectedResult": {
+                "outcome": "green",
                 "assertion": "缺失冻结 raw 容差时 golden 验证必须失败"
               }
             }

@@ -1,0 +1,1733 @@
+{
+  "schemaVersion": 1,
+  "change": "rimeflow-backend-contract",
+  "phase": "5-validation-manifest-golden",
+  "phase1DependencyCommit": "c90d3957fbbd04b3f0b29eff7bc873b70eed4400",
+  "identities": {
+    "baseRuntime": {
+      "repository": "github/rimeflow-nn-base",
+      "ref": "refs/heads/laphael-dong/os4-base-runtime-implement",
+      "commit": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3",
+      "tree": "2a41a1f0bae4784cf9d2a0896c8d74929a1bbd2e",
+      "parent": "bc2c0139e744517df5a9d3ee6d0cbe17b6de7ab2"
+    },
+    "validationStartCommit": "eaf4dc1f8e5a88d4a235bc85f6844e6ff29900f2",
+    "model": {
+      "path": "models/yolov8n.onnx",
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+    },
+    "fixtureManifest": {
+      "path": "evidence/fixtures/manifest.json",
+      "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+    },
+    "frozenGolden": {
+      "path": "evidence/golden/web-reference.json",
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+    },
+    "validationManifest": {
+      "path": "evidence/manifest/validation-runtime-manifest.json",
+      "sha256": "fdfbd70e3382fe40c862dba78800392bf28e1dacc2d41550215e4dc0d2fe951b"
+    }
+  },
+  "postprocess": {
+    "owner": "src/postprocess.rs",
+    "decode": "operator",
+    "threshold": 0.25,
+    "nms": "operator",
+    "sourceSha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b",
+    "execution": "evidence/tooling/raw-golden delegates directly to src/postprocess.rs",
+    "duplicateArtifactSpecificImplementations": 0
+  },
+  "runtime": {
+    "web": {
+      "name": "onnxruntime-web",
+      "version": "1.27.0",
+      "executionProvider": "wasm",
+      "threads": 1
+    },
+    "legacyNativeOrt": {
+      "name": "onnxruntime-node",
+      "version": "1.24.3",
+      "executionProvider": "cpu"
+    }
+  },
+  "summary": {
+    "testCount": 11,
+    "green": 11,
+    "fixtureCount": 5,
+    "repeatCount": 3,
+    "allRuntimeComparisonsPassed": true,
+    "environmentFailures": 0
+  },
+  "tests": [
+    {
+      "testId": "RFB-VAL-IO-001",
+      "testFunction": "rfb_val_io_001_layout_and_dtype_preserve_logical_image",
+      "targetAssertion": "同一逻辑 RGB 输入按 NCHW/NHWC 和声明 dtype 转换后保持相同语义",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-IO-002",
+      "testFunction": "rfb_val_io_002_invalid_quantization_is_rejected",
+      "targetAssertion": "无效量化 scale 必须作为输入契约错误被拒绝",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-ROLE-001",
+      "testFunction": "rfb_val_role_001_renamed_output_maps_to_detections",
+      "targetAssertion": "LiteRT 重命名输出和归一化坐标必须映射回 detections role 与 ONNX 坐标语义",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-ROLE-002",
+      "testFunction": "rfb_val_role_002_missing_output_role_is_rejected",
+      "targetAssertion": "缺失 detections 逻辑 role 的输出契约必须被拒绝",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-GOLDEN-001",
+      "testFunction": "rfb_val_golden_001_all_raw_and_decoded_fixtures_match",
+      "targetAssertion": "六类 raw fixture 经逻辑 role 归一化后必须复用生产 decode/NMS 并匹配冻结结果",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-GOLDEN-002",
+      "testFunction": "rfb_val_golden_002_out_of_tolerance_output_is_rejected",
+      "targetAssertion": "超出冻结 raw tensor 容差的候选输出必须被拒绝",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-POST-001",
+      "testFunction": "rfb_val_post_001_preprocessing_responsibility_is_applied_once",
+      "targetAssertion": "Core ML 已融合的 RGB/scale 与未融合的 letterbox 责任必须各执行一次",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-POST-002",
+      "testFunction": "rfb_val_post_002_decode_and_nms_have_one_owner",
+      "targetAssertion": "非融合产物只调用生产 src/postprocess.rs 一次，融合 NMS 的产物不得重复 NMS",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-FIXTURE-001",
+      "testFunction": "rfb_val_fixture_001_web_golden_covers_all_image_fixtures",
+      "targetAssertion": "五类真实图片 fixture 必须同时校验 role/shape、raw 摘要、decoded 结果与三次重复运行",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-DETERMINISM-001",
+      "testFunction": "rfb_val_determinism_001_three_logical_runs_are_identical",
+      "targetAssertion": "六类 fixture 的逻辑 role 归一化与生产后处理连续三次必须逐位确定",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    },
+    {
+      "testId": "RFB-VAL-FIXTURE-002",
+      "testFunction": "rfb_val_fixture_002_missing_tolerance_is_rejected",
+      "targetAssertion": "缺失冻结 raw 容差时 golden 验证必须失败",
+      "outcome": "green",
+      "environmentFailure": false,
+      "processExitCode": 0
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "no-detection",
+      "imageSha256": "5a0d17c1055bd16e1b790fe8fcc048828c4112b50646ad217a25bd4a2fdf833f",
+      "hostNchw": {
+        "role": "image",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "sha256Float32Le": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b"
+      },
+      "web": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274475098,
+              "mean": 10.108611967,
+              "sha256Float32Le": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+            },
+            "decoded": []
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274475098,
+              "mean": 10.108611967,
+              "sha256Float32Le": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+            },
+            "decoded": []
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274475098,
+              "mean": 10.108611967,
+              "sha256Float32Le": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+            },
+            "decoded": []
+          }
+        ],
+        "deterministic": true,
+        "frozenRawDigestMatches": true,
+        "decodedComparison": {
+          "passed": true,
+          "detectionCount": 0,
+          "maximumConfidenceDifference": 0,
+          "minimumIou": null
+        }
+      },
+      "legacyNativeOrt": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274536133,
+              "mean": 10.108611191,
+              "sha256Float32Le": "1ef6f07d2b5794d657373fa9873b32dfdbcc56dbf02397c8ff55d475aa4aacf4"
+            },
+            "decoded": []
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274536133,
+              "mean": 10.108611191,
+              "sha256Float32Le": "1ef6f07d2b5794d657373fa9873b32dfdbcc56dbf02397c8ff55d475aa4aacf4"
+            },
+            "decoded": []
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.274536133,
+              "mean": 10.108611191,
+              "sha256Float32Le": "1ef6f07d2b5794d657373fa9873b32dfdbcc56dbf02397c8ff55d475aa4aacf4"
+            },
+            "decoded": []
+          }
+        ],
+        "deterministic": true,
+        "rawComparisonToWeb": {
+          "passed": true,
+          "maxAbsoluteDifference": 0.00250244140625,
+          "maxRelativeDifference": 0.023841857910156247,
+          "tolerance": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "decodedComparisonToWeb": {
+          "passed": true,
+          "detectionCount": 0,
+          "maximumConfidenceDifference": 0,
+          "minimumIou": null
+        }
+      }
+    },
+    {
+      "id": "single-target",
+      "imageSha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18",
+      "hostNchw": {
+        "role": "image",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "sha256Float32Le": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe"
+      },
+      "web": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809623919,
+              "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723951667547226,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327919006347656
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809623919,
+              "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723951667547226,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327919006347656
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809623919,
+              "sha256Float32Le": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723951667547226,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327919006347656
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "frozenRawDigestMatches": true,
+        "decodedComparison": {
+          "passed": true,
+          "detectionCount": 1,
+          "maximumConfidenceDifference": 6.347655734373348e-10,
+          "minimumIou": 0.9999999154278457
+        }
+      },
+      "legacyNativeOrt": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809624082,
+              "sha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723954647779465,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327916622161865
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809624082,
+              "sha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723954647779465,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327916622161865
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.05645752,
+              "mean": 9.809624082,
+              "sha256Float32Le": "c84b2985786685fe134fe4dbb7c091ecb72d5be7bdbd442aac832b0995013f27"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.09723954647779465,
+                  0.12138328701257706,
+                  0.7592294812202454,
+                  0.9256502389907837
+                ],
+                "classId": 16,
+                "score": 0.7327916622161865
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "rawComparisonToWeb": {
+          "passed": true,
+          "maxAbsoluteDifference": 0.001373291015625,
+          "maxRelativeDifference": 0.023841857910156247,
+          "tolerance": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "decodedComparisonToWeb": {
+          "passed": true,
+          "detectionCount": 1,
+          "maximumConfidenceDifference": 2.384185791015625e-7,
+          "minimumIou": 0.9999999549807037
+        }
+      }
+    },
+    {
+      "id": "multi-class",
+      "imageSha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688",
+      "hostNchw": {
+        "role": "image",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "sha256Float32Le": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c"
+      },
+      "web": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902032,
+              "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285737633705139,
+                  0.3609803318977356,
+                  1,
+                  0.8149450421333313
+                ],
+                "classId": 0,
+                "score": 0.9027921557426453
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837427854537964,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911558985710144
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744186162948608
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414506435394287,
+                  0.9874762296676636,
+                  0.7206222414970398
+                ],
+                "classId": 5,
+                "score": 0.8555362820625305
+              },
+              {
+                "bbox": [
+                  0.0005876541254110634,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307899475097656
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902032,
+              "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285737633705139,
+                  0.3609803318977356,
+                  1,
+                  0.8149450421333313
+                ],
+                "classId": 0,
+                "score": 0.9027921557426453
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837427854537964,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911558985710144
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744186162948608
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414506435394287,
+                  0.9874762296676636,
+                  0.7206222414970398
+                ],
+                "classId": 5,
+                "score": 0.8555362820625305
+              },
+              {
+                "bbox": [
+                  0.0005876541254110634,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307899475097656
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902032,
+              "sha256Float32Le": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285737633705139,
+                  0.3609803318977356,
+                  1,
+                  0.8149450421333313
+                ],
+                "classId": 0,
+                "score": 0.9027921557426453
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837427854537964,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911558985710144
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744186162948608
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414506435394287,
+                  0.9874762296676636,
+                  0.7206222414970398
+                ],
+                "classId": 5,
+                "score": 0.8555362820625305
+              },
+              {
+                "bbox": [
+                  0.0005876541254110634,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307899475097656
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "frozenRawDigestMatches": true,
+        "decodedComparison": {
+          "passed": true,
+          "detectionCount": 5,
+          "maximumConfidenceDifference": 4.750976556611164e-9,
+          "minimumIou": 0.9999997253145693
+        }
+      },
+      "legacyNativeOrt": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902339,
+              "sha256Float32Le": "488e67fa580b4dd1a3152d45c9d5d2cde3bbe027ed952b6c15c3e42c40fbac48"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285735845565796,
+                  0.3609803318977356,
+                  1,
+                  0.8149451017379761
+                ],
+                "classId": 0,
+                "score": 0.9027920365333557
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837421894073486,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911559581756592
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744187355041504
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414503455162048,
+                  0.9874762296676636,
+                  0.720622181892395
+                ],
+                "classId": 5,
+                "score": 0.8555368781089783
+              },
+              {
+                "bbox": [
+                  0.0005876859067939222,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307923316955566
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902339,
+              "sha256Float32Le": "488e67fa580b4dd1a3152d45c9d5d2cde3bbe027ed952b6c15c3e42c40fbac48"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285735845565796,
+                  0.3609803318977356,
+                  1,
+                  0.8149451017379761
+                ],
+                "classId": 0,
+                "score": 0.9027920365333557
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837421894073486,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911559581756592
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744187355041504
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414503455162048,
+                  0.9874762296676636,
+                  0.720622181892395
+                ],
+                "classId": 5,
+                "score": 0.8555368781089783
+              },
+              {
+                "bbox": [
+                  0.0005876859067939222,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307923316955566
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.30078125,
+              "mean": 9.266902339,
+              "sha256Float32Le": "488e67fa580b4dd1a3152d45c9d5d2cde3bbe027ed952b6c15c3e42c40fbac48"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8285735845565796,
+                  0.3609803318977356,
+                  1,
+                  0.8149451017379761
+                ],
+                "classId": 0,
+                "score": 0.9027920365333557
+              },
+              {
+                "bbox": [
+                  0.2744178771972656,
+                  0.37837421894073486,
+                  0.42494532465934753,
+                  0.7929381132125854
+                ],
+                "classId": 0,
+                "score": 0.8911559581756592
+              },
+              {
+                "bbox": [
+                  0.06316954642534256,
+                  0.36887580156326294,
+                  0.3015599548816681,
+                  0.838917076587677
+                ],
+                "classId": 0,
+                "score": 0.8744187355041504
+              },
+              {
+                "bbox": [
+                  0.03674354404211044,
+                  0.21414503455162048,
+                  0.9874762296676636,
+                  0.720622181892395
+                ],
+                "classId": 5,
+                "score": 0.8555368781089783
+              },
+              {
+                "bbox": [
+                  0.0005876859067939222,
+                  0.5083454251289368,
+                  0.07410898059606552,
+                  0.8073220252990723
+                ],
+                "classId": 0,
+                "score": 0.44307923316955566
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "rawComparisonToWeb": {
+          "passed": true,
+          "maxAbsoluteDifference": 0.00244140625,
+          "maxRelativeDifference": 0.023841857910156247,
+          "tolerance": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "decodedComparisonToWeb": {
+          "passed": true,
+          "detectionCount": 5,
+          "maximumConfidenceDifference": 5.960464477539062e-7,
+          "minimumIou": 0.9999988256077823
+        }
+      }
+    },
+    {
+      "id": "boundary-box",
+      "imageSha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057",
+      "hostNchw": {
+        "role": "image",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "sha256Float32Le": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0"
+      },
+      "web": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270817917,
+              "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902824997901917,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991990089416504
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.37873271107673645,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333920478821
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463250160217
+              },
+              {
+                "bbox": [
+                  0.03830886632204056,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532297611236572
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938428044319153
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270817917,
+              "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902824997901917,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991990089416504
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.37873271107673645,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333920478821
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463250160217
+              },
+              {
+                "bbox": [
+                  0.03830886632204056,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532297611236572
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938428044319153
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270817917,
+              "sha256Float32Le": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902824997901917,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991990089416504
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.37873271107673645,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333920478821
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463250160217
+              },
+              {
+                "bbox": [
+                  0.03830886632204056,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532297611236572
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938428044319153
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "frozenRawDigestMatches": true,
+        "decodedComparison": {
+          "passed": true,
+          "detectionCount": 5,
+          "maximumConfidenceDifference": 4.983978230121977e-9,
+          "minimumIou": 0.9999996451769472
+        }
+      },
+      "legacyNativeOrt": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270818326,
+              "sha256Float32Le": "f057d9a4d9ee243ddca4ffac3161443319627e795495aaab7326ceaf65324cfc"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902830958366394,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991989493370056
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.3787327706813812,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333324432373
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463846206665
+              },
+              {
+                "bbox": [
+                  0.038308773189783096,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532299995422363
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938347578048706
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270818326,
+              "sha256Float32Le": "f057d9a4d9ee243ddca4ffac3161443319627e795495aaab7326ceaf65324cfc"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902830958366394,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991989493370056
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.3787327706813812,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333324432373
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463846206665
+              },
+              {
+                "bbox": [
+                  0.038308773189783096,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532299995422363
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938347578048706
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 637.313171387,
+              "mean": 9.270818326,
+              "sha256Float32Le": "f057d9a4d9ee243ddca4ffac3161443319627e795495aaab7326ceaf65324cfc"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.8299707770347595,
+                  0.35902830958366394,
+                  1,
+                  0.8137332201004028
+                ],
+                "classId": 0,
+                "score": 0.8991989493370056
+              },
+              {
+                "bbox": [
+                  0.27475377917289734,
+                  0.3787327706813812,
+                  0.42536455392837524,
+                  0.7922741174697876
+                ],
+                "classId": 0,
+                "score": 0.8934333324432373
+              },
+              {
+                "bbox": [
+                  0.06357714533805847,
+                  0.36876487731933594,
+                  0.30140089988708496,
+                  0.8389585614204407
+                ],
+                "classId": 0,
+                "score": 0.8722463846206665
+              },
+              {
+                "bbox": [
+                  0.038308773189783096,
+                  0.214161679148674,
+                  0.9903939962387085,
+                  0.7201180458068848
+                ],
+                "classId": 5,
+                "score": 0.8532299995422363
+              },
+              {
+                "bbox": [
+                  0.0016516094328835607,
+                  0.5086345672607422,
+                  0.07152954488992691,
+                  0.8061723709106445
+                ],
+                "classId": 0,
+                "score": 0.40938347578048706
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "rawComparisonToWeb": {
+          "passed": true,
+          "maxAbsoluteDifference": 0.002532958984375,
+          "maxRelativeDifference": 0.023841857910156247,
+          "tolerance": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "decodedComparisonToWeb": {
+          "passed": true,
+          "detectionCount": 5,
+          "maximumConfidenceDifference": 8.046627044677734e-7,
+          "minimumIou": 0.9999998558677707
+        }
+      }
+    },
+    {
+      "id": "extreme-aspect",
+      "imageSha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc",
+      "hostNchw": {
+        "role": "image",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32",
+        "sha256Float32Le": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf"
+      },
+      "web": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674305035,
+              "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462554931640625,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739934682846069
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674305035,
+              "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462554931640625,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739934682846069
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674305035,
+              "sha256Float32Le": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462554931640625,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739934682846069
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "frozenRawDigestMatches": true,
+        "decodedComparison": {
+          "passed": true,
+          "detectionCount": 1,
+          "maximumConfidenceDifference": 1.7153930498281511e-9,
+          "minimumIou": 0.9999991722027088
+        }
+      },
+      "legacyNativeOrt": {
+        "role": "detections",
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "runs": [
+          {
+            "repeat": 1,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674306175,
+              "sha256Float32Le": "573397ff67075e796e6c88d686969a7563eae87ddf810ee642e393cc6edbebda"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462545394897461,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739943027496338
+              }
+            ]
+          },
+          {
+            "repeat": 2,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674306175,
+              "sha256Float32Le": "573397ff67075e796e6c88d686969a7563eae87ddf810ee642e393cc6edbebda"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462545394897461,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739943027496338
+              }
+            ]
+          },
+          {
+            "repeat": 3,
+            "summary": {
+              "role": "detections",
+              "shape": [
+                1,
+                84,
+                8400
+              ],
+              "elementCount": 705600,
+              "finiteCount": 705600,
+              "min": 0,
+              "max": 636.765319824,
+              "mean": 9.674306175,
+              "sha256Float32Le": "573397ff67075e796e6c88d686969a7563eae87ddf810ee642e393cc6edbebda"
+            },
+            "decoded": [
+              {
+                "bbox": [
+                  0.46178317070007324,
+                  0.1462545394897461,
+                  0.5274153351783752,
+                  0.9627037048339844
+                ],
+                "classId": 16,
+                "score": 0.6739943027496338
+              }
+            ]
+          }
+        ],
+        "deterministic": true,
+        "rawComparisonToWeb": {
+          "passed": true,
+          "maxAbsoluteDifference": 0.001373291015625,
+          "maxRelativeDifference": 0.023841857910156247,
+          "tolerance": {
+            "absolute": 0.00001,
+            "relative": 0.0001
+          }
+        },
+        "decodedComparisonToWeb": {
+          "passed": true,
+          "detectionCount": 1,
+          "maximumConfidenceDifference": 8.344650268554688e-7,
+          "minimumIou": 0.9999988319244395
+        }
+      }
+    }
+  ]
+}

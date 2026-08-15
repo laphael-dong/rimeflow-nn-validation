@@ -57,7 +57,7 @@ async function sha256(path) {
 invariant(matrix.schemaVersion === 1, 'matrix schemaVersion must be 1');
 invariant(matrix.repository === 'github/rimeflow-nn-validation', 'matrix repository mismatch');
 invariant(matrix.ownership === 'Validation', 'matrix ownership mismatch');
-invariant(matrix.phase === '2-test-first', 'matrix phase mismatch');
+invariant(matrix.phase === '5-validation-manifest-golden', 'matrix phase mismatch');
 invariant(
   JSON.stringify(matrix.cargoDependencyInput) === JSON.stringify(expectedCargoDependencyInput),
   'hermetic Cargo dependency input mismatch',
@@ -65,6 +65,11 @@ invariant(
 invariant(/^[0-9a-f]{40}$/.test(matrix.originalBaseCommit), 'invalid original base commit');
 invariant(/^[0-9a-f]{40}$/.test(matrix.phase1DependencyCommit), 'invalid Phase 1 dependency commit');
 invariant(/^[0-9a-f]{64}$/.test(matrix.model.sha256), 'invalid model SHA-256');
+invariant(matrix.validationManifestPath === 'evidence/manifest/validation-runtime-manifest.json', 'Validation manifest path mismatch');
+invariant(matrix.baseRuntime?.repository === 'github/rimeflow-nn-base', 'Base repository mismatch');
+for (const field of ['commit', 'tree', 'parent']) {
+  invariant(/^[0-9a-f]{40}$/.test(matrix.baseRuntime?.[field] ?? ''), `invalid Base ${field}`);
+}
 
 const ancestry = spawnSync(
   'git',
@@ -97,9 +102,8 @@ for (const test of tests) {
   testFunctions.add(test.testFunction);
   const expectedCommand = `cargo test --config ${matrix.cargoDependencyInput.configPath} --offline --locked --manifest-path ${matrix.cargoDependencyInput.manifestPath} tests::${test.testFunction} -- --exact`;
   invariant(test.command === expectedCommand, `non-reproducible command for ${test.testId}`);
-  invariant(test.expectedFailure?.classification === 'target-assertion', `invalid failure classification for ${test.testId}`);
-  invariant(test.expectedFailure?.marker === `${test.testId}: target_assertion`, `invalid failure marker for ${test.testId}`);
-  invariant(typeof test.expectedFailure?.assertion === 'string' && test.expectedFailure.assertion.length > 0, `missing target assertion for ${test.testId}`);
+  invariant(test.expectedResult?.outcome === 'green', `invalid expected result for ${test.testId}`);
+  invariant(typeof test.expectedResult?.assertion === 'string' && test.expectedResult.assertion.length > 0, `missing green assertion for ${test.testId}`);
 }
 
 const cargoMetadata = spawnSync(
@@ -120,7 +124,7 @@ invariant(
 );
 
 const testSource = await readFile(resolve(root, matrix.testSource), 'utf8');
-const registrations = [...testSource.matchAll(/rfb_val_red_test!\(\s*"(RFB-VAL-[A-Z0-9-]+)",\s*([a-z0-9_]+),/gs)]
+const registrations = [...testSource.matchAll(/rfb_val_test!\(\s*"(RFB-VAL-[A-Z0-9-]+)",\s*([a-z0-9_]+),/gs)]
   .map((match) => ({ testId: match[1], testFunction: match[2] }));
 sameSet(registrations.map((item) => item.testId), testIds, 'orphan or missing RFB-VAL test IDs');
 sameSet(registrations.map((item) => item.testFunction), testFunctions, 'orphan or missing Rust tests');
@@ -145,6 +149,37 @@ invariant(modelContract.source.commit === matrix.originalBaseCommit, 'model cont
 invariant(modelContract.source.modelSha256 === matrix.model.sha256, 'model contract SHA mismatch');
 invariant(await sha256(matrix.model.path) === matrix.model.sha256, 'model bytes do not match the frozen SHA');
 
+const validationManifest = await readJson(matrix.validationManifestPath);
+invariant(validationManifest.schemaVersion === 1, 'Validation manifest schemaVersion mismatch');
+invariant(JSON.stringify(validationManifest.baseRuntime) === JSON.stringify(matrix.baseRuntime), 'Validation manifest Base identity mismatch');
+invariant(validationManifest.model?.path === matrix.model.path, 'Validation manifest model path mismatch');
+invariant(validationManifest.model?.sha256 === matrix.model.sha256, 'Validation manifest model SHA mismatch');
+invariant(validationManifest.postprocess?.owner === 'src/postprocess.rs', 'postprocess owner mismatch');
+invariant(validationManifest.postprocess?.decode === 'operator', 'decode ownership mismatch');
+invariant(validationManifest.postprocess?.threshold === 0.25, 'threshold mismatch');
+invariant(validationManifest.postprocess?.nms === 'operator', 'NMS ownership mismatch');
+invariant(await sha256(validationManifest.postprocess.owner) === validationManifest.postprocess.sourceSha256, 'production postprocess SHA mismatch');
+sameSet(validationManifest.artifacts.map((artifact) => artifact.id), ['web-onnx-wasm', 'legacy-native-ort', 'host-nchw'], 'runtime artifact coverage');
+for (const artifact of validationManifest.artifacts) {
+  invariant(artifact.input?.role === 'image', `${artifact.id}: missing image role`);
+  invariant(artifact.input?.layout === 'NCHW' && artifact.input?.dtype === 'float32', `${artifact.id}: invalid input contract`);
+  invariant(artifact.output?.role === 'detections', `${artifact.id}: missing detections role`);
+  invariant(JSON.stringify(artifact.output?.shape) === '[1,84,8400]', `${artifact.id}: invalid detections shape`);
+  invariant(artifact.output?.nmsFused === false, `${artifact.id}: unexpected fused NMS`);
+}
+invariant(await sha256(validationManifest.fixtures.manifestPath) === validationManifest.fixtures.manifestSha256, 'fixture manifest SHA mismatch');
+invariant(await sha256(validationManifest.fixtures.goldenPath) === validationManifest.fixtures.goldenSha256, 'golden reference SHA mismatch');
+invariant(validationManifest.fixtures.repeatCount === matrix.fixtureCoverage.repeatCount, 'manifest repeat count mismatch');
+
+for (const scriptPath of [
+  'evidence/scripts/run_web_golden.mjs',
+  'evidence/scripts/run_validation_manifest_golden.mjs',
+]) {
+  const source = await readFile(resolve(root, scriptPath), 'utf8');
+  invariant(!/function\s+(decode|nms|iou)\s*\(/.test(source), `${scriptPath}: artifact-specific postprocess duplicate`);
+  invariant(source.includes('evidence/tooling/raw-golden/Cargo.toml'), `${scriptPath}: production postprocess delegation missing`);
+}
+
 const goldenManifest = await readJson('evidence/golden/manifest.json');
 const ownedArtifacts = goldenManifest.artifacts.filter(({ path }) =>
   path === matrix.model.path
@@ -159,13 +194,27 @@ for (const artifact of ownedArtifacts) {
 
 if (process.argv.includes('--require-report')) {
   const report = await readJson(matrix.reportPath);
-  invariant(report.schemaVersion === 1, 'red-test report schemaVersion mismatch');
+  invariant(report.schemaVersion === 1, 'Validation report schemaVersion mismatch');
   invariant(report.phase1DependencyCommit === matrix.phase1DependencyCommit, 'report dependency commit mismatch');
-  sameSet(report.results.map((result) => result.testId), testIds, 'red-test report coverage');
-  for (const result of report.results) {
-    invariant(result.outcome === 'expected-red', `${result.testId}: report outcome is not expected-red`);
-    invariant(result.actualFailureClassification === 'target-assertion', `${result.testId}: invalid report failure classification`);
-    invariant(result.environmentFailure === false, `${result.testId}: environment failure cannot be red evidence`);
+  sameSet(report.tests.map((result) => result.testId), testIds, 'Validation report test coverage');
+  for (const result of report.tests) {
+    invariant(result.outcome === 'green', `${result.testId}: report outcome is not green`);
+    invariant(result.processExitCode === 0, `${result.testId}: green test did not exit cleanly`);
+    invariant(result.environmentFailure === false, `${result.testId}: environment failure cannot be green evidence`);
+  }
+  invariant(report.summary?.green === tests.length, 'Validation report green count mismatch');
+  invariant(report.summary?.allRuntimeComparisonsPassed === true, 'runtime golden comparison did not pass');
+  invariant(report.summary?.environmentFailures === 0, 'Validation report contains environment failures');
+  invariant(report.postprocess?.sourceSha256 === validationManifest.postprocess.sourceSha256, 'report postprocess identity mismatch');
+  invariant(report.postprocess?.duplicateArtifactSpecificImplementations === 0, 'report contains duplicate postprocess implementations');
+  sameSet(report.fixtures.map((fixture) => fixture.id), imageFixtureIds, 'runtime golden fixture coverage');
+  for (const fixture of report.fixtures) {
+    invariant(fixture.web?.deterministic === true, `${fixture.id}: Web result is not deterministic`);
+    invariant(fixture.legacyNativeOrt?.deterministic === true, `${fixture.id}: Legacy result is not deterministic`);
+    invariant(fixture.web?.runs?.length === matrix.fixtureCoverage.repeatCount, `${fixture.id}: Web report repeat mismatch`);
+    invariant(fixture.legacyNativeOrt?.runs?.length === matrix.fixtureCoverage.repeatCount, `${fixture.id}: Legacy report repeat mismatch`);
+    invariant(fixture.legacyNativeOrt?.rawComparisonToWeb?.passed === true, `${fixture.id}: Legacy raw comparison failed`);
+    invariant(fixture.legacyNativeOrt?.decodedComparisonToWeb?.passed === true, `${fixture.id}: Legacy decoded comparison failed`);
   }
 }
 

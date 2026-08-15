@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,42 +38,37 @@ for (const test of tests) {
   ];
   const execution = spawnSync('cargo', args, { cwd: root, encoding: 'utf8' });
   const output = `${execution.stdout ?? ''}\n${execution.stderr ?? ''}`;
-  const markerObserved = output.includes(test.expectedFailure.marker);
-  const notImplementedObserved = output.includes('actual=not_implemented(');
-  const expectedRed = execution.status !== 0 && markerObserved && notImplementedObserved;
+  const green = execution.status === 0;
   results.push({
     testId: test.testId,
     testFunction: test.testFunction,
     command: test.command,
-    targetAssertion: test.expectedFailure.assertion,
-    outcome: expectedRed ? 'expected-red' : 'invalid-red',
-    actualFailureClassification: expectedRed ? 'target-assertion' : 'compile-fixture-environment-or-unexpected-result',
-    environmentFailure: !expectedRed,
+    targetAssertion: test.expectedResult.assertion,
+    outcome: green ? 'green' : 'failed',
+    environmentFailure: !green,
     processExitCode: execution.status,
-    markerObserved,
-    notImplementedObserved,
   });
-  if (!expectedRed) {
+  if (!green) {
     process.stderr.write(output);
     break;
   }
 }
 
 const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' });
-if (head.status !== 0) throw new Error('cannot resolve source commit for red-test report');
-const allExpectedRed = results.length === tests.length && results.every((result) => result.outcome === 'expected-red');
+if (head.status !== 0) throw new Error('cannot resolve source commit for Validation report');
+const allGreen = results.length === tests.length && results.every((result) => result.outcome === 'green');
 const report = {
   schemaVersion: 1,
   sourceCommit: head.stdout.trim(),
   phase1DependencyCommit: matrix.phase1DependencyCommit,
   matrixPath: 'evidence/requirements/validation-requirement-test-matrix.json',
   matrixSha256: createHash('sha256').update(matrixBytes).digest('hex'),
-  runnerCommand: 'node evidence/scripts/run_validation_red_tests.mjs --write-report evidence/reports/validation-test-first.json',
+  runnerCommand: 'node evidence/scripts/run_validation_manifest_golden.mjs --write-report evidence/reports/validation-manifest-golden-report.json',
   summary: {
-    expectedRed: tests.length,
-    observedExpectedRed: results.filter((result) => result.outcome === 'expected-red').length,
+    expectedGreen: tests.length,
+    observedGreen: results.filter((result) => result.outcome === 'green').length,
     environmentFailures: results.filter((result) => result.environmentFailure).length,
-    firstFailureClassification: results[0]?.actualFailureClassification ?? null,
+    firstFailureClassification: results.find((result) => result.outcome !== 'green')?.testId ?? null,
   },
   results,
 };
@@ -82,13 +77,18 @@ const reportFlag = process.argv.indexOf('--write-report');
 if (reportFlag !== -1) {
   const reportArgument = process.argv[reportFlag + 1];
   if (!reportArgument) throw new Error('--write-report requires a repository-relative path');
-  const requestedPath = resolve(root, reportArgument);
-  invariantInsideRoot(requestedPath);
-  await writeFile(requestedPath, `${JSON.stringify(report, null, 2)}\n`);
+  invariantInsideRoot(resolve(root, reportArgument));
+  const golden = spawnSync('node', [
+    'evidence/scripts/run_validation_manifest_golden.mjs',
+    '--write-report', reportArgument,
+  ], { cwd: root, encoding: 'utf8' });
+  process.stdout.write(golden.stdout ?? '');
+  process.stderr.write(golden.stderr ?? '');
+  if (golden.status !== 0) process.exitCode = 1;
 }
 
 process.stdout.write(`${JSON.stringify(report.summary)}\n`);
-if (!allExpectedRed) process.exitCode = 1;
+if (!allGreen) process.exitCode = 1;
 
 function invariantInsideRoot(path) {
   if (path !== root && !path.startsWith(`${root}/`)) {

@@ -25,18 +25,12 @@ mod tests {
     const MODEL_SIZE: f32 = 640.0;
     const EPSILON: f32 = 1.0e-6;
 
-    macro_rules! rfb_val_red_test {
+    macro_rules! rfb_val_test {
         ($id:literal, $name:ident, $body:block) => {
             #[test]
             fn $name() {
                 fn run() -> Result<(), ContractError> $body
-                let result = run();
-                if let Err(error) = result {
-                    panic!(
-                        "{}: target_assertion: expected contract behavior; actual={}",
-                        $id, error
-                    );
-                }
+                run().unwrap_or_else(|error| panic!("{}: contract assertion failed: {}", $id, error));
             }
         };
     }
@@ -108,6 +102,20 @@ mod tests {
             coordinate_scale: MODEL_SIZE,
             nms_fused: false,
         }
+    }
+
+    fn runtime_manifest() -> Value {
+        read_json("evidence/manifest/validation-runtime-manifest.json")
+    }
+
+    fn manifest_artifact(id: &str) -> Value {
+        runtime_manifest()["artifacts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|artifact| artifact["id"] == id)
+            .unwrap()
+            .clone()
     }
 
     fn input_spec(layout: TensorLayout, dtype: TensorDType) -> TensorSpec {
@@ -261,7 +269,7 @@ mod tests {
         }
     }
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-IO-001",
         rfb_val_io_001_layout_and_dtype_preserve_logical_image,
         {
@@ -274,11 +282,33 @@ mod tests {
                 nchw.data, nhwc.data,
                 "layout-specific byte order must differ"
             );
+            let mut u8_spec = input_spec(TensorLayout::Nhwc, TensorDType::U8);
+            u8_spec.quantization = Some(Quantization {
+                scale: 1.0 / 255.0,
+                zero_point: 0,
+            });
+            let u8_tensor = prepare_input(&image, &u8_spec)?;
+            assert_eq!(u8_tensor.data, TensorData::U8(image.rgb.clone()));
+            let manifest = runtime_manifest();
+            assert_eq!(
+                manifest["baseRuntime"]["commit"],
+                "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3"
+            );
+            assert_eq!(
+                manifest["model"]["sha256"],
+                read_json("evidence/model/model-contract.json")["source"]["modelSha256"]
+            );
+            for artifact_id in ["web-onnx-wasm", "legacy-native-ort", "host-nchw"] {
+                let artifact = manifest_artifact(artifact_id);
+                assert_eq!(artifact["input"]["role"], "image");
+                assert_eq!(artifact["input"]["layout"], "NCHW");
+                assert_eq!(artifact["output"]["role"], "detections");
+            }
             Ok(())
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-IO-002",
         rfb_val_io_002_invalid_quantization_is_rejected,
         {
@@ -295,7 +325,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-ROLE-001",
         rfb_val_role_001_renamed_output_maps_to_detections,
         {
@@ -307,14 +337,21 @@ mod tests {
                     *value /= MODEL_SIZE;
                 }
             }
-            let logical = normalize_output(&spec, &runtime_tensor(&spec, normalized))?;
+            let mut runtime = runtime_tensor(&spec, normalized);
+            runtime.name = "renamed-without-framework-contract".to_owned();
+            runtime.index = 91;
+            let logical = normalize_output(&spec, &runtime)?;
             assert_eq!(logical.role, LogicalRole::Detections);
+            let web = manifest_artifact("web-onnx-wasm");
+            let legacy = manifest_artifact("legacy-native-ort");
+            assert_eq!(web["output"]["role"], "detections");
+            assert_eq!(legacy["output"]["role"], "detections");
             decode_and_nms(&fixture, &logical.values);
             Ok(())
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-ROLE-002",
         rfb_val_role_002_missing_output_role_is_rejected,
         {
@@ -328,7 +365,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-GOLDEN-001",
         rfb_val_golden_001_all_raw_and_decoded_fixtures_match,
         {
@@ -346,7 +383,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-GOLDEN-002",
         rfb_val_golden_002_out_of_tolerance_output_is_rejected,
         {
@@ -366,7 +403,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-POST-001",
         rfb_val_post_001_preprocessing_responsibility_is_applied_once,
         {
@@ -397,7 +434,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-POST-002",
         rfb_val_post_002_decode_and_nms_have_one_owner,
         {
@@ -420,7 +457,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-DETERMINISM-001",
         rfb_val_determinism_001_three_logical_runs_are_identical,
         {
@@ -452,7 +489,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-FIXTURE-001",
         rfb_val_fixture_001_web_golden_covers_all_image_fixtures,
         {
@@ -485,7 +522,7 @@ mod tests {
         }
     );
 
-    rfb_val_red_test!(
+    rfb_val_test!(
         "RFB-VAL-FIXTURE-002",
         rfb_val_fixture_002_missing_tolerance_is_rejected,
         {

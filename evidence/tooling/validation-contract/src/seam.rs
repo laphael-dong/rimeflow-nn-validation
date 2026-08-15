@@ -1,7 +1,8 @@
-//! 仅供第 2 阶段红测使用的确定性 seam。
+//! Validation-side adapters for the frozen runtime manifest.
 //!
-//! 第 5 阶段接入真实 manifest/adapter 时，应以生产实现替换这些入口；本阶段不得在这里
-//! 预先实现 layout、dtype、量化、逻辑 role 或后处理责任分派。
+//! The adapter deliberately receives a logical role from the manifest. Runtime
+//! tensor names and indexes are retained as diagnostics only; they are not used
+//! to infer the image or detections role.
 
 #![allow(dead_code)]
 
@@ -101,66 +102,271 @@ pub struct PostprocessPlan {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ContractError {
-    NotImplemented(&'static str),
     MissingLogicalRole,
     UnsupportedInputContract,
     InvalidQuantization,
     GoldenMismatch,
     MissingTolerance,
+    TensorShapeMismatch,
+    TensorDataMismatch,
+    NonFiniteTensor,
 }
 
 impl fmt::Display for ContractError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::NotImplemented(feature) => write!(formatter, "not_implemented({feature})"),
             Self::MissingLogicalRole => formatter.write_str("missing_logical_role"),
             Self::UnsupportedInputContract => formatter.write_str("unsupported_input_contract"),
             Self::InvalidQuantization => formatter.write_str("invalid_quantization"),
             Self::GoldenMismatch => formatter.write_str("golden_mismatch"),
             Self::MissingTolerance => formatter.write_str("missing_tolerance"),
+            Self::TensorShapeMismatch => formatter.write_str("tensor_shape_mismatch"),
+            Self::TensorDataMismatch => formatter.write_str("tensor_data_mismatch"),
+            Self::NonFiniteTensor => formatter.write_str("non_finite_tensor"),
         }
     }
 }
 
 pub fn prepare_input(
-    _image: &LogicalImage,
-    _spec: &TensorSpec,
+    image: &LogicalImage,
+    spec: &TensorSpec,
 ) -> Result<RuntimeTensor, ContractError> {
-    Err(ContractError::NotImplemented(
-        "logical image layout/dtype/quantization adapter",
-    ))
+    if spec.role != Some(LogicalRole::Image)
+        || !matches!(spec.layout, TensorLayout::Nchw | TensorLayout::Nhwc)
+        || image.width == 0
+        || image.height == 0
+        || image.rgb.len() != image.width * image.height * 3
+        || spec.shape.len() != 4
+    {
+        return Err(ContractError::UnsupportedInputContract);
+    }
+    let expected_shape = match spec.layout {
+        TensorLayout::Nchw => vec![1, 3, image.height, image.width],
+        TensorLayout::Nhwc => vec![1, image.height, image.width, 3],
+        TensorLayout::AttributesAnchors => unreachable!(),
+    };
+    if spec.shape != expected_shape {
+        return Err(ContractError::TensorShapeMismatch);
+    }
+    if let Some(quantization) = spec.quantization {
+        if !quantization.scale.is_finite() || quantization.scale <= 0.0 {
+            return Err(ContractError::InvalidQuantization);
+        }
+    }
+
+    let ordered = ordered_rgb(image, spec.layout);
+    let data = match spec.dtype {
+        TensorDType::F32 => {
+            if spec.quantization.is_some() {
+                return Err(ContractError::UnsupportedInputContract);
+            }
+            TensorData::F32(
+                ordered
+                    .into_iter()
+                    .map(|value| value as f32 / 255.0)
+                    .collect(),
+            )
+        }
+        TensorDType::U8 => {
+            let quantization = spec
+                .quantization
+                .ok_or(ContractError::InvalidQuantization)?;
+            TensorData::U8(
+                ordered
+                    .into_iter()
+                    .map(|value| {
+                        ((value as f32 / 255.0) / quantization.scale).round() as i32
+                            + quantization.zero_point
+                    })
+                    .map(|value| value.clamp(0, 255) as u8)
+                    .collect(),
+            )
+        }
+        TensorDType::I8 => {
+            let quantization = spec
+                .quantization
+                .ok_or(ContractError::InvalidQuantization)?;
+            TensorData::I8(
+                ordered
+                    .into_iter()
+                    .map(|value| {
+                        ((value as f32 / 255.0) / quantization.scale).round() as i32
+                            + quantization.zero_point
+                    })
+                    .map(|value| value.clamp(-128, 127) as i8)
+                    .collect(),
+            )
+        }
+    };
+    Ok(RuntimeTensor {
+        name: spec.runtime_name.clone(),
+        index: spec.runtime_index,
+        shape: spec.shape.clone(),
+        data,
+    })
 }
 
 pub fn normalize_output(
-    _spec: &TensorSpec,
-    _runtime_tensor: &RuntimeTensor,
+    spec: &TensorSpec,
+    runtime_tensor: &RuntimeTensor,
 ) -> Result<LogicalTensor, ContractError> {
-    Err(ContractError::NotImplemented(
-        "runtime output to logical role mapping",
-    ))
+    if spec.role != Some(LogicalRole::Detections) {
+        return Err(ContractError::MissingLogicalRole);
+    }
+    if spec.layout != TensorLayout::AttributesAnchors || spec.shape != runtime_tensor.shape {
+        return Err(ContractError::TensorShapeMismatch);
+    }
+    let expected = product(&spec.shape).ok_or(ContractError::TensorShapeMismatch)?;
+    let mut values = match (&spec.dtype, &runtime_tensor.data) {
+        (TensorDType::F32, TensorData::F32(values)) => values.clone(),
+        (TensorDType::U8, TensorData::U8(values)) => dequantize_u8(values, spec.quantization)?,
+        (TensorDType::I8, TensorData::I8(values)) => dequantize_i8(values, spec.quantization)?,
+        _ => return Err(ContractError::TensorDataMismatch),
+    };
+    if values.len() != expected {
+        return Err(ContractError::TensorDataMismatch);
+    }
+    if values.iter().any(|value| !value.is_finite()) {
+        return Err(ContractError::NonFiniteTensor);
+    }
+    if !spec.coordinate_scale.is_finite() || spec.coordinate_scale <= 0.0 {
+        return Err(ContractError::UnsupportedInputContract);
+    }
+    if spec.coordinate_scale != 1.0 {
+        let anchors = *spec
+            .shape
+            .last()
+            .ok_or(ContractError::TensorShapeMismatch)?;
+        if spec.shape.len() != 3 || spec.shape[1] < 4 {
+            return Err(ContractError::TensorShapeMismatch);
+        }
+        for attribute in 0..4 {
+            for value in &mut values[attribute * anchors..(attribute + 1) * anchors] {
+                *value *= spec.coordinate_scale;
+            }
+        }
+    }
+    Ok(LogicalTensor {
+        role: LogicalRole::Detections,
+        shape: spec.shape.clone(),
+        values,
+    })
 }
 
 pub fn compare_raw_golden(
-    _reference: &LogicalTensor,
-    _candidate: &LogicalTensor,
-    _tolerance: &GoldenTolerance,
+    reference: &LogicalTensor,
+    candidate: &LogicalTensor,
+    tolerance: &GoldenTolerance,
 ) -> Result<(), ContractError> {
-    Err(ContractError::NotImplemented(
-        "frozen raw/decoded golden comparison",
-    ))
+    let absolute = tolerance
+        .raw_absolute
+        .ok_or(ContractError::MissingTolerance)?;
+    let relative = tolerance
+        .raw_relative
+        .ok_or(ContractError::MissingTolerance)?;
+    if !absolute.is_finite() || absolute < 0.0 || !relative.is_finite() || relative < 0.0 {
+        return Err(ContractError::MissingTolerance);
+    }
+    if reference.role != LogicalRole::Detections
+        || candidate.role != LogicalRole::Detections
+        || reference.shape != candidate.shape
+        || reference.values.len() != candidate.values.len()
+    {
+        return Err(ContractError::GoldenMismatch);
+    }
+    for (reference, candidate) in reference.values.iter().zip(&candidate.values) {
+        if !reference.is_finite() || !candidate.is_finite() {
+            return Err(ContractError::NonFiniteTensor);
+        }
+        if (reference - candidate).abs() > absolute + relative * reference.abs() {
+            return Err(ContractError::GoldenMismatch);
+        }
+    }
+    Ok(())
 }
 
 pub fn validate_golden_summary(
-    _summary: &GoldenSummary,
-    _tolerance: &GoldenTolerance,
+    summary: &GoldenSummary,
+    tolerance: &GoldenTolerance,
 ) -> Result<(), ContractError> {
-    Err(ContractError::NotImplemented(
-        "logical role and golden summary validation",
-    ))
+    if tolerance.raw_absolute.is_none()
+        || tolerance.raw_relative.is_none()
+        || tolerance.confidence_absolute.is_none()
+        || tolerance.box_iou_minimum.is_none()
+    {
+        return Err(ContractError::MissingTolerance);
+    }
+    if summary.role != Some(LogicalRole::Detections)
+        || summary.shape != [1, 84, 8400]
+        || summary.element_count != 84 * 8400
+        || summary.finite_count != summary.element_count
+        || summary.raw_digest.len() != 64
+        || !summary
+            .raw_digest
+            .bytes()
+            .all(|value| value.is_ascii_hexdigit())
+    {
+        return Err(ContractError::GoldenMismatch);
+    }
+    Ok(())
 }
 
-pub fn resolve_postprocess_plan(_spec: &TensorSpec) -> Result<PostprocessPlan, ContractError> {
-    Err(ContractError::NotImplemented(
-        "single postprocess responsibility plan",
-    ))
+pub fn resolve_postprocess_plan(spec: &TensorSpec) -> Result<PostprocessPlan, ContractError> {
+    if spec.role != Some(LogicalRole::Detections)
+        || spec.layout != TensorLayout::AttributesAnchors
+        || spec.shape != [1, 84, 8400]
+    {
+        return Err(ContractError::UnsupportedInputContract);
+    }
+    Ok(PostprocessPlan {
+        decode_in_operator: true,
+        threshold_in_operator: true,
+        nms_in_operator: !spec.nms_fused,
+    })
+}
+
+fn ordered_rgb(image: &LogicalImage, layout: TensorLayout) -> Vec<u8> {
+    match layout {
+        TensorLayout::Nhwc => image.rgb.clone(),
+        TensorLayout::Nchw => (0..3)
+            .flat_map(|channel| {
+                (0..image.width * image.height).map(move |pixel| image.rgb[pixel * 3 + channel])
+            })
+            .collect(),
+        TensorLayout::AttributesAnchors => unreachable!(),
+    }
+}
+
+fn product(shape: &[usize]) -> Option<usize> {
+    shape
+        .iter()
+        .try_fold(1usize, |total, dimension| total.checked_mul(*dimension))
+}
+
+fn dequantize_u8(
+    values: &[u8],
+    quantization: Option<Quantization>,
+) -> Result<Vec<f32>, ContractError> {
+    let quantization = quantization.ok_or(ContractError::InvalidQuantization)?;
+    if !quantization.scale.is_finite() || quantization.scale <= 0.0 {
+        return Err(ContractError::InvalidQuantization);
+    }
+    Ok(values
+        .iter()
+        .map(|value| (*value as i32 - quantization.zero_point) as f32 * quantization.scale)
+        .collect())
+}
+
+fn dequantize_i8(
+    values: &[i8],
+    quantization: Option<Quantization>,
+) -> Result<Vec<f32>, ContractError> {
+    let quantization = quantization.ok_or(ContractError::InvalidQuantization)?;
+    if !quantization.scale.is_finite() || quantization.scale <= 0.0 {
+        return Err(ContractError::InvalidQuantization);
+    }
+    Ok(values
+        .iter()
+        .map(|value| (*value as i32 - quantization.zero_point) as f32 * quantization.scale)
+        .collect())
 }
