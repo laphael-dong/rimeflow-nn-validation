@@ -33,7 +33,7 @@ model-embedded    = []
 # a checkout under `../rimeflow-onnx-base/`, add a workspace-root `[patch]`
 # section (rimecut's Cargo.toml has the reference pattern).
 [dependencies]
-rimeflow-onnx-base = { git = "https://github.com/caozisheng/rimeflow-onnx-base", branch = "main" }
+rimeflow-onnx-base = { git = "https://github.com/laphael-dong/rimeflow-nn-base.git", rev = "aaff04fa416b0366d6e69a61b4887b6d2fdd4215" }
 wgpu     = { version = "29", default-features = false, features = ["wgsl"] }
 bytemuck = { version = "1", features = ["derive"] }
 
@@ -52,4 +52,4 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [build-dependencies]
-rimeflow-onnx-base = { git = "https://github.com/caozisheng/rimeflow-onnx-base", branch = "main", features = ["build-helper"] }
+rimeflow-onnx-base = { git = "https://github.com/laphael-dong/rimeflow-nn-base.git", rev = "aaff04fa416b0366d6e69a61b4887b6d2fdd4215", features = ["build-helper"] }
