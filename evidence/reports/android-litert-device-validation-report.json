@@ -1,0 +1,449 @@
+{
+  "candidate": {
+    "candidateId": "rimeflow-yolov8n-android-litert-fp32-794e17d9a279",
+    "manifestSha256": "365567e382a6edfb590ee9caae4dc290d4d320e2c2151b064761e7a7770b8ed5",
+    "reportSha256": "f18dca9363ae30fc76888ee290d8da6d27677776834998dffecb94d523daeab7",
+    "runnerBundleId": "sha256-0c309e3f63aa69920a1ac55a42b0a5211771671bf7df0fa180205550ce535866",
+    "runnerCommit": "52c85ec737dc4b4ab482f6c2654f914150c4dfae",
+    "sourceCheckpointSha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+    "tfliteSha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+    "validationCommit": "c7bca1cdc1235bbb294c0e40cdfcfacfdc95a660"
+  },
+  "deviceEvidence": {
+    "dispatchId": "ctx_67518c7c38fb",
+    "evidenceManifest": {
+      "path": "evidence-manifest.json",
+      "sha256": "bc7ab86c8afc89b019ed3831fdad0a23ec9b2d15d8ec2c9adba6d765a5b322ff"
+    },
+    "executionSummary": {
+      "path": "execution-summary.json",
+      "sha256": "0f45ab0fbe30d0017b6c70c5e43e04a17838d89dd947ccecbf7a0c0f8f2337db"
+    },
+    "immutableRootId": ".device-evidence/rfb-android-device-accept-02",
+    "manifestParity": {
+      "actualFileCount": 164,
+      "declaredFileCount": 164,
+      "duplicateEntryCount": 0,
+      "everyByteCountMatched": true,
+      "everySha256Matched": true,
+      "extraFileCount": 0,
+      "missingFileCount": 0,
+      "selfEntryCount": 0,
+      "status": "passed"
+    },
+    "runId": "run_88ee582c93cd",
+    "taskId": "task_e723335e3bb8",
+    "workerReport": {
+      "path": "worker-report.md",
+      "sha256": "5cb262c23a5b6ee03b278de1aed7d1a28de3b25392f6f680e38936845fe92081"
+    }
+  },
+  "faultContract": {
+    "initialization": {
+      "contractOutcome": "UseWebFallback-eligible",
+      "failureStage": "ArtifactIntegrity",
+      "fallbackExecutionClaimed": false,
+      "interpretation": "The accepted runner schema has no explicit UseWebFallback field; no host fallback execution was claimed.",
+      "resolvedBackend": false,
+      "selectionCode": "adapter_or_artifact_unavailable"
+    },
+    "postReady": {
+      "backendRecreationObserved": false,
+      "backendSwitchObserved": false,
+      "contractOutcome": "InferenceError-style",
+      "failureStage": "inference",
+      "resolvedBackendRetained": true,
+      "selectionCode": "invalid_tensor_bytes"
+    },
+    "source": {
+      "path": "fault-fallback-summary.json",
+      "sha256": "3c23a7fc9747a05f776bd304ae979227e9d7243ee5ec6a66de6c210bcc8e307e"
+    },
+    "status": "observations-match-contract-boundaries"
+  },
+  "goldenComparison": {
+    "coordinateMapping": "multiply attributes 0..3 by 640 to reverse the official Ultralytics LiteRT _NormalizeCoords wrapper",
+    "fixtures": [
+      {
+        "beforeNmsCount": 0,
+        "decodedComparison": {
+          "anchorMismatchCount": 0,
+          "classMismatchCount": 0,
+          "countMismatch": false,
+          "maximumConfidenceAbsolute": 0.0,
+          "maximumDecodedBboxAbsolute": 0.0,
+          "minimumBboxIou": null
+        },
+        "decodedCount": 0,
+        "determinism": {
+          "exact": true,
+          "rawDeviceSha256": [
+            "0884ad63436a38d6214d51d00155dcc785bfbe45bd9eed5ad28d58bc55b66f6a",
+            "0884ad63436a38d6214d51d00155dcc785bfbe45bd9eed5ad28d58bc55b66f6a"
+          ],
+          "runs": 2
+        },
+        "fixtureId": "no-detection",
+        "mappedRawSha256": "bb63e05498d5e6ce81ef4a89dd27258ccf3b6b8c725ad2725ebf7dbf05a8a35b",
+        "mismatches": [],
+        "rawComparison": {
+          "maxAbsolute": 0.0015869140625,
+          "maxAbsoluteLocation": [
+            0,
+            2,
+            8351
+          ],
+          "maxRelative": 4.391966819763184,
+          "maxRelativeLocation": [
+            0,
+            66,
+            6061
+          ],
+          "mismatchCount": 0,
+          "nearZeroPolicy": {
+            "absoluteToleranceOnly": true,
+            "count": 23422,
+            "threshold": 1e-12
+          }
+        },
+        "webDecodedCount": 0,
+        "webRawSha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+      },
+      {
+        "beforeNmsCount": 9,
+        "decodedComparison": {
+          "anchorMismatchCount": 0,
+          "classMismatchCount": 0,
+          "countMismatch": false,
+          "maximumConfidenceAbsolute": 3.569931030789064e-07,
+          "maximumDecodedBboxAbsolute": 9.196268602185143e-08,
+          "minimumBboxIou": 0.9999996774706684
+        },
+        "decodedCount": 1,
+        "determinism": {
+          "exact": true,
+          "rawDeviceSha256": [
+            "5f21248b82cd5370d310da7bdb149b868239fffb9e95495134f3b274e6d56a16",
+            "5f21248b82cd5370d310da7bdb149b868239fffb9e95495134f3b274e6d56a16"
+          ],
+          "runs": 2
+        },
+        "fixtureId": "single-target",
+        "mappedRawSha256": "d634afeb859f8a17c95adc81f0f0e3d5ab63a32370176aae496dfca94f3ccbaa",
+        "mismatches": [],
+        "rawComparison": {
+          "maxAbsolute": 0.002166748046875,
+          "maxAbsoluteLocation": [
+            0,
+            2,
+            8047
+          ],
+          "maxRelative": 4.278779029846191,
+          "maxRelativeLocation": [
+            0,
+            13,
+            4135
+          ],
+          "mismatchCount": 0,
+          "nearZeroPolicy": {
+            "absoluteToleranceOnly": true,
+            "count": 64020,
+            "threshold": 1e-12
+          }
+        },
+        "webDecodedCount": 1,
+        "webRawSha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+      },
+      {
+        "beforeNmsCount": 48,
+        "decodedComparison": {
+          "anchorMismatchCount": 0,
+          "classMismatchCount": 0,
+          "countMismatch": false,
+          "maximumConfidenceAbsolute": 1.137239227289033e-06,
+          "maximumDecodedBboxAbsolute": 1.9677545026741683e-07,
+          "minimumBboxIou": 0.9999991741265476
+        },
+        "decodedCount": 5,
+        "determinism": {
+          "exact": true,
+          "rawDeviceSha256": [
+            "af87e2fe53c08b4e4c76573fbf6e01c7db2d20184eb10dbfbc5ef835a8836314",
+            "af87e2fe53c08b4e4c76573fbf6e01c7db2d20184eb10dbfbc5ef835a8836314"
+          ],
+          "runs": 2
+        },
+        "fixtureId": "multi-class",
+        "mappedRawSha256": "f9b48d582eee457e00b7dd05118c91ca6311a26db9388c2da505b7ddce40ad2e",
+        "mismatches": [],
+        "rawComparison": {
+          "maxAbsolute": 0.00201416015625,
+          "maxAbsoluteLocation": [
+            0,
+            2,
+            6826
+          ],
+          "maxRelative": 4.291727542877197,
+          "maxRelativeLocation": [
+            0,
+            50,
+            242
+          ],
+          "mismatchCount": 0,
+          "nearZeroPolicy": {
+            "absoluteToleranceOnly": true,
+            "count": 76470,
+            "threshold": 1e-12
+          }
+        },
+        "webDecodedCount": 5,
+        "webRawSha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+      },
+      {
+        "beforeNmsCount": 46,
+        "decodedComparison": {
+          "anchorMismatchCount": 0,
+          "classMismatchCount": 0,
+          "countMismatch": false,
+          "maximumConfidenceAbsolute": 8.349082183944923e-07,
+          "maximumDecodedBboxAbsolute": 1.320935548859703e-07,
+          "minimumBboxIou": 0.9999990222415206
+        },
+        "decodedCount": 5,
+        "determinism": {
+          "exact": true,
+          "rawDeviceSha256": [
+            "310d1e1f11d195266bcc6e87ccd84e9bb5b115f2a785ecdbcf4f54828d3097f5",
+            "310d1e1f11d195266bcc6e87ccd84e9bb5b115f2a785ecdbcf4f54828d3097f5"
+          ],
+          "runs": 2
+        },
+        "fixtureId": "boundary-box",
+        "mappedRawSha256": "5081ad04d59f47019121186af7a72533d540088d59e7240e072a030eb66b6bd3",
+        "mismatches": [],
+        "rawComparison": {
+          "maxAbsolute": 0.002105712890625,
+          "maxAbsoluteLocation": [
+            0,
+            2,
+            6826
+          ],
+          "maxRelative": 4.296241283416748,
+          "maxRelativeLocation": [
+            0,
+            70,
+            6004
+          ],
+          "mismatchCount": 0,
+          "nearZeroPolicy": {
+            "absoluteToleranceOnly": true,
+            "count": 75796,
+            "threshold": 1e-12
+          }
+        },
+        "webDecodedCount": 5,
+        "webRawSha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+      },
+      {
+        "beforeNmsCount": 8,
+        "decodedComparison": {
+          "anchorMismatchCount": 0,
+          "classMismatchCount": 0,
+          "countMismatch": false,
+          "maximumConfidenceAbsolute": 4.189479064775625e-07,
+          "maximumDecodedBboxAbsolute": 2.4541931153976293e-08,
+          "minimumBboxIou": 0.9999993026392707
+        },
+        "decodedCount": 1,
+        "determinism": {
+          "exact": true,
+          "rawDeviceSha256": [
+            "15532cd904c1e1ca3196986ebbd3ba5fa3b2f47f4f3eb994fcaff52f839fffca",
+            "15532cd904c1e1ca3196986ebbd3ba5fa3b2f47f4f3eb994fcaff52f839fffca"
+          ],
+          "runs": 2
+        },
+        "fixtureId": "extreme-aspect",
+        "mappedRawSha256": "270b76004c8ccecd7f0a963b807659ffae27ec6171af2f45966765301d785969",
+        "mismatches": [],
+        "rawComparison": {
+          "maxAbsolute": 0.002655029296875,
+          "maxAbsoluteLocation": [
+            0,
+            2,
+            8070
+          ],
+          "maxRelative": 4.217672348022461,
+          "maxRelativeLocation": [
+            0,
+            46,
+            6602
+          ],
+          "mismatchCount": 0,
+          "nearZeroPolicy": {
+            "absoluteToleranceOnly": true,
+            "count": 82441,
+            "threshold": 1e-12
+          }
+        },
+        "webDecodedCount": 1,
+        "webRawSha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+      }
+    ],
+    "frozenReference": {
+      "path": "evidence/golden/web-reference.json",
+      "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+    },
+    "summary": {
+      "anchorMismatchCount": 0,
+      "classMismatchCount": 0,
+      "countMismatchCount": 0,
+      "deterministic": true,
+      "fixtureCount": 5,
+      "maximumConfidenceAbsolute": 1.137239227289033e-06,
+      "maximumDecodedBboxAbsolute": 1.9677545026741683e-07,
+      "maximumRawAbsolute": 0.002655029296875,
+      "minimumBboxIou": 0.9999990222415206,
+      "passed": true,
+      "rawMismatchCount": 0
+    },
+    "toleranceCanonicalSha256": "8d2ac80770ce336df0e1cded48bb0c225c808f5f8e0ee428b2821952edb6ba80",
+    "tolerances": {
+      "boxIouMinimum": 0.999,
+      "classIdExact": true,
+      "confidenceAbsolute": 0.0001,
+      "decodedBoxAbsolute": 0.0001,
+      "frozenBeforeNativeAdapterResults": true,
+      "missingValuePolicy": "fail",
+      "nonFinitePolicy": "fail",
+      "rawTensorAbsolute": 1e-05,
+      "rawTensorRelative": 0.0001
+    }
+  },
+  "ioContract": {
+    "accelerator": "CPU",
+    "backendKind": "lite_rt_v2",
+    "executionPath": [
+      "AndroidLiteRtV2Factory",
+      "CompiledModel",
+      "RuntimeBackend::infer"
+    ],
+    "input": {
+      "dtype": "f32",
+      "layout": "NCHW",
+      "namesAreDistinct": true,
+      "role": "image",
+      "runtimeIndex": 0,
+      "runtimeName": "serving_default_args_0",
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "signatureBindingName": "args_0"
+    },
+    "output": {
+      "allFinite": true,
+      "dtype": "f32",
+      "elementCount": 705600,
+      "finiteElementCount": 705600,
+      "layout": "NCHW",
+      "namesAreDistinct": true,
+      "role": "detections",
+      "runtimeIndex": 0,
+      "runtimeName": "serving_default_output_0_output",
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "signatureBindingName": "output_0"
+    },
+    "outputLayoutInterpretation": {
+      "frozenSemanticLayout": "N_ATTRIBUTES_ANCHORS",
+      "identityMapping": "identity: runtime output already uses [batch,attribute,anchor] [1,84,8400]",
+      "runnerRankLayout": "NCHW",
+      "shape": [
+        1,
+        84,
+        8400
+      ]
+    },
+    "provider": "LiteRT CompiledModel",
+    "runtimeVersion": "2.1.6",
+    "source": {
+      "path": "io-contract.json",
+      "sha256": "a1b655d7aebf88d953de8f1cb05845673176a31ebe979e2b9020aa1a443f633b"
+    },
+    "status": "matched"
+  },
+  "ownership": {
+    "finalCloseOwner": "RFB-ANDROID-BASE-CLOSE-01",
+    "platformMatrixChanged": false,
+    "supportedDecisionMade": false
+  },
+  "performance": {
+    "absoluteMetrics": {
+      "bundleBytes": {
+        "model": 12841227,
+        "runner": 1703600,
+        "runtime": 5246296
+      },
+      "coldInferenceMs": 131.493177,
+      "initializationMs": 233,
+      "measuredSampleCount": 30,
+      "peakProcessRssBytes": 116412416,
+      "resolvedInitializationMs": 202,
+      "warmInferenceMs": {
+        "maxMs": 159.20000000000002,
+        "meanMs": 151.3271631333333,
+        "medianMs": 152.133386,
+        "minMs": 134.936667
+      },
+      "warmupRuns": 5
+    },
+    "exception": {
+      "approved": true,
+      "deviceSerial": "RFCX90C568W",
+      "expiry": "independent Validation report completion",
+      "kind": "non-submitter-absolute-metric",
+      "notGoldenApproval": true,
+      "notPerformanceApproval": true,
+      "notSupportedStatus": true,
+      "reason": "No approved Legacy Native ORT or Web ONNX comparator was runnable meaningfully on the same authorized phone.",
+      "scope": "this repaired-bundle attempt"
+    },
+    "outcome": "exception-recorded-no-comparative-pass",
+    "packageLoad": {
+      "accelerator": "CPU",
+      "loadedLibraryCount": 50,
+      "loadedRuntimeSha256": "35e34acfb76722868b0fe6bccab9d4432ac3f9fe95e7f29d2d6c030b66052369",
+      "runtimeShaMatches": true,
+      "status": "passed"
+    },
+    "performancePassed": false,
+    "samePhoneBaselineAvailable": false,
+    "source": {
+      "path": "performance-summary.json",
+      "sha256": "d73553ac1ca4051c80b4522330e0f221a0cb5cdad668fec7b8e5e35824b44899"
+    }
+  },
+  "reportId": "RFB-ANDROID-VAL-REPORT-01",
+  "requirementTrace": {
+    "path": "evidence/requirements/android-litert-device-validation-trace.json",
+    "sha256": "9b79186904a78033baf1a5cda71895950ea7772c6199b22c77cb9f609b6cf6c2"
+  },
+  "schema": {
+    "path": "evidence/schemas/android-litert-device-validation-report.schema.json",
+    "sha256": "ee699614b3c7de5001416a6ef7d88b786627aef71c196a366e440be243dc8e5f"
+  },
+  "schemaVersion": 1,
+  "status": {
+    "finalPlatformClose": false,
+    "performancePassed": false,
+    "supported": false,
+    "validationComparisonPassed": true,
+    "value": "device-golden-verified-pending-base-close"
+  }
+}

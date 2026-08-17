@@ -5,6 +5,28 @@
   "ownership": "Validation",
   "phase": "5-validation-manifest-golden",
   "validationManifestPath": "evidence/manifest/validation-runtime-manifest.json",
+  "androidLiteRtCandidateEvidence": {
+    "taskId": "RFB-ANDROID-VAL-CANDIDATE-01",
+    "manifestPath": "evidence/conversions/android-litert-candidate-manifest.json",
+    "reportPath": "evidence/reports/android-litert-candidate-report.json",
+    "requirementScenarios": [
+      "Model conversion preserves a golden behavior baseline::Detection artifact matches baseline",
+      "Artifact publication is gated by reproducible tests::Required artifact checks pass",
+      "Tested artifacts are immutable through release promotion::A package or model digest changes after testing"
+    ],
+    "tests": [
+      {
+        "testId": "RFB-ANDROID-VAL-CANDIDATE-001",
+        "command": "python3 evidence/scripts/android_litert_candidate.py --manifest evidence/conversions/android-litert-candidate-manifest.json --report evidence/reports/android-litert-candidate-report.json --bundle-root .evidence/litert/candidate-bundle --require-bundle",
+        "assertion": "两轮历史 TFLite/manifest 身份、五个输入 tensor、冻结 golden、tracked inputs、许可边界和本地 bundle 字节必须一致，且不得声称 Android target accepted 或 supported"
+      },
+      {
+        "testId": "RFB-ANDROID-VAL-CANDIDATE-002",
+        "command": "python3 evidence/scripts/test_android_litert_candidate_guards.py",
+        "assertion": "artifact、input、容差、target acceptance 或再分发边界任一漂移都必须被拒绝"
+      }
+    ]
+  },
   "baseRuntime": {
     "repository": "github/rimeflow-nn-base",
     "ref": "refs/heads/laphael-dong/os4-base-runtime-implement",

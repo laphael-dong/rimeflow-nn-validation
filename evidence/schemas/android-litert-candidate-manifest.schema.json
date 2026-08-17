@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://rimeflow.local/schemas/android-litert-candidate-manifest.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "candidateId": { "type": "string", "pattern": "^rimeflow-yolov8n-android-litert-fp32-[0-9a-f]{12}$" },
+    "contract": { "type": "object", "required": ["io", "mapping", "ownership"] },
+    "fixtures": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "golden": {
+            "additionalProperties": false,
+            "properties": {
+              "decodedCanonicalSha256": { "$ref": "#/definitions/sha256" },
+              "decodedCount": { "minimum": 0, "type": "integer" },
+              "hostMappedRawSha256": { "$ref": "#/definitions/sha256" },
+              "webRawSha256": { "$ref": "#/definitions/sha256" }
+            },
+            "required": ["decodedCanonicalSha256", "decodedCount", "hostMappedRawSha256", "webRawSha256"],
+            "type": "object"
+          },
+          "id": { "enum": ["no-detection", "single-target", "multi-class", "boundary-box", "extreme-aspect"] },
+          "input": {
+            "additionalProperties": false,
+            "properties": {
+              "byteOrder": { "const": "little-endian" },
+              "bytes": { "const": 4915200 },
+              "dtype": { "const": "float32" },
+              "path": { "pattern": "^inputs/[a-z-]+\\.f32le$", "type": "string" },
+              "sha256": { "$ref": "#/definitions/sha256" },
+              "shape": { "const": [1, 3, 640, 640] }
+            },
+            "required": ["byteOrder", "bytes", "dtype", "path", "sha256", "shape"],
+            "type": "object"
+          },
+          "license": {},
+          "sourceImageSha256": { "$ref": "#/definitions/sha256" }
+        },
+        "required": ["golden", "id", "input", "license", "sourceImageSha256"],
+        "type": "object"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "type": "array"
+    },
+    "hostProof": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison": { "type": "object" },
+        "goldenReport": { "type": "object" },
+        "replayArtifactManifestSha256": {
+          "items": { "$ref": "#/definitions/sha256" },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "replayArtifactSha256": {
+          "items": { "$ref": "#/definitions/sha256" },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "rounds": { "const": 2 }
+      },
+      "required": ["comparison", "goldenReport", "replayArtifactManifestSha256", "replayArtifactSha256", "rounds"],
+      "type": "object"
+    },
+    "licenses": { "type": "object" },
+    "model": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {
+          "additionalProperties": false,
+          "properties": {
+            "bytes": { "const": 12841227 },
+            "format": { "type": "string" },
+            "path": { "const": "model/yolov8n-fp32.tflite" },
+            "sha256": { "$ref": "#/definitions/sha256" }
+          },
+          "required": ["bytes", "format", "path", "sha256"],
+          "type": "object"
+        },
+        "canonicalOnnx": { "type": "object" },
+        "id": { "const": "rimeflow-yolov8n" },
+        "sourceCheckpoint": { "type": "object" },
+        "version": { "const": "yolov8n-onnx-20260707" }
+      },
+      "required": ["artifact", "canonicalOnnx", "id", "sourceCheckpoint", "version"],
+      "type": "object"
+    },
+    "provenance": { "type": "object" },
+    "schema": { "$ref": "#/definitions/fileIdentity" },
+    "schemaVersion": { "const": 1 },
+    "status": {
+      "additionalProperties": false,
+      "properties": {
+        "androidTargetAccepted": { "const": false },
+        "hostGoldenPassed": { "const": true },
+        "supported": { "const": false },
+        "value": { "const": "host-candidate-verified-pending-real-device" }
+      },
+      "required": ["androidTargetAccepted", "hostGoldenPassed", "supported", "value"],
+      "type": "object"
+    },
+    "target": {
+      "additionalProperties": false,
+      "properties": {
+        "architecture": { "const": "arm64-v8a" },
+        "backend": { "const": "litert-v2" },
+        "os": { "const": "android" },
+        "runtimeVersion": { "const": "2.1.6" }
+      },
+      "required": ["architecture", "backend", "os", "runtimeVersion"],
+      "type": "object"
+    },
+    "tolerances": { "type": "object" },
+    "usageScope": { "type": "object" }
+  },
+  "required": ["candidateId", "contract", "fixtures", "hostProof", "licenses", "model", "provenance", "schema", "schemaVersion", "status", "target", "tolerances", "usageScope"],
+  "title": "Android LiteRT device candidate manifest",
+  "type": "object",
+  "definitions": {
+    "fileIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": { "minimum": 1, "type": "integer" },
+        "path": { "minLength": 1, "type": "string" },
+        "sha256": { "$ref": "#/definitions/sha256" }
+      },
+      "required": ["bytes", "path", "sha256"],
+      "type": "object"
+    },
+    "sha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
+  }
+}

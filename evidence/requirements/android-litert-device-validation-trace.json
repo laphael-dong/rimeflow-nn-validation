@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "taskId": "RFB-ANDROID-VAL-REPORT-01",
+  "reportPath": "evidence/reports/android-litert-device-validation-report.json",
+  "schemaPath": "evidence/schemas/android-litert-device-validation-report.schema.json",
+  "requirementScenarios": [
+    "Input semantics are explicit::Layout and dtype differ by artifact",
+    "Output semantics are mapped by logical role::Converted artifact renames outputs",
+    "Model conversion preserves a golden behavior baseline::Detection artifact matches baseline",
+    "Native initialization failure has one Web fallback boundary::Native initialization fails",
+    "Runtime errors do not change the selected backend::Native inference fails after Ready",
+    "Physical-device acceptance gates supported status::A later platform passes every physical gate"
+  ],
+  "tests": [
+    {
+      "testId": "RFB-ANDROID-VAL-REPORT-001",
+      "command": "python3 evidence/scripts/android_litert_device_report.py --device-evidence-root \"$RFB_ANDROID_DEVICE_EVIDENCE_ROOT\" --web-reference-dir .evidence/litert/candidate-01/replay/round-2/web-reference --report evidence/reports/android-litert-device-validation-report.json",
+      "assertion": "只读设备证据的 164 项 manifest parity、I/O、五 fixture 双跑、冻结 golden、fault 边界、绝对性能指标和 package-load 必须复算一致；不得声称性能通过、supported 或最终平台闭合"
+    },
+    {
+      "testId": "RFB-ANDROID-VAL-REPORT-002",
+      "command": "python3 evidence/scripts/test_android_litert_device_report_guards.py",
+      "assertion": "冻结容差、raw mismatch、性能、fallback 执行或 supported 边界任一漂移都必须被拒绝"
+    }
+  ]
+}
