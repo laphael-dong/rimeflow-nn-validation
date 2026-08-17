@@ -12,6 +12,15 @@ from datetime import datetime, timezone
 from importlib.metadata import version
 from pathlib import Path
 
+from android_litert_candidate import (
+    EXPECTED_ARTIFACT_MANIFEST_SHA256,
+    EXPECTED_ARTIFACT_SHA256,
+    EXPECTED_SOURCE_SHA256,
+    build_candidate_manifest,
+    build_candidate_report,
+    validate_candidate_report,
+)
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -184,11 +193,18 @@ def main() -> int:
     parser.add_argument("--pt", required=True, type=Path)
     parser.add_argument("--workspace", default=".evidence/litert/replay", type=Path)
     parser.add_argument("--record", action="store_true")
+    parser.add_argument("--record-candidate", action="store_true")
+    parser.add_argument("--bundle-dir", default=".evidence/litert/candidate-bundle", type=Path)
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[2]
     source = args.pt.resolve(strict=True)
+    if sha256(source) != EXPECTED_SOURCE_SHA256:
+        raise SystemExit(
+            f"checkpoint SHA-256 mismatch: expected {EXPECTED_SOURCE_SHA256}, got {sha256(source)}"
+        )
     workspace = (root / args.workspace).resolve()
+    bundle_root = (root / args.bundle_dir).resolve()
     workspace.mkdir(parents=True, exist_ok=True)
     rounds = []
     stable_manifests = []
@@ -221,6 +237,12 @@ def main() -> int:
             raise SystemExit(f"round {round_number} conversion failed: {conversion['stderr']}")
         conversion_result = parse_last_json(conversion["stdout"])
         artifact_path = conversion_dir / "yolov8n.tflite"
+        artifact_sha256 = sha256(artifact_path)
+        if artifact_sha256 != EXPECTED_ARTIFACT_SHA256:
+            raise SystemExit(
+                f"round {round_number} produced a new failed candidate identity: "
+                f"expected {EXPECTED_ARTIFACT_SHA256}, got {artifact_sha256}"
+            )
         validation = execute(
             [
                 sys.executable,
@@ -231,6 +253,8 @@ def main() -> int:
                 str(web_dir),
                 "--output",
                 str(golden_path),
+                "--expected-artifact-sha256",
+                EXPECTED_ARTIFACT_SHA256,
             ],
             root,
             source,
@@ -241,6 +265,12 @@ def main() -> int:
         stable_manifest = stable_artifact_manifest(root, conversion_result, golden)
         stable_manifest_path = round_root / "artifact-manifest.json"
         stable_manifest_path.write_bytes(json_bytes(stable_manifest))
+        stable_manifest_sha256 = sha256(stable_manifest_path)
+        if stable_manifest_sha256 != EXPECTED_ARTIFACT_MANIFEST_SHA256:
+            raise SystemExit(
+                f"round {round_number} produced a new failed artifact manifest identity: "
+                f"expected {EXPECTED_ARTIFACT_MANIFEST_SHA256}, got {stable_manifest_sha256}"
+            )
         after = git_status(root)
         rounds.append(
             {
@@ -299,9 +329,30 @@ def main() -> int:
     replay_path = workspace / "litert-replay.json"
     replay_path.write_bytes(json_bytes(replay))
 
+    candidate_manifest = build_candidate_manifest(
+        root,
+        final_artifact,
+        workspace,
+        bundle_root,
+        rounds,
+        stable_manifests[1],
+        golden_reports[1],
+        comparison,
+    )
+    candidate_manifest_bytes = json_bytes(candidate_manifest)
+    candidate_workspace_path = workspace / "android-litert-candidate-manifest.json"
+    candidate_workspace_path.write_bytes(candidate_manifest_bytes)
+    (bundle_root / "manifest.json").write_bytes(candidate_manifest_bytes)
+    candidate_report = build_candidate_report(root, candidate_manifest, candidate_manifest_bytes)
+    candidate_report_bytes = json_bytes(candidate_report)
+    candidate_report_workspace_path = workspace / "android-litert-candidate-report.json"
+    candidate_report_workspace_path.write_bytes(candidate_report_bytes)
+
     tracked_manifest = root / "evidence/conversions/litert-artifact-manifest.json"
     tracked_golden = root / "evidence/reports/litert-golden-report.json"
     tracked_report = root / "evidence/reports/litert-conversion-report.json"
+    tracked_candidate_manifest = root / "evidence/conversions/android-litert-candidate-manifest.json"
+    tracked_candidate_report = root / "evidence/reports/android-litert-candidate-report.json"
     if args.record:
         tracked_manifest.write_bytes(json_bytes(stable_manifests[1]))
         tracked_golden.write_bytes(json_bytes(golden_reports[1]))
@@ -328,11 +379,28 @@ def main() -> int:
             if not path.exists() or path.read_bytes() != actual:
                 raise SystemExit(f"tracked LiteRT evidence drift: {path.relative_to(root)}")
 
+    if args.record_candidate:
+        tracked_candidate_manifest.write_bytes(candidate_manifest_bytes)
+        tracked_candidate_report.write_bytes(candidate_report_bytes)
+    else:
+        for path, actual in (
+            (tracked_candidate_manifest, candidate_manifest_bytes),
+            (tracked_candidate_report, candidate_report_bytes),
+        ):
+            if not path.exists() or path.read_bytes() != actual:
+                raise SystemExit(f"tracked Android LiteRT candidate evidence drift: {path.relative_to(root)}")
+    validate_candidate_report(root, candidate_report, candidate_manifest)
+
     print(
         json.dumps(
             {
                 "artifact": {"bytes": final_artifact.stat().st_size, "sha256": sha256(final_artifact)},
+                "candidateManifest": {
+                    "bytes": len(candidate_manifest_bytes),
+                    "sha256": hashlib.sha256(candidate_manifest_bytes).hexdigest(),
+                },
                 "comparison": comparison,
+                "recordedCandidate": args.record_candidate,
                 "recorded": args.record,
                 "replay": str(replay_path.relative_to(root)),
             },

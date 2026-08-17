@@ -1,0 +1,405 @@
+{
+  "$id": "https://rimeflow.local/schemas/android-litert-device-validation-report.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateId": { "minLength": 1, "type": "string" },
+        "manifestSha256": { "$ref": "#/definitions/sha256" },
+        "reportSha256": { "$ref": "#/definitions/sha256" },
+        "runnerBundleId": { "pattern": "^sha256-[0-9a-f]{64}$", "type": "string" },
+        "runnerCommit": { "$ref": "#/definitions/gitCommit" },
+        "sourceCheckpointSha256": { "$ref": "#/definitions/sha256" },
+        "tfliteSha256": { "$ref": "#/definitions/sha256" },
+        "validationCommit": { "$ref": "#/definitions/gitCommit" }
+      },
+      "required": [
+        "candidateId",
+        "manifestSha256",
+        "reportSha256",
+        "runnerBundleId",
+        "runnerCommit",
+        "sourceCheckpointSha256",
+        "tfliteSha256",
+        "validationCommit"
+      ],
+      "type": "object"
+    },
+    "deviceEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "dispatchId": { "const": "ctx_67518c7c38fb" },
+        "evidenceManifest": { "$ref": "#/definitions/fileIdentity" },
+        "executionSummary": { "$ref": "#/definitions/fileIdentity" },
+        "immutableRootId": { "const": ".device-evidence/rfb-android-device-accept-02" },
+        "manifestParity": {
+          "additionalProperties": false,
+          "properties": {
+            "actualFileCount": { "const": 164 },
+            "declaredFileCount": { "const": 164 },
+            "duplicateEntryCount": { "const": 0 },
+            "everyByteCountMatched": { "const": true },
+            "everySha256Matched": { "const": true },
+            "extraFileCount": { "const": 0 },
+            "missingFileCount": { "const": 0 },
+            "selfEntryCount": { "const": 0 },
+            "status": { "const": "passed" }
+          },
+          "required": [
+            "actualFileCount",
+            "declaredFileCount",
+            "duplicateEntryCount",
+            "everyByteCountMatched",
+            "everySha256Matched",
+            "extraFileCount",
+            "missingFileCount",
+            "selfEntryCount",
+            "status"
+          ],
+          "type": "object"
+        },
+        "runId": { "const": "run_88ee582c93cd" },
+        "taskId": { "const": "task_e723335e3bb8" },
+        "workerReport": { "$ref": "#/definitions/fileIdentity" }
+      },
+      "required": [
+        "dispatchId",
+        "evidenceManifest",
+        "executionSummary",
+        "immutableRootId",
+        "manifestParity",
+        "runId",
+        "taskId",
+        "workerReport"
+      ],
+      "type": "object"
+    },
+    "faultContract": {
+      "additionalProperties": false,
+      "properties": {
+        "initialization": {
+          "additionalProperties": false,
+          "properties": {
+            "contractOutcome": { "const": "UseWebFallback-eligible" },
+            "fallbackExecutionClaimed": { "const": false },
+            "failureStage": { "const": "ArtifactIntegrity" },
+            "interpretation": { "minLength": 1, "type": "string" },
+            "resolvedBackend": { "const": false },
+            "selectionCode": { "const": "adapter_or_artifact_unavailable" }
+          },
+          "required": [
+            "contractOutcome",
+            "fallbackExecutionClaimed",
+            "failureStage",
+            "interpretation",
+            "resolvedBackend",
+            "selectionCode"
+          ],
+          "type": "object"
+        },
+        "postReady": {
+          "additionalProperties": false,
+          "properties": {
+            "backendRecreationObserved": { "const": false },
+            "backendSwitchObserved": { "const": false },
+            "contractOutcome": { "const": "InferenceError-style" },
+            "failureStage": { "const": "inference" },
+            "resolvedBackendRetained": { "const": true },
+            "selectionCode": { "const": "invalid_tensor_bytes" }
+          },
+          "required": [
+            "backendRecreationObserved",
+            "backendSwitchObserved",
+            "contractOutcome",
+            "failureStage",
+            "resolvedBackendRetained",
+            "selectionCode"
+          ],
+          "type": "object"
+        },
+        "source": { "$ref": "#/definitions/fileIdentity" },
+        "status": { "const": "observations-match-contract-boundaries" }
+      },
+      "required": ["initialization", "postReady", "source", "status"],
+      "type": "object"
+    },
+    "goldenComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "coordinateMapping": { "minLength": 1, "type": "string" },
+        "fixtures": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "beforeNmsCount": { "minimum": 0, "type": "integer" },
+              "decodedComparison": { "type": "object" },
+              "decodedCount": { "minimum": 0, "type": "integer" },
+              "determinism": {
+                "additionalProperties": false,
+                "properties": {
+                  "exact": { "const": true },
+                  "rawDeviceSha256": {
+                    "items": { "$ref": "#/definitions/sha256" },
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "runs": { "const": 2 }
+                },
+                "required": ["exact", "rawDeviceSha256", "runs"],
+                "type": "object"
+              },
+              "fixtureId": {
+                "enum": [
+                  "no-detection",
+                  "single-target",
+                  "multi-class",
+                  "boundary-box",
+                  "extreme-aspect"
+                ]
+              },
+              "mappedRawSha256": { "$ref": "#/definitions/sha256" },
+              "mismatches": { "maxItems": 0, "type": "array" },
+              "rawComparison": { "type": "object" },
+              "webDecodedCount": { "minimum": 0, "type": "integer" },
+              "webRawSha256": { "$ref": "#/definitions/sha256" }
+            },
+            "required": [
+              "beforeNmsCount",
+              "decodedComparison",
+              "decodedCount",
+              "determinism",
+              "fixtureId",
+              "mappedRawSha256",
+              "mismatches",
+              "rawComparison",
+              "webDecodedCount",
+              "webRawSha256"
+            ],
+            "type": "object"
+          },
+          "maxItems": 5,
+          "minItems": 5,
+          "type": "array"
+        },
+        "frozenReference": { "$ref": "#/definitions/fileIdentity" },
+        "summary": {
+          "additionalProperties": false,
+          "properties": {
+            "anchorMismatchCount": { "const": 0 },
+            "classMismatchCount": { "const": 0 },
+            "countMismatchCount": { "const": 0 },
+            "deterministic": { "const": true },
+            "fixtureCount": { "const": 5 },
+            "maximumConfidenceAbsolute": { "minimum": 0, "type": "number" },
+            "maximumDecodedBboxAbsolute": { "minimum": 0, "type": "number" },
+            "maximumRawAbsolute": { "minimum": 0, "type": "number" },
+            "minimumBboxIou": { "maximum": 1, "minimum": 0.999, "type": "number" },
+            "passed": { "const": true },
+            "rawMismatchCount": { "const": 0 }
+          },
+          "required": [
+            "anchorMismatchCount",
+            "classMismatchCount",
+            "countMismatchCount",
+            "deterministic",
+            "fixtureCount",
+            "maximumConfidenceAbsolute",
+            "maximumDecodedBboxAbsolute",
+            "maximumRawAbsolute",
+            "minimumBboxIou",
+            "passed",
+            "rawMismatchCount"
+          ],
+          "type": "object"
+        },
+        "toleranceCanonicalSha256": { "$ref": "#/definitions/sha256" },
+        "tolerances": {
+          "additionalProperties": false,
+          "properties": {
+            "boxIouMinimum": { "const": 0.999 },
+            "classIdExact": { "const": true },
+            "confidenceAbsolute": { "const": 0.0001 },
+            "decodedBoxAbsolute": { "const": 0.0001 },
+            "frozenBeforeNativeAdapterResults": { "const": true },
+            "missingValuePolicy": { "const": "fail" },
+            "nonFinitePolicy": { "const": "fail" },
+            "rawTensorAbsolute": { "const": 0.00001 },
+            "rawTensorRelative": { "const": 0.0001 }
+          },
+          "required": [
+            "boxIouMinimum",
+            "classIdExact",
+            "confidenceAbsolute",
+            "decodedBoxAbsolute",
+            "frozenBeforeNativeAdapterResults",
+            "missingValuePolicy",
+            "nonFinitePolicy",
+            "rawTensorAbsolute",
+            "rawTensorRelative"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "coordinateMapping",
+        "fixtures",
+        "frozenReference",
+        "summary",
+        "toleranceCanonicalSha256",
+        "tolerances"
+      ],
+      "type": "object"
+    },
+    "ioContract": {
+      "additionalProperties": false,
+      "properties": {
+        "accelerator": { "const": "CPU" },
+        "backendKind": { "const": "lite_rt_v2" },
+        "executionPath": {
+          "const": ["AndroidLiteRtV2Factory", "CompiledModel", "RuntimeBackend::infer"]
+        },
+        "input": { "type": "object" },
+        "output": { "type": "object" },
+        "outputLayoutInterpretation": {
+          "additionalProperties": false,
+          "properties": {
+            "frozenSemanticLayout": { "const": "N_ATTRIBUTES_ANCHORS" },
+            "identityMapping": { "minLength": 1, "type": "string" },
+            "runnerRankLayout": { "const": "NCHW" },
+            "shape": { "const": [1, 84, 8400] }
+          },
+          "required": ["frozenSemanticLayout", "identityMapping", "runnerRankLayout", "shape"],
+          "type": "object"
+        },
+        "provider": { "const": "LiteRT CompiledModel" },
+        "runtimeVersion": { "const": "2.1.6" },
+        "source": { "$ref": "#/definitions/fileIdentity" },
+        "status": { "const": "matched" }
+      },
+      "required": [
+        "accelerator",
+        "backendKind",
+        "executionPath",
+        "input",
+        "output",
+        "outputLayoutInterpretation",
+        "provider",
+        "runtimeVersion",
+        "source",
+        "status"
+      ],
+      "type": "object"
+    },
+    "ownership": {
+      "additionalProperties": false,
+      "properties": {
+        "finalCloseOwner": { "const": "RFB-ANDROID-BASE-CLOSE-01" },
+        "platformMatrixChanged": { "const": false },
+        "supportedDecisionMade": { "const": false }
+      },
+      "required": ["finalCloseOwner", "platformMatrixChanged", "supportedDecisionMade"],
+      "type": "object"
+    },
+    "performance": {
+      "additionalProperties": false,
+      "properties": {
+        "absoluteMetrics": { "type": "object" },
+        "exception": {
+          "additionalProperties": false,
+          "properties": {
+            "approved": { "const": true },
+            "deviceSerial": { "const": "RFCX90C568W" },
+            "expiry": { "const": "independent Validation report completion" },
+            "kind": { "const": "non-submitter-absolute-metric" },
+            "notGoldenApproval": { "const": true },
+            "notPerformanceApproval": { "const": true },
+            "notSupportedStatus": { "const": true },
+            "reason": { "minLength": 1, "type": "string" },
+            "scope": { "minLength": 1, "type": "string" }
+          },
+          "required": [
+            "approved",
+            "deviceSerial",
+            "expiry",
+            "kind",
+            "notGoldenApproval",
+            "notPerformanceApproval",
+            "notSupportedStatus",
+            "reason",
+            "scope"
+          ],
+          "type": "object"
+        },
+        "outcome": { "const": "exception-recorded-no-comparative-pass" },
+        "packageLoad": { "type": "object" },
+        "performancePassed": { "const": false },
+        "samePhoneBaselineAvailable": { "const": false },
+        "source": { "$ref": "#/definitions/fileIdentity" }
+      },
+      "required": [
+        "absoluteMetrics",
+        "exception",
+        "outcome",
+        "packageLoad",
+        "performancePassed",
+        "samePhoneBaselineAvailable",
+        "source"
+      ],
+      "type": "object"
+    },
+    "reportId": { "const": "RFB-ANDROID-VAL-REPORT-01" },
+    "requirementTrace": { "$ref": "#/definitions/fileIdentity" },
+    "schema": { "$ref": "#/definitions/fileIdentity" },
+    "schemaVersion": { "const": 1 },
+    "status": {
+      "additionalProperties": false,
+      "properties": {
+        "finalPlatformClose": { "const": false },
+        "performancePassed": { "const": false },
+        "supported": { "const": false },
+        "validationComparisonPassed": { "const": true },
+        "value": { "const": "device-golden-verified-pending-base-close" }
+      },
+      "required": [
+        "finalPlatformClose",
+        "performancePassed",
+        "supported",
+        "validationComparisonPassed",
+        "value"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "candidate",
+    "deviceEvidence",
+    "faultContract",
+    "goldenComparison",
+    "ioContract",
+    "ownership",
+    "performance",
+    "reportId",
+    "requirementTrace",
+    "schema",
+    "schemaVersion",
+    "status"
+  ],
+  "title": "Android LiteRT physical-device validation report",
+  "type": "object",
+  "definitions": {
+    "fileIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "path": { "minLength": 1, "type": "string" },
+        "sha256": { "$ref": "#/definitions/sha256" }
+      },
+      "required": ["path", "sha256"],
+      "type": "object"
+    },
+    "gitCommit": { "pattern": "^[0-9a-f]{40}$", "type": "string" },
+    "sha256": { "pattern": "^[0-9a-f]{64}$", "type": "string" }
+  }
+}

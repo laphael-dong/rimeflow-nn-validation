@@ -1,0 +1,450 @@
+{
+  "candidateId": "rimeflow-yolov8n-android-litert-fp32-794e17d9a279",
+  "contract": {
+    "io": {
+      "input": {
+        "dtype": "float32",
+        "index": 0,
+        "layout": "NCHW",
+        "name": "serving_default_args_0",
+        "quantization": {
+          "scale": 0.0,
+          "zeroPoint": 0
+        },
+        "quantizationParameters": {
+          "quantizedDimension": 0,
+          "scales": [],
+          "zeroPoints": []
+        },
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "shapeSignature": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "output": {
+        "dtype": "float32",
+        "index": 414,
+        "layout": "N_ATTRIBUTES_ANCHORS",
+        "name": "serving_default_output_0_output",
+        "quantization": {
+          "scale": 0.0,
+          "zeroPoint": 0
+        },
+        "quantizationParameters": {
+          "quantizedDimension": 0,
+          "scales": [],
+          "zeroPoints": []
+        },
+        "shape": [
+          1,
+          84,
+          8400
+        ],
+        "shapeSignature": [
+          1,
+          84,
+          8400
+        ]
+      },
+      "outputRole": "detections"
+    },
+    "mapping": {
+      "input": "identity: runtime input already uses NCHW FP32 [1,3,640,640]",
+      "outputCoordinates": "multiply attributes 0..3 by 640 to reverse the official Ultralytics LiteRT _NormalizeCoords wrapper",
+      "outputLayout": "identity: runtime output already uses [batch,attribute,anchor] [1,84,8400]"
+    },
+    "ownership": {
+      "nms": "operator postprocess; no NMS op is present in the model graph",
+      "postprocess": "operator decode, confidence threshold and NMS",
+      "preprocess": "runtime adapter letterbox/RGB/FP32 [0,1]; not fused into the model"
+    }
+  },
+  "fixtures": [
+    {
+      "golden": {
+        "decodedCanonicalSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "decodedCount": 0,
+        "hostMappedRawSha256": "2465b2cf37284d92b2f215d06bcf198c032e993622c231f8735e882fd8097477",
+        "webRawSha256": "0925949c09194116b3afa6c3ff174ea0df8722103cecd66a4c00f60770ee399c"
+      },
+      "id": "no-detection",
+      "input": {
+        "byteOrder": "little-endian",
+        "bytes": 4915200,
+        "dtype": "float32",
+        "path": "inputs/no-detection.f32le",
+        "sha256": "06688fff06f12ae3ea0acf7be866cd7d725743484db7d3e91d6a6ab75b49d41b",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "license": {
+        "source": "\u7531\u672c\u4ed3\u5e93\u786e\u5b9a\u6027\u811a\u672c\u751f\u6210\uff0c\u4e0d\u542b\u4eba\u7269\u3001\u79c1\u4eba\u5a92\u4f53\u6216\u5916\u90e8\u7d20\u6750",
+        "spdx": "CC0-1.0"
+      },
+      "sourceImageSha256": "5a0d17c1055bd16e1b790fe8fcc048828c4112b50646ad217a25bd4a2fdf833f"
+    },
+    {
+      "golden": {
+        "decodedCanonicalSha256": "c3bc650ac7b7c7d5367b4fb7ccdecc4bcc3ac4b96becb1d29c0a68988d982a62",
+        "decodedCount": 1,
+        "hostMappedRawSha256": "66a39b29b559b39a78160b3bdc201a7bd27a8f2a4d74a8b40ec778b7cf00718d",
+        "webRawSha256": "37cc9955c15f1c4283fd2ed0d8aa360905357fd03a386db3a526d94dd0cca212"
+      },
+      "id": "single-target",
+      "input": {
+        "byteOrder": "little-endian",
+        "bytes": 4915200,
+        "dtype": "float32",
+        "path": "inputs/single-target.f32le",
+        "sha256": "7cde7a22823666ede34cae26a348a563dbd7e64df800406b433733baabee24fe",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "license": {
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md",
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "sourceImageSha256": "607e88462bd0d80db53b313c12269dff69c608637a582c7a5d2158404b8d4a18"
+    },
+    {
+      "golden": {
+        "decodedCanonicalSha256": "c0fdbea7dd064313c2abb88fd31c29f23d14ffe9a80d655f74ca461634949079",
+        "decodedCount": 5,
+        "hostMappedRawSha256": "7b715a94ce5d732012820c050a77e9c0ab29160e8a526c60f5ff831a110fce34",
+        "webRawSha256": "5a9430616fc356b950326b9695aa067a1d5e7bf9b8341ae2ccc974fe35e8f6b0"
+      },
+      "id": "multi-class",
+      "input": {
+        "byteOrder": "little-endian",
+        "bytes": 4915200,
+        "dtype": "float32",
+        "path": "inputs/multi-class.f32le",
+        "sha256": "628e401f44a59db8370e278b27b946ce7f3d26b4b80f1cdc2cf4e72b945b890c",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "license": {
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md",
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "sourceImageSha256": "6cdb4b6728a36516826f9adb9387774a6b5db0a49837d515c9045324e04e8688"
+    },
+    {
+      "golden": {
+        "decodedCanonicalSha256": "e16e44bb353dae5d8fea62cebefc779ddacce7f6b6c5a2f41f21c97e66d9a7cf",
+        "decodedCount": 5,
+        "hostMappedRawSha256": "95722a5208d81728c2902a02381cb3690e311be82e09ddb729f5f4b7b9caebd4",
+        "webRawSha256": "693f67016b64e244853a3b73db60700ad30df89c4b0e00a215a285d0df6bc4b5"
+      },
+      "id": "boundary-box",
+      "input": {
+        "byteOrder": "little-endian",
+        "bytes": 4915200,
+        "dtype": "float32",
+        "path": "inputs/boundary-box.f32le",
+        "sha256": "bb14c23a6d37bc4183bc05a908806fbf545587f4f99055a2534c3be93ea6cef0",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "license": {
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md",
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "sourceImageSha256": "75c9991d89e8c036c6ee135ada52d21b7c6f2007c8af41534f8801b105eac057"
+    },
+    {
+      "golden": {
+        "decodedCanonicalSha256": "5d7938d8f76d3b800ffa62bb1b1fa6f97b9986ae9b1fbff16487cd6d4cc14cd7",
+        "decodedCount": 1,
+        "hostMappedRawSha256": "a04bae281dd7d6bfcd0dda8bc0f1e25346a4dbe9a64b74cd6e1ac9419b133e90",
+        "webRawSha256": "355d3d29fcfbe31fd93480a5697a5b34cd5d153a116629ab77304c508301e686"
+      },
+      "id": "extreme-aspect",
+      "input": {
+        "byteOrder": "little-endian",
+        "bytes": 4915200,
+        "dtype": "float32",
+        "path": "inputs/extreme-aspect.f32le",
+        "sha256": "ebb46465c0525b41a1151d4f14712669319f02db1c7368c50933b8ff5ecfcdcf",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      },
+      "license": {
+        "localPath": "evidence/fixtures/licenses/ultralytics-assets-AGPL-3.0.txt",
+        "noticePath": "evidence/fixtures/THIRD_PARTY_NOTICES.md",
+        "spdx": "AGPL-3.0-only",
+        "url": "https://github.com/ultralytics/assets/blob/42ef8a125df038dcca49f6216f446fe9112946c1/LICENSE"
+      },
+      "sourceImageSha256": "511885000defcce877a128d19407a07b3601749268ec1dac9332916e560e81fc"
+    }
+  ],
+  "hostProof": {
+    "comparison": {
+      "artifactSha256Equal": true,
+      "fixtureRawAndDecodedEqual": true,
+      "goldenReportDigestEqual": true,
+      "ioMetadataEqual": true,
+      "manifestDigestEqual": true,
+      "trackedWorktreeUnchanged": true
+    },
+    "goldenReport": {
+      "path": "evidence/reports/litert-golden-report.json",
+      "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+      "summary": {
+        "allFinite": true,
+        "allShapesMatched": true,
+        "classMismatchCount": 0,
+        "deterministic": true,
+        "fixtureCount": 5,
+        "maximumConfidenceAbsolute": 9.530395508328127e-07,
+        "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+        "maximumRawAbsolute": 0.003204345703125,
+        "maximumRawRelative": 4.391961097717285,
+        "minimumBboxIou": 0.9999981541566957,
+        "rawToleranceMismatchCount": 0
+      }
+    },
+    "replayArtifactManifestSha256": [
+      "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881",
+      "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+    ],
+    "replayArtifactSha256": [
+      "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+      "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+    ],
+    "rounds": 2
+  },
+  "licenses": {
+    "checkpoint": {
+      "declared": "AGPL-3.0 License (https://ultralytics.com/license)",
+      "redistributionAllowed": false
+    },
+    "converterAndRuntime": {
+      "declared": "Apache-2.0",
+      "packages": [
+        "ai-edge-litert",
+        "litert-converter",
+        "litert-torch"
+      ]
+    },
+    "fixtures": {
+      "manifestPath": "evidence/fixtures/manifest.json",
+      "manifestSha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc",
+      "policy": "per-file; test-and-evidence-only"
+    },
+    "repository": {
+      "path": "LICENSE",
+      "sha256": "0e9cf1beb7efd7c779613bd0030ed303a5c26d73dd5e22e5a8fad4ffc2e968e0",
+      "spdx": "MIT"
+    }
+  },
+  "model": {
+    "artifact": {
+      "bytes": 12841227,
+      "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+      "path": "model/yolov8n-fp32.tflite",
+      "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+    },
+    "canonicalOnnx": {
+      "firstRepositoryCommit": "8eb3a3f33ca945694af5a08b81b28a013af8695a",
+      "path": "models/yolov8n.onnx",
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+    },
+    "id": "rimeflow-yolov8n",
+    "sourceCheckpoint": {
+      "bytes": 6549796,
+      "releaseAssetId": 195719301,
+      "releaseTag": "v8.3.0",
+      "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt"
+    },
+    "version": "yolov8n-onnx-20260707"
+  },
+  "provenance": {
+    "baseRuntime": {
+      "commit": "aaff04fa416b0366d6e69a61b4887b6d2fdd4215",
+      "repository": "https://github.com/laphael-dong/rimeflow-nn-base.git"
+    },
+    "trackedInputs": [
+      {
+        "bytes": 1064,
+        "path": "LICENSE",
+        "sha256": "0e9cf1beb7efd7c779613bd0030ed303a5c26d73dd5e22e5a8fad4ffc2e968e0"
+      },
+      {
+        "bytes": 12851098,
+        "path": "models/yolov8n.onnx",
+        "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+      },
+      {
+        "bytes": 2910,
+        "path": "src/postprocess.rs",
+        "sha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+      },
+      {
+        "bytes": 7152,
+        "path": "evidence/conversions/litert-artifact-manifest.json",
+        "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+      },
+      {
+        "bytes": 9945,
+        "path": "evidence/fixtures/manifest.json",
+        "sha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc"
+      },
+      {
+        "bytes": 29752,
+        "path": "evidence/golden/web-reference.json",
+        "sha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68"
+      },
+      {
+        "bytes": 20179,
+        "path": "evidence/reports/litert-golden-report.json",
+        "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
+      },
+      {
+        "bytes": 5303,
+        "path": "evidence/reports/model-provenance.json",
+        "sha256": "478b09fc38b18929e70dc00968a1d31760a3ec5844a322a5bcbc648bd5f3403c"
+      },
+      {
+        "bytes": 11741,
+        "path": "evidence/requirements/validation-requirement-test-matrix.json",
+        "sha256": "eca97cd29963ceea7ba53fac5c0c882dc40264fc2b57e5ca56d12a8218547372"
+      },
+      {
+        "bytes": 5230,
+        "path": "evidence/schemas/android-litert-candidate-manifest.schema.json",
+        "sha256": "3c39b021a8a0a8705d98a1cf9f89aeb7de4985ff02bbabb765f1099be19d3c4a"
+      },
+      {
+        "bytes": 1278,
+        "path": "evidence/schemas/android-litert-candidate-report.schema.json",
+        "sha256": "0df7dca0c6cb429d32e24cab18b29d32e92fa5de5c29e9614b598bec4a290794"
+      },
+      {
+        "bytes": 21838,
+        "path": "evidence/scripts/android_litert_candidate.py",
+        "sha256": "ff1980f269d4e9a4315964bf7c4fd787e4961256a83e41a2d639daaabcce737d"
+      },
+      {
+        "bytes": 6192,
+        "path": "evidence/scripts/export_litert_model.py",
+        "sha256": "480550b54c191e008e5f3a51dbcfcd2f0e53b4c60f3e18b7b47bdd31510f64eb"
+      },
+      {
+        "bytes": 3183,
+        "path": "evidence/scripts/export_web_reference_tensors.mjs",
+        "sha256": "c0da6ee41fb320dd98e58b91456725fe7f495caf828592d281fa13b0878dd7ef"
+      },
+      {
+        "bytes": 3939,
+        "path": "evidence/scripts/preprocess_contract.mjs",
+        "sha256": "6ab42f34588643884762fad2497716ea324a6a207461ca6cdd125de830a2c530"
+      },
+      {
+        "bytes": 16595,
+        "path": "evidence/scripts/run_litert_replay.py",
+        "sha256": "ea58877e5f94ea4f731d884ab37cb2de2d6c9d6f436517f4406e86615fab7d79"
+      },
+      {
+        "bytes": 16494,
+        "path": "evidence/scripts/validate_litert_golden.py",
+        "sha256": "6e6490213f50b8e01168321c68611f23899b150bcf46cbb304aa80614475c339"
+      },
+      {
+        "bytes": 361,
+        "path": "evidence/tooling/litert-requirements.in",
+        "sha256": "a312b3559442470a1091f7e13e61e45cc6a09486b2659e2cf9b39baf30abc8b7"
+      },
+      {
+        "bytes": 8235,
+        "path": "evidence/tooling/litert-requirements.lock",
+        "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
+      },
+      {
+        "bytes": 16541,
+        "path": "evidence/tooling/web/bun.lock",
+        "sha256": "762f37b284dc99009ead59fc5deb322ca1b7920d40b113a0b1488de7de9c6c55"
+      },
+      {
+        "bytes": 220,
+        "path": "evidence/tooling/web/package.json",
+        "sha256": "6e614de4e2bfe30b7fbcd7842cdee1d9dccae461733a5b0799f08cb778a4a255"
+      }
+    ],
+    "validation": {
+      "baseCommit": "1c42b81c6066126b303c4a2ec606eafc7328517f",
+      "baseTree": "eb7c05130fdc97b90577973ecf5e9b101b29b504",
+      "repository": "https://github.com/laphael-dong/rimeflow-nn-validation.git"
+    }
+  },
+  "schema": {
+    "bytes": 5230,
+    "path": "evidence/schemas/android-litert-candidate-manifest.schema.json",
+    "sha256": "3c39b021a8a0a8705d98a1cf9f89aeb7de4985ff02bbabb765f1099be19d3c4a"
+  },
+  "schemaVersion": 1,
+  "status": {
+    "androidTargetAccepted": false,
+    "hostGoldenPassed": true,
+    "supported": false,
+    "value": "host-candidate-verified-pending-real-device"
+  },
+  "target": {
+    "architecture": "arm64-v8a",
+    "backend": "litert-v2",
+    "os": "android",
+    "runtimeVersion": "2.1.6"
+  },
+  "tolerances": {
+    "boxIouMinimum": 0.999,
+    "classIdExact": true,
+    "confidenceAbsolute": 0.0001,
+    "decodedBoxAbsolute": 0.0001,
+    "frozenBeforeNativeAdapterResults": true,
+    "missingValuePolicy": "fail",
+    "nonFinitePolicy": "fail",
+    "rawTensorAbsolute": 1e-05,
+    "rawTensorRelative": 0.0001
+  },
+  "usageScope": {
+    "artifactRedistributionAllowed": false,
+    "productPackaging": "excluded",
+    "purpose": "internal-rimeflow-framework-validation-only",
+    "transfer": "approved-private-runner-only"
+  }
+}
