@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "change": "rimeflow-backend-contract",
+  "owner": "Validation",
+  "baseRuntime": {
+    "repository": "github/rimeflow-nn-base",
+    "ref": "refs/heads/laphael-dong/os4-base-runtime-implement",
+    "commit": "96fcfa0a54a3db1978af5ec38fc3a92132be4ee3",
+    "tree": "2a41a1f0bae4784cf9d2a0896c8d74929a1bbd2e",
+    "parent": "bc2c0139e744517df5a9d3ee6d0cbe17b6de7ab2"
+  },
+  "model": {
+    "id": "rimeflow-yolov8n",
+    "version": "yolov8n-onnx-20260707",
+    "path": "models/yolov8n.onnx",
+    "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+  },
+  "artifacts": [
+    {
+      "id": "web-onnx-wasm",
+      "runtime": "onnxruntime-web-wasm",
+      "input": {
+        "role": "image",
+        "runtimeName": "images",
+        "runtimeIndex": 0,
+        "shape": [1, 3, 640, 640],
+        "layout": "NCHW",
+        "dtype": "float32"
+      },
+      "output": {
+        "role": "detections",
+        "runtimeName": "output0",
+        "runtimeIndex": 0,
+        "shape": [1, 84, 8400],
+        "layout": "N_ATTRIBUTES_ANCHORS",
+        "dtype": "float32",
+        "coordinateScale": 1,
+        "nmsFused": false
+      }
+    },
+    {
+      "id": "legacy-native-ort",
+      "runtime": "onnxruntime-node-native",
+      "input": {
+        "role": "image",
+        "runtimeName": "images",
+        "runtimeIndex": 0,
+        "shape": [1, 3, 640, 640],
+        "layout": "NCHW",
+        "dtype": "float32"
+      },
+      "output": {
+        "role": "detections",
+        "runtimeName": "output0",
+        "runtimeIndex": 0,
+        "shape": [1, 84, 8400],
+        "layout": "N_ATTRIBUTES_ANCHORS",
+        "dtype": "float32",
+        "coordinateScale": 1,
+        "nmsFused": false
+      }
+    },
+    {
+      "id": "host-nchw",
+      "runtime": "host-f32-nchw",
+      "input": {
+        "role": "image",
+        "runtimeName": "host-nchw",
+        "runtimeIndex": 0,
+        "shape": [1, 3, 640, 640],
+        "layout": "NCHW",
+        "dtype": "float32"
+      },
+      "output": {
+        "role": "detections",
+        "runtimeName": "host-detections",
+        "runtimeIndex": 0,
+        "shape": [1, 84, 8400],
+        "layout": "N_ATTRIBUTES_ANCHORS",
+        "dtype": "float32",
+        "coordinateScale": 1,
+        "nmsFused": false
+      }
+    }
+  ],
+  "postprocess": {
+    "owner": "src/postprocess.rs",
+    "decode": "operator",
+    "threshold": 0.25,
+    "nms": "operator",
+    "sourceSha256": "2a07f30ef59aa5d730cc0593adf7e69bc7351f285bdc10a2f7199f4e05d8ff4b"
+  },
+  "fixtures": {
+    "manifestPath": "evidence/fixtures/manifest.json",
+    "manifestSha256": "430c391b9cab0c36b2bde93964e8f6afcd66b0dcb05b055d2728c47679a38acc",
+    "goldenPath": "evidence/golden/web-reference.json",
+    "goldenSha256": "114d7ab29afa5bf9b6246dfd6f1cff37ee3d4fc8212b355d2fb3ac9122f9ce68",
+    "repeatCount": 3
+  }
+}

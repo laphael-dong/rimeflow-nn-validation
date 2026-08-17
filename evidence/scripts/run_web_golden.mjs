@@ -1,7 +1,9 @@
 import { createHash } from 'node:crypto';
-import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import * as ort from '../tooling/web/node_modules/onnxruntime-web/dist/ort.node.min.mjs';
 import { PREPROCESS_CONTRACT, preprocessCanonical, readPpm, tensorDigest } from './preprocess_contract.mjs';
@@ -12,42 +14,19 @@ const stable = (value) => JSON.stringify(value, null, 2) + '\n';
 const round = (value, digits = 8) => Number(value.toFixed(digits));
 async function directoryBytes(path) { let total = 0; for (const name of await readdir(path)) { const child = resolve(path, name); const info = await stat(child); total += info.isDirectory() ? await directoryBytes(child) : info.size; } return total; }
 
-function iou(a, b) {
-  const x1 = Math.max(a[0], b[0]); const y1 = Math.max(a[1], b[1]);
-  const x2 = Math.min(a[2], b[2]); const y2 = Math.min(a[3], b[3]);
-  const intersection = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
-  const union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - intersection;
-  return union <= 0 ? 0 : intersection / union;
-}
+const temporaryRoot = await mkdtemp(resolve(tmpdir(), 'rimeflow-web-golden-'));
 
-function decode(raw, image, prep) {
-  const boxes = 8400; const found = [];
-  for (let index = 0; index < boxes; index++) {
-    let score = 0; let classId = 0;
-    for (let c = 0; c < 80; c++) {
-      const candidate = raw[(4 + c) * boxes + index];
-      if (candidate > score) { score = candidate; classId = c; }
-    }
-    if (score < 0.25) continue;
-    const cx = raw[index]; const cy = raw[boxes + index];
-    const width = raw[2 * boxes + index]; const height = raw[3 * boxes + index];
-    const clamp = (v) => Math.min(1, Math.max(0, v));
-    found.push({
-      anchor: index,
-      classId,
-      score,
-      bbox: [
-        clamp(((cx - width / 2) - prep.padXPixels) / (image.width * prep.scale)),
-        clamp(((cy - height / 2) - prep.padYPixels) / (image.height * prep.scale)),
-        clamp(((cx + width / 2) - prep.padXPixels) / (image.width * prep.scale)),
-        clamp(((cy + height / 2) - prep.padYPixels) / (image.height * prep.scale)),
-      ],
-    });
-  }
-  found.sort((a, b) => b.score - a.score || a.anchor - b.anchor);
-  const kept = [];
-  for (const candidate of found) if (!kept.some((current) => iou(current.bbox, candidate.bbox) > 0.45)) kept.push(candidate);
-  return kept.map((item) => ({ anchor: item.anchor, classId: item.classId, score: round(item.score), bbox: item.bbox.map((v) => round(v)) }));
+async function productionPostprocess(raw, image, fixtureId, repeat) {
+  const rawPath = resolve(temporaryRoot, `${fixtureId}-${repeat}.f32le`);
+  const decodedPath = resolve(temporaryRoot, `${fixtureId}-${repeat}.json`);
+  await writeFile(rawPath, Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength));
+  const execution = spawnSync('cargo', [
+    'run', '--quiet', '--offline', '--locked',
+    '--manifest-path', 'evidence/tooling/raw-golden/Cargo.toml',
+    '--', rawPath, String(image.width), String(image.height), decodedPath,
+  ], { cwd: root, encoding: 'utf8' });
+  if (execution.status !== 0) throw new Error(`production postprocess failed: ${execution.stderr}`);
+  return JSON.parse(await readFile(decodedPath, 'utf8'));
 }
 
 function summary(values) {
@@ -102,7 +81,7 @@ for (const entry of manifest.images) {
     peakRssBytes = Math.max(peakRssBytes, process.memoryUsage().rss);
     timings.push(performance.now() - start);
     const raw = outputs.output0.data;
-    runs.push({ repeat: repeat + 1, rawTensor: summary(raw), decoded: decode(raw, image, prep) });
+    runs.push({ repeat: repeat + 1, rawTensor: summary(raw), decoded: await productionPostprocess(raw, image, entry.id, repeat + 1) });
   }
   const reference = runs[0].rawTensor.sha256Float32Le;
   const determinism = { allRawDigestsEqual: runs.every((run) => run.rawTensor.sha256Float32Le === reference), maxRawAbsoluteDifference: 0, allDecodedEqual: runs.every((run) => JSON.stringify(run.decoded) === JSON.stringify(runs[0].decoded)) };
@@ -122,4 +101,5 @@ if (process.env.RIMEFLOW_RECORD_PERFORMANCE === '1') {
   await writeFile(resolve(root, 'evidence/reports/web-wasm-performance.json'), stable({ schemaVersion: 1, sourceReferenceSha256: sha256(Buffer.from(stable(reference))), runtime: reference.runtime, host: { os: process.platform, arch: process.arch, node: process.version }, metrics: { initializationMs: round(initializationMs, 3), fixtures: performanceSamples, peakProcessRssBytes: peakRssBytes, runtimePackageBytes: await directoryBytes(resolve(root, 'evidence/tooling/web/node_modules/onnxruntime-web')) }, note: '性能采样可变；峰值是独立 harness 进程 RSS 上界；包体为 onnxruntime-web package 文件总和；不得与 WebGPU 或 Native 数据混合。' }));
 }
 await session.release();
+await rm(temporaryRoot, { recursive: true, force: true });
 console.log(sha256(Buffer.from(stable(reference))));

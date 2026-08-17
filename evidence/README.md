@@ -112,6 +112,20 @@ $AUDIT_PYTHON evidence/scripts/audit_handoff_models.py --pt "$HANDOFF_ASSETS/yol
 
 ## 状态判定
 
+### 平台 conformance 汇总
+
+Validation 维护一份可消费的、版本化平台 conformance 报告：`evidence/schemas/platform-conformance-report.schema.json` 定义 schema，`evidence/reports/platform-conformance-report.json` 是由已冻结转换 manifest、replay 和 validation report 派生出的当前实例。报告显式锁定已发布的 Base platform-adapters integration ref、commit 与 tree，以及生成该报告的固定 Validation implementation commit/tree；它不新增平台 adapter，也不复制 decode/NMS，所有非融合产物仍由 `src/postprocess.rs` 作为唯一生产后处理所有者。
+
+重新生成并校验该报告：
+
+```sh
+node evidence/scripts/platform_conformance.mjs --write
+node evidence/scripts/platform_conformance.mjs --check
+node evidence/scripts/test_platform_conformance_negative.mjs
+```
+
+报告按 6.2--6.6 的 Apple Core ML、Android LiteRT v2、Windows ML x64/ARM64、Linux ORT 和 HarmonyOS MindSpore Lite 记录 artifact digest、逻辑 I/O role、runner OS/arch/identity、SDK/runtime、converter、固定 Base commit 与九类检查（manifest、I/O、timeout、smoke、golden、fault、diagnostics、performance、package-load）。真实目标 runner 缺失时字段必须为 `blocked`；它不会由 Linux host replay 推断为 `supported`，因此当前所有平台 `supported=false`。
+
 Linux x86_64 OpenVINO provider spike 使用官方 `onnxruntime-openvino==1.24.1` CPython 3.12 manylinux wheel；该 wheel 内置 OpenVINO Runtime `2025.4.1`。完整传递依赖、每个 wheel 的 SHA-256 与精确版本固定在 `evidence/tooling/openvino-requirements.lock`，官方 PyPI 下载 URL、许可证字段、ORT build commit、实际映射的 ORT/OpenVINO shared library bytes/SHA、host/CPU/kernel/glibc、OpenVINO CPU device/plugin introspection 则记录在 `evidence/conversions/openvino-ep-manifest.json`。本 spike 不做模型转换，只读取唯一 `models/yolov8n.onnx`；runtime、wheel、cache、profile 和 raw tensor 仅进入 ignored `.evidence/openvino/`，不进入 Git、RimeCut、产品包或发布目录。
 
 OpenVINO manifest 的 runtime library `path` 与 `actualPath` 使用固定 `$OPENVINO_VENV/` trusted-root token 加 `lib/python3.12/site-packages/onnxruntime/capi/` 下的库名，不记录 checkout-specific absolute path。validator 只将该 token 解析到当前 checkout 的 canonical `.evidence/openvino/venv`，并拒绝绝对路径、遍历、错误 capi、basename substitution、symlink escape 以及 bytes/SHA/version/library set 漂移；tracked manifest 的 token 化是一次确定性证据迁移，不是新的 runtime record。

@@ -1,0 +1,5 @@
+[source.crates-io]
+replace-with = "validation-contract-vendor"
+
+[source.validation-contract-vendor]
+directory = "validation-contract/vendor"
