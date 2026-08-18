@@ -1,0 +1,159 @@
+{
+  "contractToEvidence": {
+    "AC-VAL-X64-1": {
+      "evidence": [
+        "models/yolov8n-fp32.tflite",
+        "evidence/conversions/android-litert-validation-model-manifest.json",
+        "evidence/reports/android-litert-validation-model-report.json",
+        "evidence/scripts/export_litert_model.py"
+      ],
+      "outcome": "satisfied"
+    },
+    "AC-VAL-X64-2": {
+      "evidence": [
+        "models/yolov8n-fp32.tflite",
+        "evidence/conversions/android-litert-validation-model-manifest.json",
+        "evidence/reports/android-litert-validation-model-report.json",
+        "evidence/requirements/android-litert-validation-model-trace.json",
+        "evidence/schemas/android-litert-validation-model-manifest.schema.json",
+        "evidence/schemas/android-litert-validation-model-report.schema.json"
+      ],
+      "outcome": "satisfied"
+    },
+    "AC-VAL-X64-3": {
+      "evidence": [
+        "evidence/reports/android-litert-validation-model-report.json",
+        "evidence/reports/litert-golden-report.json",
+        "evidence/scripts/test_android_litert_validation_model_guards.py"
+      ],
+      "outcome": "satisfied"
+    },
+    "AC-VAL-X64-4": {
+      "evidence": [
+        "evidence/conversions/android-litert-validation-model-manifest.json",
+        "evidence/reports/android-litert-validation-model-report.json"
+      ],
+      "outcome": "satisfied-by-tracked-paths-and-post-push-parity"
+    },
+    "AUTH-VAL-X64-1": {
+      "evidence": [
+        "evidence/reports/android-litert-validation-model-report.json"
+      ],
+      "outcome": "enforced-by-publication-procedure"
+    },
+    "CON-VAL-X64-1": {
+      "evidence": [
+        "evidence/conversions/android-litert-validation-model-manifest.json",
+        "evidence/tooling/litert-requirements.lock"
+      ],
+      "outcome": "enforced"
+    },
+    "EX-VAL-X64-1": {
+      "evidence": [
+        "evidence/reports/android-litert-validation-model-report.json"
+      ],
+      "outcome": "observed"
+    },
+    "INV-VAL-X64-1": {
+      "evidence": [
+        "evidence/conversions/android-litert-candidate-manifest.json",
+        "evidence/reports/android-litert-candidate-report.json",
+        "evidence/reports/android-litert-device-validation-report.json",
+        "evidence/requirements/android-litert-device-validation-trace.json",
+        "evidence/reports/litert-golden-report.json",
+        "evidence/conversions/litert-artifact-manifest.json"
+      ],
+      "outcome": "preserved"
+    },
+    "INV-VAL-X64-2": {
+      "evidence": [
+        "evidence/conversions/android-litert-validation-model-manifest.json",
+        "evidence/reports/android-litert-validation-model-report.json"
+      ],
+      "outcome": "preserved"
+    },
+    "INV-VAL-X64-3": {
+      "evidence": [
+        "evidence/reports/android-litert-validation-model-report.json"
+      ],
+      "outcome": "preserved-by-diff-guard"
+    }
+  },
+  "deliveryContract": {
+    "hash": "sha256:7d5f2f46a7e2acdcb97bea3adf2ae5c9f3a2d0ae711dd91d7c3f06ade6298c49",
+    "id": "DC-RFB-ANDROID-VAL-X64-LITERT-PRODUCER-01",
+    "mode": "formal-acceptance",
+    "version": 1
+  },
+  "deviationLog": "none",
+  "identities": {
+    "manifest": {
+      "bytes": 7453,
+      "path": "evidence/conversions/android-litert-validation-model-manifest.json",
+      "sha256": "e0f0338d12f5acd1ef701d19d804dd5f96f38ae4dc2903e7f98aae40b59acdde"
+    },
+    "model": {
+      "abiSpecificBytes": false,
+      "architectureNeutral": true,
+      "bytes": 12841227,
+      "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+      "path": "models/yolov8n-fp32.tflite",
+      "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+      "trackedByGit": true
+    },
+    "schemas": {
+      "manifest": {
+        "bytes": 6008,
+        "path": "evidence/schemas/android-litert-validation-model-manifest.schema.json",
+        "sha256": "fc2f65dc63e9b2cb696f86431737038c118f8f434ef88eaf3f892788208c02ff"
+      },
+      "report": {
+        "bytes": 3731,
+        "path": "evidence/schemas/android-litert-validation-model-report.schema.json",
+        "sha256": "909ba39000883d0dfa577435b505e28534d5e1f68507b5b8bcdcc8504ee54ef6"
+      }
+    },
+    "validationCommit": {
+      "command": "git rev-parse HEAD",
+      "kind": "commit-containing-this-manifest"
+    }
+  },
+  "releaseBoundary": {
+    "apkOrAabBuilt": false,
+    "artifactRedistributionAllowed": false,
+    "productPackaging": "excluded",
+    "releaseCandidate": false,
+    "releasePublicationInput": false,
+    "supported": false,
+    "targetAccepted": false,
+    "validationOnly": true,
+    "validationPackageConsumption": "allowed"
+  },
+  "remoteParity": {
+    "branch": "rfb-android-val-x64-model-01",
+    "headCommand": "git ls-remote origin refs/heads/rfb-android-val-x64-model-01",
+    "prHeadCommand": "gh pr view --json headRefName,headRefOid,url",
+    "requiredAfterSingleAuthorizedPush": true,
+    "statusAtRecord": "verify-after-single-authorized-push"
+  },
+  "replayCommands": [
+    "$REPO/.evidence/litert/verify-venv/bin/python evidence/scripts/run_litert_replay.py --pt $REPO/.evidence/litert/inputs/yolov8n.pt --workspace $REPO/.evidence/litert/x64-model/replay --bundle-dir $REPO/.evidence/litert/x64-model/bundle",
+    "$REPO/.evidence/litert/verify-venv/bin/python evidence/scripts/android_litert_validation_model.py --replay-root $REPO/.evidence/litert/x64-model/replay --record",
+    "$REPO/.evidence/litert/verify-venv/bin/python evidence/scripts/android_litert_validation_model.py --replay-root $REPO/.evidence/litert/x64-model/replay",
+    "python3 evidence/scripts/test_android_litert_validation_model_guards.py"
+  ],
+  "schemaVersion": 1,
+  "validation": {
+    "comparison": {
+      "artifactSha256Equal": true,
+      "fixtureRawAndDecodedEqual": true,
+      "goldenReportDigestEqual": true,
+      "ioMetadataEqual": true,
+      "manifestDigestEqual": true,
+      "trackedWorktreeUnchanged": true
+    },
+    "fixtureCount": 5,
+    "negativeGuardCommand": "python3 evidence/scripts/test_android_litert_validation_model_guards.py",
+    "rounds": 2
+  }
+}

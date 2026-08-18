@@ -1,0 +1,231 @@
+{
+  "artifact": {
+    "abiSpecificBytes": false,
+    "architectureNeutral": true,
+    "bytes": 12841227,
+    "format": "TFLite FlatBuffer with deterministic Ultralytics metadata ZIP trailer",
+    "path": "models/yolov8n-fp32.tflite",
+    "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+    "trackedByGit": true
+  },
+  "consumption": {
+    "consumers": [
+      {
+        "abi": "x86_64",
+        "bytes": 12841227,
+        "modelPath": "models/yolov8n-fp32.tflite",
+        "os": "android",
+        "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+        "usage": "validation-package-only"
+      },
+      {
+        "abi": "arm64-v8a",
+        "bytes": 12841227,
+        "modelPath": "models/yolov8n-fp32.tflite",
+        "os": "android",
+        "sha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+        "usage": "validation-package-only"
+      }
+    ],
+    "sameArtifactRequired": true,
+    "scope": "Android x86_64 CI and arm64-v8a device validation"
+  },
+  "deliveryContract": {
+    "hash": "sha256:7d5f2f46a7e2acdcb97bea3adf2ae5c9f3a2d0ae711dd91d7c3f06ade6298c49",
+    "id": "DC-RFB-ANDROID-VAL-X64-LITERT-PRODUCER-01",
+    "mode": "formal-acceptance",
+    "version": 1
+  },
+  "ioContract": {
+    "input": {
+      "dtype": "float32",
+      "index": 0,
+      "layout": "NCHW",
+      "name": "serving_default_args_0",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "shapeSignature": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    "output": {
+      "dtype": "float32",
+      "index": 414,
+      "layout": "N_ATTRIBUTES_ANCHORS",
+      "name": "serving_default_output_0_output",
+      "quantization": {
+        "scale": 0.0,
+        "zeroPoint": 0
+      },
+      "quantizationParameters": {
+        "quantizedDimension": 0,
+        "scales": [],
+        "zeroPoints": []
+      },
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "shapeSignature": [
+        1,
+        84,
+        8400
+      ]
+    },
+    "outputRole": "detections"
+  },
+  "preservedEvidence": [
+    {
+      "bytes": 15687,
+      "path": "evidence/conversions/android-litert-candidate-manifest.json",
+      "sha256": "365567e382a6edfb590ee9caae4dc290d4d320e2c2151b064761e7a7770b8ed5"
+    },
+    {
+      "bytes": 6471,
+      "path": "evidence/reports/android-litert-candidate-report.json",
+      "sha256": "f18dca9363ae30fc76888ee290d8da6d27677776834998dffecb94d523daeab7"
+    },
+    {
+      "bytes": 14714,
+      "path": "evidence/reports/android-litert-device-validation-report.json",
+      "sha256": "b9aa52ce8e046f67cca266b0ad90763f83cec3a692b81d0318ca0a94b460098c"
+    },
+    {
+      "bytes": 1696,
+      "path": "evidence/requirements/android-litert-device-validation-trace.json",
+      "sha256": "9b79186904a78033baf1a5cda71895950ea7772c6199b22c77cb9f609b6cf6c2"
+    },
+    {
+      "bytes": 20179,
+      "path": "evidence/reports/litert-golden-report.json",
+      "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28"
+    },
+    {
+      "bytes": 7152,
+      "path": "evidence/conversions/litert-artifact-manifest.json",
+      "sha256": "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+    }
+  ],
+  "provenance": {
+    "base": {
+      "commit": "ff31c6523fea98e929ac736feec06735a03565ac",
+      "ref": "origin/main"
+    },
+    "canonicalOnnx": {
+      "bytes": 12851098,
+      "path": "models/yolov8n.onnx",
+      "sha256": "9e7e3921595672c4b97e78f78bf5604d86ffc117773da49f142d1047109d07ad"
+    },
+    "conversion": {
+      "command": "$REPO/.evidence/litert/verify-venv/bin/python evidence/scripts/run_litert_replay.py --pt $REPO/.evidence/litert/inputs/yolov8n.pt --workspace $REPO/.evidence/litert/x64-model/replay --bundle-dir $REPO/.evidence/litert/x64-model/bundle",
+      "converterScript": {
+        "bytes": 6192,
+        "path": "evidence/scripts/export_litert_model.py",
+        "sha256": "480550b54c191e008e5f3a51dbcfcd2f0e53b4c60f3e18b7b47bdd31510f64eb"
+      },
+      "requirementsLock": {
+        "bytes": 8235,
+        "path": "evidence/tooling/litert-requirements.lock",
+        "sha256": "e2d02de988f6ca13d2a2882c9938620b25e74ebd6b66cd7daf372329174dfba2"
+      }
+    },
+    "requirementTrace": {
+      "bytes": 2440,
+      "path": "evidence/requirements/android-litert-validation-model-trace.json",
+      "sha256": "e01bd2664631b5825b8740d0858876a2b166a86b79a0c741b31ac34dfee230eb"
+    },
+    "sourceCheckpoint": {
+      "bytes": 6549796,
+      "releaseTag": "v8.3.0",
+      "sha256": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+      "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt"
+    },
+    "validationCommit": {
+      "command": "git rev-parse HEAD",
+      "kind": "commit-containing-this-manifest"
+    }
+  },
+  "releaseBoundary": {
+    "apkOrAabBuilt": false,
+    "artifactRedistributionAllowed": false,
+    "productPackaging": "excluded",
+    "releaseCandidate": false,
+    "releasePublicationInput": false,
+    "supported": false,
+    "targetAccepted": false,
+    "validationOnly": true,
+    "validationPackageConsumption": "allowed"
+  },
+  "replay": {
+    "artifactManifestSha256": [
+      "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881",
+      "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+    ],
+    "artifactSha256": [
+      "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+      "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+    ],
+    "comparison": {
+      "artifactSha256Equal": true,
+      "fixtureRawAndDecodedEqual": true,
+      "goldenReportDigestEqual": true,
+      "ioMetadataEqual": true,
+      "manifestDigestEqual": true,
+      "trackedWorktreeUnchanged": true
+    },
+    "hostGolden": {
+      "path": "evidence/reports/litert-golden-report.json",
+      "sha256": "071f418b79c0612e00bcea97aa7785cc4e90e4aeb2356884703e666c4bfb9e28",
+      "summary": {
+        "allFinite": true,
+        "allShapesMatched": true,
+        "classMismatchCount": 0,
+        "deterministic": true,
+        "fixtureCount": 5,
+        "maximumConfidenceAbsolute": 9.530395508328127e-07,
+        "maximumDecodedBboxAbsolute": 6.82200851476189e-07,
+        "maximumRawAbsolute": 0.003204345703125,
+        "maximumRawRelative": 4.391961097717285,
+        "minimumBboxIou": 0.9999981541566957,
+        "rawToleranceMismatchCount": 0
+      }
+    },
+    "producerCommand": "$REPO/.evidence/litert/verify-venv/bin/python evidence/scripts/android_litert_validation_model.py --replay-root $REPO/.evidence/litert/x64-model/replay --record",
+    "rounds": 2
+  },
+  "runtime": {
+    "name": "ai-edge-litert Interpreter",
+    "threads": 1,
+    "version": "2.1.6"
+  },
+  "schemaVersion": 1,
+  "schemas": {
+    "manifest": {
+      "bytes": 6008,
+      "path": "evidence/schemas/android-litert-validation-model-manifest.schema.json",
+      "sha256": "fc2f65dc63e9b2cb696f86431737038c118f8f434ef88eaf3f892788208c02ff"
+    },
+    "report": {
+      "bytes": 3731,
+      "path": "evidence/schemas/android-litert-validation-model-report.schema.json",
+      "sha256": "909ba39000883d0dfa577435b505e28534d5e1f68507b5b8bcdcc8504ee54ef6"
+    }
+  }
+}

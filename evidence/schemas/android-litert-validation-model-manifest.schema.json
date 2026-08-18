@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Android LiteRT architecture-neutral validation model manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "deliveryContract",
+    "artifact",
+    "consumption",
+    "ioContract",
+    "runtime",
+    "replay",
+    "provenance",
+    "preservedEvidence",
+    "releaseBoundary",
+    "schemas"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "deliveryContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "hash", "mode"],
+      "properties": {
+        "id": { "const": "DC-RFB-ANDROID-VAL-X64-LITERT-PRODUCER-01" },
+        "version": { "const": 1 },
+        "hash": { "const": "sha256:7d5f2f46a7e2acdcb97bea3adf2ae5c9f3a2d0ae711dd91d7c3f06ade6298c49" },
+        "mode": { "const": "formal-acceptance" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "format", "trackedByGit", "architectureNeutral", "abiSpecificBytes"],
+      "properties": {
+        "path": { "const": "models/yolov8n-fp32.tflite" },
+        "bytes": { "const": 12841227 },
+        "sha256": { "const": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1" },
+        "format": { "type": "string", "minLength": 1 },
+        "trackedByGit": { "const": true },
+        "architectureNeutral": { "const": true },
+        "abiSpecificBytes": { "const": false }
+      }
+    },
+    "consumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "sameArtifactRequired", "consumers"],
+      "properties": {
+        "scope": { "type": "string", "minLength": 1 },
+        "sameArtifactRequired": { "const": true },
+        "consumers": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["os", "abi", "modelPath", "bytes", "sha256", "usage"],
+            "properties": {
+              "os": { "const": "android" },
+              "abi": { "enum": ["x86_64", "arm64-v8a"] },
+              "modelPath": { "const": "models/yolov8n-fp32.tflite" },
+              "bytes": { "const": 12841227 },
+              "sha256": { "const": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1" },
+              "usage": { "const": "validation-package-only" }
+            }
+          }
+        }
+      }
+    },
+    "ioContract": {
+      "type": "object",
+      "required": ["input", "output", "outputRole"],
+      "properties": {
+        "input": {
+          "type": "object",
+          "required": ["dtype", "shape"],
+          "properties": {
+            "dtype": { "const": "float32" },
+            "shape": { "const": [1, 3, 640, 640] }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": ["dtype", "shape"],
+          "properties": {
+            "dtype": { "const": "float32" },
+            "shape": { "const": [1, 84, 8400] }
+          }
+        },
+        "outputRole": { "const": "detections" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "threads"],
+      "properties": {
+        "name": { "const": "ai-edge-litert Interpreter" },
+        "version": { "const": "2.1.6" },
+        "threads": { "const": 1 }
+      }
+    },
+    "replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rounds", "artifactSha256", "artifactManifestSha256", "comparison", "hostGolden", "producerCommand"],
+      "properties": {
+        "rounds": { "const": 2 },
+        "artifactSha256": {
+          "const": [
+            "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+            "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1"
+          ]
+        },
+        "artifactManifestSha256": {
+          "const": [
+            "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881",
+            "f1f95bac2006cd02e364123ab9e7556cc331e6d20f49006c50fcebd15d0c4881"
+          ]
+        },
+        "comparison": { "type": "object" },
+        "hostGolden": { "type": "object" },
+        "producerCommand": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provenance": { "type": "object" },
+    "preservedEvidence": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/fileIdentity" }
+    },
+    "releaseBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validationOnly", "validationPackageConsumption", "targetAccepted", "supported", "releaseCandidate", "productPackaging", "releasePublicationInput", "apkOrAabBuilt", "artifactRedistributionAllowed"],
+      "properties": {
+        "validationOnly": { "const": true },
+        "validationPackageConsumption": { "const": "allowed" },
+        "targetAccepted": { "const": false },
+        "supported": { "const": false },
+        "releaseCandidate": { "const": false },
+        "productPackaging": { "const": "excluded" },
+        "releasePublicationInput": { "const": false },
+        "apkOrAabBuilt": { "const": false },
+        "artifactRedistributionAllowed": { "const": false }
+      }
+    },
+    "schemas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest", "report"],
+      "properties": {
+        "manifest": { "$ref": "#/$defs/fileIdentity" },
+        "report": { "$ref": "#/$defs/fileIdentity" }
+      }
+    }
+  },
+  "$defs": {
+    "fileIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

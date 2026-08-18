@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "taskId": "RFB-ANDROID-VAL-X64-LITERT-PRODUCER-01",
+  "contractId": "DC-RFB-ANDROID-VAL-X64-LITERT-PRODUCER-01",
+  "contractVersion": 1,
+  "contractHash": "sha256:7d5f2f46a7e2acdcb97bea3adf2ae5c9f3a2d0ae711dd91d7c3f06ade6298c49",
+  "modelPath": "models/yolov8n-fp32.tflite",
+  "manifestPath": "evidence/conversions/android-litert-validation-model-manifest.json",
+  "reportPath": "evidence/reports/android-litert-validation-model-report.json",
+  "manifestSchemaPath": "evidence/schemas/android-litert-validation-model-manifest.schema.json",
+  "reportSchemaPath": "evidence/schemas/android-litert-validation-model-report.schema.json",
+  "modelSha256": "794e17d9a2795084787e5125bcfada6cb501c6afc4f708e7e58e96fd8dc84be1",
+  "consumers": [
+    { "os": "android", "abi": "x86_64", "modelPath": "models/yolov8n-fp32.tflite", "sameDigest": true },
+    { "os": "android", "abi": "arm64-v8a", "modelPath": "models/yolov8n-fp32.tflite", "sameDigest": true }
+  ],
+  "contractToEvidenceKeys": [
+    "AC-VAL-X64-1",
+    "AC-VAL-X64-2",
+    "AC-VAL-X64-3",
+    "AC-VAL-X64-4",
+    "INV-VAL-X64-1",
+    "INV-VAL-X64-2",
+    "INV-VAL-X64-3",
+    "EX-VAL-X64-1",
+    "CON-VAL-X64-1",
+    "AUTH-VAL-X64-1"
+  ],
+  "tests": [
+    {
+      "testId": "RFB-ANDROID-VAL-X64-001",
+      "command": ".evidence/litert/verify-venv/bin/python evidence/scripts/android_litert_validation_model.py --replay-root .evidence/litert/x64-model/replay",
+      "assertion": "tracked TFLite 的 bytes/SHA、LiteRT 2.1.6、IO shape/dtype、两轮 replay、host golden、两个 ABI 同一路径与 validation-only boundary 必须逐项一致"
+    },
+    {
+      "testId": "RFB-ANDROID-VAL-X64-002",
+      "command": "python3 evidence/scripts/test_android_litert_validation_model_guards.py",
+      "assertion": "model digest、ABI-neutral claim、consumer path、runtime version、golden/replay、supported/release/product boundary 或 Contract-to-Evidence key 任一漂移都必须被拒绝"
+    },
+    {
+      "testId": "RFB-ANDROID-VAL-X64-003",
+      "command": "git diff --check && git diff --name-only origin/main -- README LICENSE",
+      "assertion": "格式无空白错误，README 与 LICENSE 不得出现在 diff"
+    }
+  ],
+  "remoteParity": {
+    "branch": "rfb-android-val-x64-model-01",
+    "headCommand": "git ls-remote origin refs/heads/rfb-android-val-x64-model-01",
+    "prHeadCommand": "gh pr view --json headRefName,headRefOid,url"
+  }
+}
